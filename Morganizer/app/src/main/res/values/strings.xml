@@ -9,5 +9,16 @@
     <string name="login_username">Username/E-Mail</string>
     <string name="login_password">Password</string>
     <string name="login_button">Login</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <!-- Navigation Activity -->
+    <string name="title_section1">Chat</string>
+    <string name="title_section2">Documents</string>
+    <string name="title_section3">Settings</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_example">Example action</string>
 
 </resources>
