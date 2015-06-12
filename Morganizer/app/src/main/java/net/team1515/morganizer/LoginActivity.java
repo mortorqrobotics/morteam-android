@@ -1,9 +1,11 @@
-package morganizer.mortorq.com.morganizer;
+package net.team1515.morganizer;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import morganizer.mortorq.com.morganizer.R;
 
 
 public class LoginActivity extends ActionBarActivity {

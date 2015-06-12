@@ -6,7 +6,7 @@
 
     <!-- Login Activity -->
     <string name="login_welcome">Welcome to Morganizer!</string>
-    <string name="login_username">Username</string>
+    <string name="login_username">Username/E-Mail</string>
     <string name="login_password">Password</string>
     <string name="login_button">Login</string>
 
