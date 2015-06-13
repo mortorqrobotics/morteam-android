@@ -7,6 +7,7 @@
     tools:context="net.team1515.morganizer.MainActivity$PlaceholderFragment">
 
     <TextView android:id="@+id/section_label" android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="Home Fragment"/>
 
 </RelativeLayout>
