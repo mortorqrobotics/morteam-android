@@ -1,5 +1,9 @@
 package net.team1515.morganizer;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -75,6 +79,24 @@ public class MainActivity extends ActionBarActivity
                         .commit();
                 break;
             case 5:
+                //Mark user as logged out
+                SharedPreferences preferences = getSharedPreferences(null, 0);
+                preferences.edit().putBoolean("isLoggedIn", false).apply();
+
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        try {
+                            finish();
+                        } catch (Throwable throwable) {
+                            throwable.printStackTrace();
+                        }
+                    }
+                });
+                alert.setCancelable(false);
+                alert.setMessage("Successfully Logged Out");
+                alert.create().show();
                 break;
         }
 
