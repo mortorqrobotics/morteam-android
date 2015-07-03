@@ -16,7 +16,13 @@
     <string name="title_frag3">Drive</string>
     <string name="title_frag4">Calendar</string>
     <string name="title_frag5">Settings</string>
+    <string name="title_frag6">Sign Out</string>
     <string name="title_activity_main">Morganizer</string>
-    <string name="hello_world">Hello world!</string>
+
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_example">Example action</string>
 
 </resources>

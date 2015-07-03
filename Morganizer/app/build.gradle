@@ -5,7 +5,7 @@ android {
     buildToolsVersion "21.1.2"
 
     defaultConfig {
-        applicationId "morganizer.mortorq.com.morganizer"
+        applicationId "net.mortorq.morganizer"
         minSdkVersion 10
         targetSdkVersion 21
         versionCode 1
