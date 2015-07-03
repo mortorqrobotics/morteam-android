@@ -7,6 +7,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import net.team1515.morganizer.network.Connection;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 
 public class LoginActivity extends ActionBarActivity {
 
@@ -32,6 +42,15 @@ public class LoginActivity extends ActionBarActivity {
     }
 
     public void loginPressed(View view) {
+        try {
+            Connection connection = new Connection("192.168.1.127", "/f/loginUser");
+            String response = connection.execute(new BasicNameValuePair("user", "username"), new BasicNameValuePair("pass", "password")).get();
+            System.out.println(response);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
