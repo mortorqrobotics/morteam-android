@@ -26,4 +26,7 @@
     <!-- Home Fragment -->
     <string name="home_title">Welcome to Morganizer!</string>
 
+    <!-- Chat Fragment -->
+    <string name="chat_button">Send</string>
+
 </resources>

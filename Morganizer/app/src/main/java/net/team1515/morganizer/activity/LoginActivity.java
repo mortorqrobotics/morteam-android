@@ -1,28 +1,22 @@
-package net.team1515.morganizer;
+package net.team1515.morganizer.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
+import net.team1515.morganizer.R;
 import net.team1515.morganizer.network.Connection;
 
-import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 
@@ -64,7 +58,6 @@ public class LoginActivity extends ActionBarActivity {
         EditText passBox = (EditText)findViewById(R.id.password_box);
         String user = userBox.getText().toString();
         String pass = passBox.getText().toString();
-        System.out.println("FOOOD" + user);
 
         if(user.isEmpty() || pass.isEmpty()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -87,12 +80,10 @@ public class LoginActivity extends ActionBarActivity {
                 //Store necessary information from login
                 try {
                     JSONObject json = new JSONObject(response);
+                    System.out.println(json);
                     preferences.edit().putString("user", json.getString("user"))
                             .putString("token", json.getString("token"))
                             .putString("email", json.getString("email"))
-                            .putString("teamName", json.getString("teamName"))
-                            .putString("teamNumber", json.getString("teamNumber"))
-                            .putString("subdivision", json.getString("subdivision"))
                             .putString("phone", json.getString("phone"))
                             .putString("first", json.getString("first"))
                             .putString("last", json.getString("last"))

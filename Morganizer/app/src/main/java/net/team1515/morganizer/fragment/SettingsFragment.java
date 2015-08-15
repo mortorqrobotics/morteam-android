@@ -1,4 +1,4 @@
-package net.team1515.morganizer;
+package net.team1515.morganizer.fragment;
 
 import android.app.Activity;
 import android.net.Uri;

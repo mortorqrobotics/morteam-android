@@ -1,8 +1,7 @@
-package net.team1515.morganizer;
+package net.team1515.morganizer.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,6 +11,14 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import net.team1515.morganizer.R;
+import net.team1515.morganizer.fragment.CalendarFragment;
+import net.team1515.morganizer.fragment.ChatFragment;
+import net.team1515.morganizer.fragment.DriveFragment;
+import net.team1515.morganizer.fragment.HomeFragment;
+import net.team1515.morganizer.fragment.NavigationDrawerFragment;
+import net.team1515.morganizer.fragment.SettingsFragment;
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
@@ -81,7 +88,7 @@ public class MainActivity extends ActionBarActivity
             case 5:
                 //Mark user as logged out
                 SharedPreferences preferences = getSharedPreferences(null, 0);
-                preferences.edit().putBoolean("isLoggedIn", false).apply();
+                preferences.edit().clear().putBoolean("isLoggedIn", false).apply();
 
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
                 alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
