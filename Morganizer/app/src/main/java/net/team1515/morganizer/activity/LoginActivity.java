@@ -74,13 +74,13 @@ public class LoginActivity extends ActionBarActivity {
 
             try {
 
-                Connection connection = new Connection("192.168.1.132", "/f/loginUser");
+                Connection connection = new Connection("/f/loginUser");
                 String response = connection.execute(new BasicNameValuePair("user", user), new BasicNameValuePair("pass", pass)).get();
+                System.out.println(response);
 
                 //Store necessary information from login
                 try {
                     JSONObject json = new JSONObject(response);
-                    System.out.println(json);
                     preferences.edit().putString("user", json.getString("user"))
                             .putString("token", json.getString("token"))
                             .putString("email", json.getString("email"))

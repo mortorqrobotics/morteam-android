@@ -14,20 +14,19 @@ import android.view.MenuItem;
 
 import net.team1515.morganizer.R;
 import net.team1515.morganizer.fragment.CalendarFragment;
-import net.team1515.morganizer.fragment.ChatFragment;
+import net.team1515.morganizer.fragment.GroupChatFragment;
 import net.team1515.morganizer.fragment.DriveFragment;
-import net.team1515.morganizer.fragment.HomeFragment;
+import net.team1515.morganizer.fragment.AnnouncementsFragment;
 import net.team1515.morganizer.fragment.NavigationDrawerFragment;
 import net.team1515.morganizer.fragment.SettingsFragment;
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
-            HomeFragment.OnFragmentInteractionListener,
-            ChatFragment.OnFragmentInteractionListener,
+            AnnouncementsFragment.OnFragmentInteractionListener,
+            GroupChatFragment.OnFragmentInteractionListener,
             DriveFragment.OnFragmentInteractionListener,
             CalendarFragment.OnFragmentInteractionListener,
-            SettingsFragment.OnFragmentInteractionListener
-         {
+            SettingsFragment.OnFragmentInteractionListener {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -38,6 +37,8 @@ public class MainActivity extends ActionBarActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+
+    SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +53,8 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        preferences = getSharedPreferences(null, 0);
     }
 
     @Override
@@ -62,12 +65,12 @@ public class MainActivity extends ActionBarActivity
         switch(position) {
             case 0:
                 fragmentManager.beginTransaction()
-                        .replace(R.id.container, new HomeFragment())
+                        .replace(R.id.container, new AnnouncementsFragment())
                         .commit();
                 break;
             case 1:
                 fragmentManager.beginTransaction()
-                        .replace(R.id.container, new ChatFragment())
+                        .replace(R.id.container, new GroupChatFragment())
                         .commit();
                 break;
             case 2:
@@ -87,7 +90,6 @@ public class MainActivity extends ActionBarActivity
                 break;
             case 5:
                 //Mark user as logged out
-                SharedPreferences preferences = getSharedPreferences(null, 0);
                 preferences.edit().clear().putBoolean("isLoggedIn", false).apply();
 
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -169,4 +171,6 @@ public class MainActivity extends ActionBarActivity
     public void onFragmentInteraction(Uri uri) {
 
     }
+
+
 }

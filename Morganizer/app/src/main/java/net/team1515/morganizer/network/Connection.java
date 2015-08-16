@@ -15,10 +15,19 @@ import java.util.Scanner;
  * Created by david on 6/11/15.
  */
 public class Connection extends AsyncTask<NameValuePair, Void, String> {
+    final String host = "192.168.1.132";
     URL url;
     HttpURLConnection connection;
 
     public Connection(String host, String file) {
+        try {
+            url = new URL("http", host, file);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Connection(String file) {
         try {
             url = new URL("http", host, file);
         } catch (MalformedURLException e) {

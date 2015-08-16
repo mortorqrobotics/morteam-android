@@ -24,9 +24,12 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <!-- Home Fragment -->
-    <string name="home_title">Welcome to Morganizer!</string>
+    <string name="home_title">Announcements</string>
 
     <!-- Chat Fragment -->
     <string name="chat_button">Send</string>
+    <string name="title_activity_chat">Chat</string>
+
+    <string name="hello_world">Hello world!</string>
 
 </resources>
