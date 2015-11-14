@@ -22,17 +22,19 @@ public class CookieRequest extends StringRequest {
     private static final String COOKIE_KEY = "Cookie";
     public static final String SESSION_COOKIE = "connect.sid";
 
+    private static final String host = "http://www.morteam.com";
+
     private final Map<String, String> params;
     private SharedPreferences preferences;
 
-    public CookieRequest(int method, String url, SharedPreferences preferences, Listener<String> listener, ErrorListener errorListener) {
-        super(method, url, listener, errorListener);
+    public CookieRequest(int method, String path, SharedPreferences preferences, Listener<String> listener, ErrorListener errorListener) {
+        super(method, host + path, listener, errorListener);
         this.params = null;
         this.preferences = preferences;
     }
 
-    public CookieRequest(int method, String url, Map<String, String> params, SharedPreferences preferences, Listener<String> listener, ErrorListener errorListener) {
-        super(method, url, listener, errorListener);
+    public CookieRequest(int method, String path, Map<String, String> params, SharedPreferences preferences, Listener<String> listener, ErrorListener errorListener) {
+        super(method, host + path, listener, errorListener);
         this.params = params;
         this.preferences = preferences;
     }

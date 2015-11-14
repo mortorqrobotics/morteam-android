@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -28,7 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class LoginActivity extends ActionBarActivity {
+public class LoginActivity extends AppCompatActivity {
 
     SharedPreferences preferences;
 
@@ -45,6 +47,8 @@ public class LoginActivity extends ActionBarActivity {
             finish();
         } else {
             setContentView(R.layout.activity_login);
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
         }
     }
 
@@ -61,17 +65,15 @@ public class LoginActivity extends ActionBarActivity {
             builder.create().show();
         } else {
             RequestQueue queue = Volley.newRequestQueue(this);
-            final String url = "http://www.morteam.com/f/login";
 
             Map<String, String> params = new HashMap<>();
             params.put("username", user);
             params.put("password", pass);
-            CookieRequest stringRequest = new CookieRequest(Request.Method.POST, url, params, preferences, new Response.Listener<String>() {
+            CookieRequest stringRequest = new CookieRequest(Request.Method.POST, "/f/login", params, preferences, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     try {
                         JSONObject json = new JSONObject(response);
-                        System.out.println(json);
                         preferences.edit()
                         .putString("_id", json.getString("_id"))
                         .putString("username", json.getString("username"))
