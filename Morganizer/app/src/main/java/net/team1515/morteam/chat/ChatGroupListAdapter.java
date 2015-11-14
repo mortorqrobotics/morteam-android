@@ -1,16 +1,14 @@
-package net.team1515.morganizer.chat;
+package net.team1515.morteam.chat;
 
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import net.team1515.morganizer.R;
+import net.team1515.morteam.R;
 
 import java.util.HashMap;
 

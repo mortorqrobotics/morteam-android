@@ -1,4 +1,4 @@
-package net.team1515.morganizer;
+package net.team1515.morteam;
 
 /**
  * Created by David on 8/16/2015.

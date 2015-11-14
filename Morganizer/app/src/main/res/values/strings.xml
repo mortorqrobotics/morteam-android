@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Morganizer</string>
+    <string name="app_name">MorTeam</string>
     <string name="action_settings">Settings</string>
 
     <!-- Login Activity -->
-    <string name="login_welcome">Welcome to Morganizer!</string>
+    <string name="login_welcome">Welcome to MorTeam!</string>
     <string name="login_username">Username/E-Mail</string>
     <string name="login_password">Password</string>
     <string name="login_button">Login</string>
@@ -17,7 +17,7 @@
     <string name="title_frag4">Calendar</string>
     <string name="title_frag5">Settings</string>
     <string name="title_frag6">Sign Out</string>
-    <string name="title_activity_main">Morganizer</string>
+    <string name="title_activity_main">MorTeam</string>
 
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -29,7 +29,5 @@
     <!-- Chat Fragment -->
     <string name="chat_button">Send</string>
     <string name="title_activity_chat">Chat</string>
-
-    <string name="hello_world">Hello world!</string>
 
 </resources>

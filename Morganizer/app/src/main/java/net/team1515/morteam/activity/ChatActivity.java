@@ -1,4 +1,4 @@
-package net.team1515.morganizer.activity;
+package net.team1515.morteam.activity;
 
 import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
@@ -7,8 +7,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import net.team1515.morganizer.R;
-import net.team1515.morganizer.network.Connection;
+import net.team1515.morteam.R;
+import net.team1515.morteam.network.Connection;
 
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;

@@ -5,8 +5,8 @@ android {
     buildToolsVersion "21.1.2"
 
     defaultConfig {
-        applicationId "net.mortorq.morganizer"
-        minSdkVersion 10
+        applicationId "net.mortorq.morteam"
+        minSdkVersion 13
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
@@ -23,5 +23,6 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:22.2.0'
     compile 'com.android.support:support-v4:22.2.0'
+    compile 'com.mcxiaoke.volley:library:1.0.17'
     compile 'com.github.nkzawa:socket.io-client:0.3.0'
 }

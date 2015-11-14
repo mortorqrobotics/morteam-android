@@ -1,4 +1,4 @@
-package net.team1515.morganizer.network;
+package net.team1515.morteam.network;
 
 import android.os.AsyncTask;
 
@@ -15,7 +15,7 @@ import java.util.Scanner;
  * Created by david on 6/11/15.
  */
 public class Connection extends AsyncTask<NameValuePair, Void, String> {
-    final String host = "192.168.1.132";
+    final String host = "morteam.com";
     URL url;
     HttpURLConnection connection;
 

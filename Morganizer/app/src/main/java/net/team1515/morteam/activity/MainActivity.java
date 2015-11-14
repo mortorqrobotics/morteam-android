@@ -1,7 +1,8 @@
-package net.team1515.morganizer.activity;
+package net.team1515.morteam.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,13 +13,14 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import net.team1515.morganizer.R;
-import net.team1515.morganizer.fragment.CalendarFragment;
-import net.team1515.morganizer.fragment.GroupChatFragment;
-import net.team1515.morganizer.fragment.DriveFragment;
-import net.team1515.morganizer.fragment.AnnouncementsFragment;
-import net.team1515.morganizer.fragment.NavigationDrawerFragment;
-import net.team1515.morganizer.fragment.SettingsFragment;
+import net.team1515.morteam.R;
+import net.team1515.morteam.fragment.CalendarFragment;
+import net.team1515.morteam.fragment.GroupChatFragment;
+import net.team1515.morteam.fragment.DriveFragment;
+import net.team1515.morteam.fragment.AnnouncementsFragment;
+import net.team1515.morteam.fragment.NavigationDrawerFragment;
+import net.team1515.morteam.fragment.SettingsFragment;
+import net.team1515.morteam.network.CookieRequest;
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
@@ -89,23 +91,22 @@ public class MainActivity extends ActionBarActivity
                         .commit();
                 break;
             case 5:
-                //Mark user as logged out
-                preferences.edit().clear().putBoolean("isLoggedIn", false).apply();
+                //Mark user as logged out and clear all data
+                preferences.edit().clear().apply();
 
-                AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Successfully logged out");
+                builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        try {
-                            finish();
-                        } catch (Throwable throwable) {
-                            throwable.printStackTrace();
-                        }
+                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                        startActivity(intent);
+                        finish();
                     }
                 });
-                alert.setCancelable(false);
-                alert.setMessage("Successfully Logged Out");
-                alert.create().show();
+                builder.setCancelable(false);
+                builder.create().show();
+
                 break;
         }
 

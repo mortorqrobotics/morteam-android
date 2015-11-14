@@ -1,4 +1,4 @@
-package net.team1515.morganizer.fragment;
+package net.team1515.morteam.fragment;
 
 import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;
@@ -20,9 +20,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
-import net.team1515.morganizer.R;
+import net.team1515.morteam.R;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.

@@ -1,4 +1,4 @@
-package net.team1515.morganizer.chat;
+package net.team1515.morteam.chat;
 
 import android.content.Context;
 import android.view.View;
