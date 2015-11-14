@@ -1,6 +1,9 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" tools:context="net.team1515.morteam.fragment.HomeFragment">
+<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="net.team1515.morteam.fragment.HomeFragment"
+    android:id="@+id/swipe_layout">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/announcement_view"
@@ -8,4 +11,4 @@
         android:layout_height="match_parent"
         android:scrollbars="vertical"/>
 
-</LinearLayout>
+</android.support.v4.widget.SwipeRefreshLayout>

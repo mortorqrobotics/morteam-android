@@ -3,6 +3,7 @@ package net.team1515.morteam.fragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -40,6 +41,7 @@ public class HomeFragment extends Fragment {
     private RecyclerView recyclerView;
     private AnnouncementAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
+    private SwipeRefreshLayout swipeLayout;
 
 
     @Override
@@ -53,6 +55,15 @@ public class HomeFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         adapter = new AnnouncementAdapter();
         recyclerView.setAdapter(adapter);
+
+        swipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_layout);
+        swipeLayout.setColorSchemeResources(R.color.orange_theme);
+        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                adapter.requestAnnouncements();
+            }
+        });
 
         return view;
     }
@@ -72,6 +83,7 @@ public class HomeFragment extends Fragment {
                 public void onResponse(String response) {
                     try {
                         JSONArray array = new JSONArray(response);
+                        announcements = new ArrayList<>();
                         for(int i = 0; i < array.length(); i++) {
                             JSONObject object = array.getJSONObject(i);
                             announcements.add(new Announcement(
@@ -81,6 +93,7 @@ public class HomeFragment extends Fragment {
 
                         //Tell adapter to update once request is finished
                         notifyDataSetChanged();
+                        swipeLayout.setRefreshing(false);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -91,6 +104,10 @@ public class HomeFragment extends Fragment {
                     System.out.println(error);
                 }
             });
+            requestAnnouncements();
+        }
+
+        public void requestAnnouncements() {
             queue.add(request);
         }
 
@@ -134,17 +151,17 @@ public class HomeFragment extends Fragment {
         public int getItemCount() {
             return announcements.size();
         }
-    }
 
-    private class Announcement {
-        public final String author;
-        public final String message;
-        public final String date;
+        private class Announcement {
+            public final String author;
+            public final String message;
+            public final String date;
 
-        public Announcement(String author, String message, String date) {
-            this.author = author;
-            this.message = message;
-            this.date = date;
+            public Announcement(String author, String message, String date) {
+                this.author = author;
+                this.message = message;
+                this.date = date;
+            }
         }
     }
 }
