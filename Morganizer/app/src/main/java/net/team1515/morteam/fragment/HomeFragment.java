@@ -1,8 +1,10 @@
 package net.team1515.morteam.fragment;
 
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,15 +12,19 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.Volley;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import net.team1515.morteam.R;
 import net.team1515.morteam.network.CookieRequest;
@@ -28,20 +34,17 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
 
-import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Locale;
 
 public class HomeFragment extends Fragment {
 
     private SharedPreferences preferences;
-    private RecyclerView recyclerView;
     private AnnouncementAdapter adapter;
-    private RecyclerView.LayoutManager layoutManager;
     private SwipeRefreshLayout swipeLayout;
+    private SlidingUpPanelLayout slidingLayout;
 
 
     @Override
@@ -50,8 +53,8 @@ public class HomeFragment extends Fragment {
 
         preferences = getActivity().getSharedPreferences(null, 0);
 
-        recyclerView = (RecyclerView) view.findViewById(R.id.announcement_view);
-        layoutManager = new LinearLayoutManager(getActivity());
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.announcement_view);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
         adapter = new AnnouncementAdapter();
         recyclerView.setAdapter(adapter);
@@ -65,7 +68,30 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        slidingLayout = (SlidingUpPanelLayout) view.findViewById(R.id.slidingLayout);
+        slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+        slidingLayout.setTouchEnabled(false);
+
         return view;
+    }
+
+    public void openNewAnnouncement() {
+        slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+    }
+
+    public void collapseNewAnnouncement() {
+        slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+
+        TextView message = (TextView) getView().findViewById(R.id.new_message);
+        message.setText("");
+    }
+
+    public SlidingUpPanelLayout.PanelState getNewAnnouncementStatus() {
+        return slidingLayout.getPanelState();
+    }
+
+    public void requestAnnouncements() {
+        adapter.requestAnnouncements();
     }
 
     public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapter.ViewHolder> {
@@ -88,7 +114,24 @@ public class HomeFragment extends Fragment {
                             JSONObject object = array.getJSONObject(i);
                             announcements.add(new Announcement(
                                     object.getJSONObject("author").getString("firstname") + " " + object.getJSONObject("author").getString("lastname"),
-                                    object.getString("content"), object.getString("timestamp")));
+                                    object.getString("content"), object.getString("timestamp"), object.getJSONObject("author").getString("profpicpath")));
+
+                            final int announcementNum = i;
+                            System.out.println("http://www.morteam.com" + announcements.get(i).picSrc + "-60");
+                            ImageRequest profPicRequest = new ImageRequest("http://www.morteam.com" + announcements.get(i).picSrc + "-60.png", new Response.Listener<Bitmap>() {
+                                @Override
+                                public void onResponse(Bitmap response) {
+                                    announcements.get(announcementNum).setPic(response);
+                                    notifyDataSetChanged();
+                                    System.out.println("0");
+                                }
+                            }, 0, 0, null, Bitmap.Config.RGB_565, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    System.out.println(error);
+                                }
+                            });
+                            queue.add(profPicRequest);
                         }
 
                         //Tell adapter to update once request is finished
@@ -129,6 +172,9 @@ public class HomeFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
+            ImageView profPic = (ImageView) holder.cardView.findViewById(R.id.announcement_pic);
+            profPic.setImageBitmap(announcements.get(position).pic);
+
             TextView author = (TextView) holder.cardView.findViewById(R.id.author);
             author.setText(announcements.get(position).author);
 
@@ -156,11 +202,19 @@ public class HomeFragment extends Fragment {
             public final String author;
             public final String message;
             public final String date;
+            public final String picSrc;
+            public Bitmap pic;
 
-            public Announcement(String author, String message, String date) {
+            public Announcement(String author, String message, String date, String picSrc) {
                 this.author = author;
                 this.message = message;
                 this.date = date;
+                this.picSrc = picSrc;
+                this.pic = null;
+            }
+
+            public void setPic(Bitmap pic) {
+                this.pic = pic;
             }
         }
     }
