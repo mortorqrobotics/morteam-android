@@ -117,7 +117,6 @@ public class HomeFragment extends Fragment {
                                     object.getString("content"), object.getString("timestamp"), object.getJSONObject("author").getString("profpicpath")));
 
                             final int announcementNum = i;
-                            System.out.println("http://www.morteam.com" + announcements.get(i).picSrc + "-60");
                             ImageRequest profPicRequest = new ImageRequest("http://www.morteam.com" + announcements.get(i).picSrc + "-60.png", new Response.Listener<Bitmap>() {
                                 @Override
                                 public void onResponse(Bitmap response) {
@@ -144,7 +143,7 @@ public class HomeFragment extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    System.out.println(error);
+                    //System.out.println(error);
                 }
             });
             requestAnnouncements();
