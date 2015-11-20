@@ -2,6 +2,7 @@ package net.team1515.morteam.activity;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.design.widget.TabLayout;
@@ -30,6 +31,7 @@ import net.team1515.morteam.fragment.ChatFragment;
 import net.team1515.morteam.fragment.HomeFragment;
 import net.team1515.morteam.network.CookieRequest;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         EditText messageBox = (EditText) sectionPagerAdapter.homeFragment.getView().findViewById(R.id.new_message);
         String message = messageBox.getText().toString();
 
-        if(!message.isEmpty()) {
+        if (!message.isEmpty()) {
             Map<String, String> params = new HashMap<>();
             params.put("content", message);
             params.put("audience", "everyone");
@@ -109,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
-
     }
 
     private class SectionPagerAdapter extends FragmentPagerAdapter {

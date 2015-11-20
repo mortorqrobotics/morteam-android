@@ -1,10 +1,11 @@
 package net.team1515.morteam.fragment;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,9 +13,9 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -32,12 +33,13 @@ import net.team1515.morteam.network.CookieRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class HomeFragment extends Fragment {
 
@@ -110,11 +112,14 @@ public class HomeFragment extends Fragment {
                     try {
                         JSONArray array = new JSONArray(response);
                         announcements = new ArrayList<>();
-                        for(int i = 0; i < array.length(); i++) {
+                        for (int i = 0; i < array.length(); i++) {
                             JSONObject object = array.getJSONObject(i);
                             announcements.add(new Announcement(
                                     object.getJSONObject("author").getString("firstname") + " " + object.getJSONObject("author").getString("lastname"),
-                                    object.getString("content"), object.getString("timestamp"), object.getJSONObject("author").getString("profpicpath")));
+                                    object.getString("content"),
+                                    object.getString("timestamp"),
+                                    object.getString("_id"),
+                                    object.getJSONObject("author").getString("profpicpath")));
 
                             final int announcementNum = i;
                             ImageRequest profPicRequest = new ImageRequest("http://www.morteam.com" + announcements.get(i).picSrc + "-60.png", new Response.Listener<Bitmap>() {
@@ -164,13 +169,13 @@ public class HomeFragment extends Fragment {
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            CardView view = (CardView)LayoutInflater.from(parent.getContext()).inflate(R.layout.announcement, parent, false);
+            CardView view = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.announcement, parent, false);
             ViewHolder viewHolder = new ViewHolder(view);
             return viewHolder;
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
+        public void onBindViewHolder(ViewHolder holder, final int position) {
             ImageView profPic = (ImageView) holder.cardView.findViewById(R.id.announcement_pic);
             profPic.setImageBitmap(announcements.get(position).pic);
 
@@ -190,6 +195,39 @@ public class HomeFragment extends Fragment {
 
             TextView message = (TextView) holder.cardView.findViewById(R.id.message);
             message.setText(Html.fromHtml(announcements.get(position).message));
+
+            ImageButton deleteButton = (ImageButton) holder.cardView.findViewById(R.id.delete_button);
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setTitle("Are you sure you want to delete?");
+                    builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                            Map<String, String> params = new HashMap<>();
+                            params.put("_id", announcements.get(position).id);
+
+                            CookieRequest request = new CookieRequest(Request.Method.POST, "/f/deleteAnnouncement", params, preferences, new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response) {
+                                    notifyDataSetChanged();
+                                }
+                            }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    System.out.println(error);
+                                }
+                            });
+
+                            queue.add(request);
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", null);
+                    builder.create().show();
+                }
+            });
         }
 
         @Override
@@ -202,13 +240,15 @@ public class HomeFragment extends Fragment {
             public final String message;
             public final String date;
             public final String picSrc;
+            public final String id;
             public Bitmap pic;
 
-            public Announcement(String author, String message, String date, String picSrc) {
+            public Announcement(String author, String message, String date, String id, String picSrc) {
                 this.author = author;
                 this.message = message;
                 this.date = date;
                 this.picSrc = picSrc;
+                this.id = id;
                 this.pic = null;
             }
 
