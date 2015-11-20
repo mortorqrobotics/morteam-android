@@ -23,6 +23,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -116,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
                         builder.create().show();
                         return true;
                     case R.id.view_profile:
-                        //TODO: display user profile
+                        Toast.makeText(MainActivity.this, "Feature coming soon!", Toast.LENGTH_LONG).show();
                         return true;
                     default:
                         return false;

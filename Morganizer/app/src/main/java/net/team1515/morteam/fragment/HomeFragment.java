@@ -194,7 +194,7 @@ public class HomeFragment extends Fragment {
             String dateString = announcements.get(position).date.replace("Z", "+0000");
 
             try {
-                CharSequence formattedDate = DateFormat.format("h:m a - MMMM d, yyyy", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US).parse(dateString));
+                CharSequence formattedDate = DateFormat.format("h:mm a - MMMM d, yyyy", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US).parse(dateString));
                 date.setText(formattedDate);
             } catch (ParseException e) {
                 date.setText("error");
