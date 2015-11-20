@@ -2,9 +2,9 @@ package net.team1515.morteam.fragment;
 
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,7 +12,6 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -22,18 +21,22 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.Volley;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import net.team1515.morteam.R;
 import net.team1515.morteam.network.CookieRequest;
+import net.team1515.morteam.network.ImageCookieRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -110,15 +113,16 @@ public class HomeFragment extends Fragment {
                     try {
                         JSONArray array = new JSONArray(response);
                         announcements = new ArrayList<>();
-                        for(int i = 0; i < array.length(); i++) {
+                        for (int i = 0; i < array.length(); i++) {
                             JSONObject object = array.getJSONObject(i);
                             announcements.add(new Announcement(
                                     object.getJSONObject("author").getString("firstname") + " " + object.getJSONObject("author").getString("lastname"),
                                     object.getString("content"), object.getString("timestamp"), object.getJSONObject("author").getString("profpicpath")));
 
                             final int announcementNum = i;
-                            System.out.println("http://www.morteam.com" + announcements.get(i).picSrc + "-60");
-                            ImageRequest profPicRequest = new ImageRequest("http://www.morteam.com" + announcements.get(i).picSrc + "-60.png", new Response.Listener<Bitmap>() {
+                            ImageCookieRequest profPicRequest = new ImageCookieRequest("http://www.morteam.com" + announcements.get(i).picSrc + "-60",
+                                    preferences,
+                                    new Response.Listener<Bitmap>() {
                                 @Override
                                 public void onResponse(Bitmap response) {
                                     announcements.get(announcementNum).setPic(response);
@@ -128,7 +132,7 @@ public class HomeFragment extends Fragment {
                             }, 0, 0, null, Bitmap.Config.RGB_565, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
-                                    System.out.println(error);
+                                    System.out.println(error.networkResponse.data);
                                 }
                             });
                             queue.add(profPicRequest);

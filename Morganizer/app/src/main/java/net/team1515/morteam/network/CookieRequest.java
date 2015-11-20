@@ -18,8 +18,8 @@ import java.util.Map;
  * Created by David on 11/13/2015.
  */
 public class CookieRequest extends StringRequest {
-    private static final String SET_COOKIE_KEY = "set-cookie";
-    private static final String COOKIE_KEY = "Cookie";
+    public static final String SET_COOKIE_KEY = "set-cookie";
+    public static final String COOKIE_KEY = "Cookie";
     public static final String SESSION_COOKIE = "connect.sid";
 
     private static final String host = "http://www.morteam.com";
