@@ -42,4 +42,20 @@
         android:id="@+id/login_button"
         android:onClick="loginPressed"/>
 
+    <TextView
+        android:id="@+id/button_separator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/login_button"
+        android:text="  - OR - "/>
+
+    <Button
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/button_separator"
+        android:text="Register"
+        android:onClick="registerPressed"/>
+
 </RelativeLayout>

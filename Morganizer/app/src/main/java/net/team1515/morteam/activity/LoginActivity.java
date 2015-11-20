@@ -102,4 +102,9 @@ public class LoginActivity extends AppCompatActivity {
             queue.add(stringRequest);
         }
     }
+
+    public void registerPressed(View view) {
+        Intent intent = new Intent(this, RegisterActivity.class);
+        startActivity(intent);
+    }
 }
