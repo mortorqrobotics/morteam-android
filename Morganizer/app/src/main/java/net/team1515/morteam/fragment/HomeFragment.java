@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -24,8 +23,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.HurlStack;
-import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.Volley;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -37,9 +34,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -104,7 +98,7 @@ public class HomeFragment extends Fragment {
 
     public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapter.ViewHolder> {
 
-        private CookieRequest request;
+        private CookieRequest announcementsRequest;
         private RequestQueue queue;
 
         private ArrayList<Announcement> announcements;
@@ -112,7 +106,14 @@ public class HomeFragment extends Fragment {
         public AnnouncementAdapter() {
             announcements = new ArrayList<>();
             queue = Volley.newRequestQueue(getContext());
-            request = new CookieRequest(Request.Method.POST, "/f/getAnnouncementsForUser", preferences, new Response.Listener<String>() {
+            queue.addRequestFinishedListener(new RequestQueue.RequestFinishedListener<Object>() {
+                @Override
+                public void onRequestFinished(Request<Object> request) {
+                    notifyDataSetChanged();
+                }
+            });
+            
+            announcementsRequest = new CookieRequest(Request.Method.POST, "/f/getAnnouncementsForUser", preferences, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     try {
@@ -135,8 +136,6 @@ public class HomeFragment extends Fragment {
                                 @Override
                                 public void onResponse(Bitmap response) {
                                     announcements.get(announcementNum).setPic(response);
-                                    notifyDataSetChanged();
-                                    System.out.println("0");
                                 }
                             }, 0, 0, null, Bitmap.Config.RGB_565, new Response.ErrorListener() {
                                 @Override
@@ -148,7 +147,6 @@ public class HomeFragment extends Fragment {
                         }
 
                         //Tell adapter to update once request is finished
-                        notifyDataSetChanged();
                         swipeLayout.setRefreshing(false);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -164,7 +162,7 @@ public class HomeFragment extends Fragment {
         }
 
         public void requestAnnouncements() {
-            queue.add(request);
+            queue.add(announcementsRequest);
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
@@ -221,7 +219,7 @@ public class HomeFragment extends Fragment {
                             CookieRequest request = new CookieRequest(Request.Method.POST, "/f/deleteAnnouncement", params, preferences, new Response.Listener<String>() {
                                 @Override
                                 public void onResponse(String response) {
-                                    notifyDataSetChanged();
+                                    requestAnnouncements();
                                 }
                             }, new Response.ErrorListener() {
                                 @Override

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -12,12 +13,16 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewParent;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageButton;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -30,6 +35,7 @@ import net.team1515.morteam.R;
 import net.team1515.morteam.fragment.ChatFragment;
 import net.team1515.morteam.fragment.HomeFragment;
 import net.team1515.morteam.network.CookieRequest;
+import net.team1515.morteam.network.ImageCookieRequest;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -40,24 +46,94 @@ public class MainActivity extends AppCompatActivity {
 
     SharedPreferences preferences;
     RequestQueue queue;
+    PopupMenu popupMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        preferences = getSharedPreferences(null, 0);
+        queue = Volley.newRequestQueue(this);
+
+
         //Set up action bar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        //Set up action bar profile picture
+        final ImageButton profilePic = (ImageButton) toolbar.findViewById(R.id.actionbar_pic);
+        profilePic.setClickable(true);
+        ImageCookieRequest profilePicRequest = new ImageCookieRequest("http://www.morteam.com" + preferences.getString("profpicpath", "") + "-60",
+                preferences, new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap response) {
+                profilePic.setImageBitmap(response);
+            }
+        }, 0, 0, null, Bitmap.Config.RGB_565, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                System.out.println(error);
+            }
+        });
+        queue.add(profilePicRequest);
+
+        //Menu
+        popupMenu = new PopupMenu(this, profilePic);
+        popupMenu.inflate(R.menu.menu_main);
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.logout:
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        builder.setTitle("Are you sure you want to logout?");
+                        builder.setPositiveButton("Logout", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                CookieRequest logoutRequest = new CookieRequest(Request.Method.POST,
+                                        "/f/logout",
+                                        preferences,
+                                        new Response.Listener<String>() {
+                                            @Override
+                                            public void onResponse(String response) {
+                                                preferences.edit().clear().apply();
+                                                finish();
+                                            }
+                                        },
+                                        new Response.ErrorListener() {
+                                            @Override
+                                            public void onErrorResponse(VolleyError error) {
+                                                preferences.edit().clear().apply();
+                                                finish();
+                                            }
+                                        });
+                                queue.add(logoutRequest);
+                            }
+                        });
+                        builder.setNegativeButton("Cancel", null);
+                        builder.create().show();
+                        return true;
+                    case R.id.view_profile:
+                        //TODO: display user profile
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         sectionPagerAdapter = new SectionPagerAdapter(getSupportFragmentManager());
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
         viewPager.setAdapter(sectionPagerAdapter);
         tabLayout.setupWithViewPager(viewPager);
+    }
 
-        preferences = getSharedPreferences(null, 0);
-        queue = Volley.newRequestQueue(this);
+    public void profilePictureClick(View view) {
+        popupMenu.show();
     }
 
     public void newAnnouncement(View view) {

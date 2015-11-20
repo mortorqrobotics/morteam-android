@@ -17,8 +17,9 @@
         android:layout_height="wrap_content">
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="85px"
+            android:layout_height="85px"
+            android:scaleType="centerCrop"
             android:layout_marginTop="5dp"
             android:layout_marginLeft="5dp"
             android:id="@+id/announcement_pic"/>
@@ -38,14 +39,11 @@
             android:id="@+id/date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="4dp"
             android:layout_marginRight="10dp"
-            android:textSize="15sp"
-            android:layout_toEndOf="@id/author"
-            android:layout_toRightOf="@id/author"
-            android:layout_alignBaseline="@id/author"/>
+            android:textSize="13sp"
+            android:layout_below="@id/announcement_pic" />
 
         <ImageButton
             android:layout_width="wrap_content"
@@ -67,7 +65,7 @@
             android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:layout_below="@id/author"/>
+            android:layout_below="@id/date"/>
 
     </RelativeLayout>
 

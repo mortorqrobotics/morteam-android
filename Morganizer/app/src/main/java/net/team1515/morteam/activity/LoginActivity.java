@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.android.volley.AuthFailureError;
@@ -53,16 +54,22 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void loginPressed(View view) {
-        EditText userBox = (EditText)findViewById(R.id.username_box);
-        EditText passBox = (EditText)findViewById(R.id.password_box);
+        //Make sure the user cannot press the button twice
+        final Button loginButton = (Button) findViewById(R.id.login_button);
+        loginButton.setClickable(false);
+
+        EditText userBox = (EditText) findViewById(R.id.username_box);
+        EditText passBox = (EditText) findViewById(R.id.password_box);
         final String user = userBox.getText().toString();
         final String pass = passBox.getText().toString();
 
-        if(user.isEmpty() || pass.isEmpty()) {
+        if (user.isEmpty() || pass.isEmpty()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Please enter a valid username/password");
             builder.setPositiveButton("Okay", null);
             builder.create().show();
+
+            loginButton.setClickable(true);
         } else {
             RequestQueue queue = Volley.newRequestQueue(this);
 
@@ -74,10 +81,12 @@ public class LoginActivity extends AppCompatActivity {
                 public void onResponse(String response) {
                     try {
                         JSONObject json = new JSONObject(response);
+                        System.out.println(json);
                         preferences.edit()
-                        .putString("_id", json.getString("_id"))
-                        .putString("username", json.getString("username"))
-                        .apply();
+                                .putString("_id", json.getString("_id"))
+                                .putString("username", json.getString("username"))
+                                .putString("profpicpath", json.getString("profpicpath"))
+                                .apply();
 
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(intent);
@@ -87,6 +96,8 @@ public class LoginActivity extends AppCompatActivity {
                         builder.setTitle("Incorrect username or password");
                         builder.setPositiveButton("Okay", null);
                         builder.create().show();
+
+                        loginButton.setClickable(true);
                     }
                 }
             }, new Response.ErrorListener() {
@@ -97,6 +108,9 @@ public class LoginActivity extends AppCompatActivity {
                     builder.setMessage("Please make sure you have a working internet connection.");
                     builder.setPositiveButton("Okay", null);
                     builder.create().show();
+
+                    loginButton.setClickable(true);
+
                 }
             });
             queue.add(stringRequest);

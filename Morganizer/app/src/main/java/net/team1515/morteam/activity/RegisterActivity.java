@@ -16,9 +16,9 @@ public class RegisterActivity extends AppCompatActivity {
 
         preferences = getSharedPreferences(null, 0);
 
-            setContentView(R.layout.activity_register);
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
+        setContentView(R.layout.activity_register);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
     }
 
 }
