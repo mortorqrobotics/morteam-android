@@ -67,15 +67,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void postAnnouncement(View view) {
+        //Hide keyboard
+        InputMethodManager imm = (InputMethodManager) getSystemService(
+                INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+
+        //Get message from edittext
         EditText messageBox = (EditText) sectionPagerAdapter.homeFragment.getView().findViewById(R.id.new_message);
         String message = messageBox.getText().toString();
+
         if(!message.isEmpty()) {
             Map<String, String> params = new HashMap<>();
-
-            CookieRequest request = new CookieRequest(Request.Method.POST, "/f/postAnnouncement", preferences, new Response.Listener<String>() {
+            params.put("content", message);
+            params.put("audience", "everyone");
+            CookieRequest request = new CookieRequest(Request.Method.POST, "/f/postAnnouncement", params, preferences, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     sectionPagerAdapter.homeFragment.requestAnnouncements();
+                    sectionPagerAdapter.homeFragment.collapseNewAnnouncement();
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -85,8 +94,6 @@ public class MainActivity extends AppCompatActivity {
             });
 
             queue.add(request);
-
-            sectionPagerAdapter.homeFragment.collapseNewAnnouncement();
         } else {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Please enter a valid message");

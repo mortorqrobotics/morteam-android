@@ -120,6 +120,7 @@ public class HomeFragment extends Fragment {
                                     object.getString("content"), object.getString("timestamp"), object.getJSONObject("author").getString("profpicpath")));
 
                             final int announcementNum = i;
+                            
                             ImageCookieRequest profPicRequest = new ImageCookieRequest("http://www.morteam.com" + announcements.get(i).picSrc + "-60",
                                     preferences,
                                     new Response.Listener<Bitmap>() {
@@ -148,7 +149,7 @@ public class HomeFragment extends Fragment {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    System.out.println(error);
+                    //System.out.println(error);
                 }
             });
             requestAnnouncements();
