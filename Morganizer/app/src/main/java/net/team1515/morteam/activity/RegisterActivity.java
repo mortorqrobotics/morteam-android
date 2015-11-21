@@ -63,7 +63,7 @@ public class RegisterActivity extends AppCompatActivity {
         EditText emailBox = (EditText)findViewById(R.id.register_email);
         params.put("email", emailBox.getText().toString());
 
-        EditText phonenumberBox = (EditText)findViewById(R.id.register_phonenumber);
+        EditText phonenumberBox = (EditText)findViewById(R.id.register_phone);
         params.put("phone", phonenumberBox.getText().toString());
 
         CookieRequest registerRequest = new CookieRequest(Request.Method.POST, "/f/createUser",

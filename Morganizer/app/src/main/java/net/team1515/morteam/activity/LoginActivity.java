@@ -85,6 +85,9 @@ public class LoginActivity extends AppCompatActivity {
                         preferences.edit()
                                 .putString("_id", json.getString("_id"))
                                 .putString("username", json.getString("username"))
+                                .putString("firstname", json.getString("firstname"))
+                                .putString("lastname", json.getString("lastname"))
+                                .putString("email", json.getString("email"))
                                 .putString("profpicpath", json.getString("profpicpath"))
                                 .apply();
 
