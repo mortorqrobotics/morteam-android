@@ -5,4 +5,77 @@
 
     <include layout="@layout/actionbar" />
 
+    <EditText
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/register_lastname"
+        android:hint="First name"
+        android:id="@+id/register_firstname"
+        android:singleLine="true" />
+
+    <EditText
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/register_username"
+        android:hint="Last name"
+        android:id="@id/register_lastname"
+        android:singleLine="true" />
+
+    <EditText
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/register_password"
+        android:hint="Username"
+        android:id="@id/register_username"
+        android:singleLine="true" />
+
+    <EditText
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:hint="Password"
+        android:id="@+id/register_password"
+        android:singleLine="true" />
+
+    <EditText
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/register_password"
+        android:hint="Confirm password"
+        android:id="@+id/register_confirmpassword"
+        android:singleLine="true" />
+
+    <EditText
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/register_confirmpassword"
+        android:hint="Email"
+        android:id="@+id/register_email"
+        android:singleLine="true" />
+
+    <EditText
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/register_email"
+        android:hint="Phone number"
+        android:id="@+id/register_phonenumber"
+        android:singleLine="true" />
+
+
+    <Button
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/register_phonenumber"
+        android:text="Register"
+        android:id="@+id/login_button"
+        android:onClick="registerPressed"/>
+
 </RelativeLayout>
