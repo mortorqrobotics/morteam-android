@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.provider.ContactsContract;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -117,7 +118,8 @@ public class MainActivity extends AppCompatActivity {
                         builder.create().show();
                         return true;
                     case R.id.view_profile:
-                        Toast.makeText(MainActivity.this, "Feature coming soon!", Toast.LENGTH_LONG).show();
+                        Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                        startActivity(intent);
                         return true;
                     default:
                         return false;
