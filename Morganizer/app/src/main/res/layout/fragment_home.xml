@@ -73,22 +73,21 @@
                 android:onClick="collapseNewAnnouncement"
                 android:src="@mipmap/ic_down" />
 
-            <TextView
-                android:id="@+id/new_title"
+            <Spinner
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/new_collapse"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="5dp"
-                android:text="New Announcement"
-                android:textSize="23sp" />
+                android:layout_alignBaseline="@id/new_collapse"
+                android:layout_alignParentLeft="true"
+                android:id="@+id/new_choicespinner">
+
+            </Spinner>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_marginTop="10dp"
-                android:layout_below="@id/new_title" >
+                android:layout_below="@id/new_collapse" >
 
                 <EditText
                     android:id="@+id/new_message"
