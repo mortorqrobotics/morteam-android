@@ -160,7 +160,8 @@ public class MainActivity extends AppCompatActivity {
         if (!message.isEmpty()) {
             Map<String, String> params = new HashMap<>();
             params.put("content", message);
-            params.put("audience", "everyone");
+            params.put("audience", sectionPagerAdapter.homeFragment.getCurrentPostGroup());
+            System.out.println(sectionPagerAdapter.homeFragment.getCurrentPostGroup());
             CookieRequest request = new CookieRequest(Request.Method.POST, "/f/postAnnouncement", params, preferences, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
