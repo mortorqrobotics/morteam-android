@@ -30,6 +30,8 @@ import com.android.volley.toolbox.Volley;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import net.team1515.morteam.R;
+import net.team1515.morteam.Subdivision;
+import net.team1515.morteam.User;
 import net.team1515.morteam.network.CookieRequest;
 import net.team1515.morteam.network.ImageCookieRequest;
 
