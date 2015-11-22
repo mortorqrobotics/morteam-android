@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
         //Set up action bar profile picture
         final ImageButton profilePic = (ImageButton) toolbar.findViewById(R.id.actionbar_pic);
         profilePic.setClickable(true);
+        profilePic.setVisibility(View.VISIBLE);
         ImageCookieRequest profilePicRequest = new ImageCookieRequest("http://www.morteam.com" + preferences.getString("profpicpath", "") + "-60",
                 preferences, new Response.Listener<Bitmap>() {
             @Override
@@ -171,7 +172,11 @@ public class MainActivity extends AppCompatActivity {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    System.out.println(error);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("Erorr posting announcement");
+                    builder.setMessage("Please try again later");
+                    builder.setPositiveButton("Okay", null);
+                    builder.create().show();
                 }
             });
 

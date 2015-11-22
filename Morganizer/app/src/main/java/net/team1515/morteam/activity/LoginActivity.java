@@ -24,6 +24,7 @@ import com.android.volley.toolbox.Volley;
 import net.team1515.morteam.R;
 import net.team1515.morteam.network.CookieRequest;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,10 +43,18 @@ public class LoginActivity extends AppCompatActivity {
         preferences = getSharedPreferences(null, 0);
 
         String sessionId = preferences.getString(CookieRequest.SESSION_COOKIE, "");
+        boolean isOnTeam = preferences.getBoolean("isOnTeam", false);
         if (!sessionId.isEmpty()) {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            finish();
+            if(isOnTeam) {
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+                finish();
+
+            } else {
+                Intent intent = new Intent(LoginActivity.this, JoinTeamActivity.class);
+                startActivity(intent);
+                finish();
+            }
         } else {
             setContentView(R.layout.activity_login);
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -82,6 +91,7 @@ public class LoginActivity extends AppCompatActivity {
                     try {
                         JSONObject json = new JSONObject(response);
                         System.out.println(json);
+                        JSONArray teams = json.getJSONArray("teams");
                         preferences.edit()
                                 .putString("_id", json.getString("_id"))
                                 .putString("username", json.getString("username"))
@@ -90,10 +100,17 @@ public class LoginActivity extends AppCompatActivity {
                                 .putString("email", json.getString("email"))
                                 .putString("profpicpath", json.getString("profpicpath"))
                                 .apply();
-
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
+                        if(teams.length() <= 0) {
+                            preferences.edit().putBoolean("isOnTeam", false).apply();
+                            Intent intent = new Intent(LoginActivity.this, JoinTeamActivity.class);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            preferences.edit().putBoolean("isOnTeam", true).apply();
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
                     } catch (JSONException e) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                         builder.setTitle("Incorrect username or password");

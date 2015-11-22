@@ -54,11 +54,11 @@ public class HomeFragment extends Fragment {
     private SlidingUpPanelLayout slidingLayout;
 
     private Spinner choiceSpinner;
-    private final Map<String, String> choices = new HashMap<>();
     private String currentPostGroup;
 
     private final Map<String, String> users = new HashMap<>();
     private final Map<String, String> subdivisions = new HashMap<>();
+    private List<String> choices = new ArrayList<>();
 
 
     @Override
@@ -103,7 +103,7 @@ public class HomeFragment extends Fragment {
                 if (item.equals("Everyone")) {
                     currentPostGroup = "everyone";
                 } else if (!item.equals("Custom")) {
-                    currentPostGroup = "\"subdivisionMembers\":[\"" + choices.get(item) + "\"],\"userMembers\":[]";
+                    currentPostGroup = subdivisions.get(item);
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(HomeFragment.this.getContext());
                     builder.setTitle("Choose an audience");
@@ -136,8 +136,10 @@ public class HomeFragment extends Fragment {
                             for(String id : subdivisionIds) {
                                 currentPostGroup += "\"" + id + "\",";
                             }
-                            currentPostGroup = currentPostGroup.substring(0, currentPostGroup.length() - 1);
-                            currentPostGroup += "],\"userMemebers\":[";
+                            if(!subdivisionIds.isEmpty()) {
+                                currentPostGroup = currentPostGroup.substring(0, currentPostGroup.length() - 1);
+                            }
+                            currentPostGroup += "],\"userMembers\":[\"" + preferences.getString("_id", "") + "\",";
                             for(String id : userIds) {
                                 currentPostGroup += "\"" + id  + "\",";
                             }
@@ -203,12 +205,6 @@ public class HomeFragment extends Fragment {
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
-                        } finally {
-                            //Populate spinner choice map
-                            choices.clear();
-                            choices.put("Everyone", "Everyone");
-                            choices.putAll(subdivisions);
-                            choices.put("Custom", "Custom");
                         }
                     }
                 },
@@ -226,11 +222,17 @@ public class HomeFragment extends Fragment {
     }
 
     private void populateChoiceSpinner() {
+        choices = new ArrayList<>();
+        choices.add("Everyone");
+        for(String subdivision : subdivisions.keySet()) {
+            choices.add(subdivision);
+        }
+        choices.add("Custom");
         choiceSpinner.setAdapter(
                 new ArrayAdapter<>(
                         getContext(),
                         R.layout.support_simple_spinner_dropdown_item,
-                        new ArrayList<>(choices.keySet()))
+                        choices)
         );
     }
 
