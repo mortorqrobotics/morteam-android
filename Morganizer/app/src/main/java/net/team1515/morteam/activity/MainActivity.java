@@ -128,7 +128,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         sectionPagerAdapter = new SectionPagerAdapter(getSupportFragmentManager());
         ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);

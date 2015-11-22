@@ -75,7 +75,7 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.announcement_view);
+        final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.announcement_view);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
         announcementAdapter = new AnnouncementAdapter();
@@ -358,37 +358,44 @@ public class HomeFragment extends Fragment {
             message.setText(Html.fromHtml(announcements.get(position).message));
 
             ImageButton deleteButton = (ImageButton) holder.cardView.findViewById(R.id.delete_button);
-            deleteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setTitle("Are you sure you want to delete?");
-                    builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
 
-                            Map<String, String> params = new HashMap<>();
-                            params.put("_id", announcements.get(position).id);
+            //Don't show delete announcement buttons if not admin
+            if(!preferences.getString("position", "").equals("admin")) {
+                deleteButton.setClickable(false);
+                deleteButton.setVisibility(View.INVISIBLE);
+            } else {
+                deleteButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                        builder.setTitle("Are you sure you want to delete?");
+                        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
 
-                            CookieRequest request = new CookieRequest(Request.Method.POST, "/f/deleteAnnouncement", params, preferences, new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response) {
-                                    requestAnnouncements();
-                                }
-                            }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    System.out.println(error);
-                                }
-                            });
+                                Map<String, String> params = new HashMap<>();
+                                params.put("_id", announcements.get(position).id);
 
-                            queue.add(request);
-                        }
-                    });
-                    builder.setNegativeButton("Cancel", null);
-                    builder.create().show();
-                }
-            });
+                                CookieRequest request = new CookieRequest(Request.Method.POST, "/f/deleteAnnouncement", params, preferences, new Response.Listener<String>() {
+                                    @Override
+                                    public void onResponse(String response) {
+                                        requestAnnouncements();
+                                    }
+                                }, new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        System.out.println(error);
+                                    }
+                                });
+
+                                queue.add(request);
+                            }
+                        });
+                        builder.setNegativeButton("Cancel", null);
+                        builder.create().show();
+                    }
+                });
+            }
         }
 
         @Override

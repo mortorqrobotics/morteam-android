@@ -99,6 +99,7 @@ public class LoginActivity extends AppCompatActivity {
                                 .putString("lastname", json.getString("lastname"))
                                 .putString("email", json.getString("email"))
                                 .putString("profpicpath", json.getString("profpicpath"))
+                                .putString("position", json.getJSONObject("current_team").getString("position"))
                                 .apply();
                         if(teams.length() <= 0) {
                             preferences.edit().putBoolean("isOnTeam", false).apply();
