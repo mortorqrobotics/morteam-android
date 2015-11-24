@@ -37,7 +37,13 @@ public class ProfileActivity extends AppCompatActivity {
 
         //Set up profile picture, name, and email
         final ImageView profilePic = (ImageView)findViewById(R.id.profile_picture);
-        ImageCookieRequest profilePicRequest = new ImageCookieRequest("http://www.morteam.com" + preferences.getString("profpicpath", "") + "-300",
+        String profPicPath = preferences.getString("profpicpath", "");
+        if(profPicPath.isEmpty()) {
+            profPicPath = MainActivity.BLANK_PIC_PATH;
+        } else {
+            profPicPath += "-300";
+        }
+        ImageCookieRequest profilePicRequest = new ImageCookieRequest("http://www.morteam.com" + profPicPath,
                 preferences, new Response.Listener<Bitmap>() {
             @Override
             public void onResponse(Bitmap response) {
@@ -61,10 +67,10 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     public void editProfileClicked(View view) {
-        Toast.makeText(this, "Coming soon", Toast.LENGTH_SHORT);
+        Toast.makeText(this, "Coming soon", Toast.LENGTH_SHORT).show();
     }
 
     public void changePasswordClicked(View view) {
-        Toast.makeText(this, "Coming soon", Toast.LENGTH_SHORT);
+        Toast.makeText(this, "Coming soon", Toast.LENGTH_SHORT).show();
     }
 }

@@ -1,30 +1,24 @@
 package net.team1515.morteam.activity;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.provider.ContactsContract;
+import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewParent;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -39,11 +33,12 @@ import net.team1515.morteam.fragment.HomeFragment;
 import net.team1515.morteam.network.CookieRequest;
 import net.team1515.morteam.network.ImageCookieRequest;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
+    public static final String BLANK_PIC_PATH = "/images/user.jpg";
+
     SectionPagerAdapter sectionPagerAdapter;
 
     SharedPreferences preferences;
@@ -68,7 +63,13 @@ public class MainActivity extends AppCompatActivity {
         final ImageButton profilePic = (ImageButton) toolbar.findViewById(R.id.actionbar_pic);
         profilePic.setClickable(true);
         profilePic.setVisibility(View.VISIBLE);
-        ImageCookieRequest profilePicRequest = new ImageCookieRequest("http://www.morteam.com" + preferences.getString("profpicpath", "") + "-60",
+        String profPicPath = preferences.getString("profpicpath", "");
+        if(profPicPath.isEmpty()) {
+            profPicPath = BLANK_PIC_PATH;
+        } else {
+            profPicPath += "-60";
+        }
+        ImageCookieRequest profilePicRequest = new ImageCookieRequest("http://www.morteam.com" + profPicPath,
                 preferences, new Response.Listener<Bitmap>() {
             @Override
             public void onResponse(Bitmap response) {

@@ -30,6 +30,7 @@ import com.android.volley.toolbox.Volley;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import net.team1515.morteam.R;
+import net.team1515.morteam.activity.MainActivity;
 import net.team1515.morteam.network.CookieRequest;
 import net.team1515.morteam.network.ImageCookieRequest;
 
@@ -284,7 +285,13 @@ public class HomeFragment extends Fragment {
 
                             final int announcementNum = i;
 
-                            ImageCookieRequest profPicRequest = new ImageCookieRequest("http://www.morteam.com" + announcements.get(i).picSrc + "-60",
+                            String profPicPath = announcements.get(i).picSrc;
+                            if(profPicPath.isEmpty()) {
+                                profPicPath = MainActivity.BLANK_PIC_PATH;
+                            } else {
+                                profPicPath += "-60";
+                            }
+                            ImageCookieRequest profPicRequest = new ImageCookieRequest("http://www.morteam.com" + profPicPath,
                                     preferences,
                                     new Response.Listener<Bitmap>() {
                                         @Override
