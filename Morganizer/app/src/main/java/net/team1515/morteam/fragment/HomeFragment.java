@@ -56,9 +56,6 @@ public class HomeFragment extends Fragment {
 
     private Spinner choiceSpinner;
     private String currentPostGroup;
-
-    private final Map<String, String> users = new HashMap<>();
-    private final Map<String, String> subdivisions = new HashMap<>();
     private List<String> choices = new ArrayList<>();
 
 
@@ -104,17 +101,17 @@ public class HomeFragment extends Fragment {
                 if (item.equals("Everyone")) {
                     currentPostGroup = "everyone";
                 } else if (!item.equals("Custom")) {
-                    currentPostGroup = subdivisions.get(item);
+                    currentPostGroup = MainActivity.yourSubs.get(item);
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(HomeFragment.this.getContext());
                     builder.setTitle("Choose an audience");
                     final List<String> subdivisionIds = new ArrayList<String>();
                     final List<String> userIds = new ArrayList<String>();
                     final List<CharSequence> audiences = new ArrayList<CharSequence>();
-                    for (String subdivision : subdivisions.keySet()) {
+                    for (String subdivision : MainActivity.yourSubs.keySet()) {
                         audiences.add(subdivision);
                     }
-                    for (String user : users.keySet()) {
+                    for (String user : MainActivity.teamUsers.keySet()) {
                         audiences.add(user);
                     }
                     builder.setMultiChoiceItems(audiences.toArray(new CharSequence[audiences.size()]), null, new DialogInterface.OnMultiChoiceClickListener() {
@@ -122,10 +119,10 @@ public class HomeFragment extends Fragment {
                         public void onClick(DialogInterface dialog, int which, boolean isChecked) {
                             if (isChecked) {
                                 String key = audiences.get(which).toString();
-                                if (subdivisions.containsKey(key)) {
-                                    subdivisionIds.add(subdivisions.get(key));
+                                if (MainActivity.yourSubs.containsKey(key)) {
+                                    subdivisionIds.add(MainActivity.yourSubs.get(key));
                                 } else {
-                                    userIds.add(users.get(key));
+                                    userIds.add(MainActivity.teamUsers.get(key));
                                 }
                             }
                         }
@@ -159,73 +156,13 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        //Get users and subdivisions
-        CookieRequest usersRequest = new CookieRequest(
-                Request.Method.POST,
-                "/f/getUsersInTeam",
-                preferences,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONArray userArray = new JSONArray(response);
-                            for (int i = 0; i < userArray.length(); i++) {
-                                JSONObject userObject = userArray.getJSONObject(i);
-                                users.put(
-                                        userObject.getString("lastname") + " " + userObject.getString("firstname"),
-                                        userObject.getString("_id")
-                                );
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        System.out.println(error);
-                    }
-                }
-        );
-
-        CookieRequest subdivisionsRequest = new CookieRequest(Request.Method.POST,
-                "/f/getAllSubdivisionsForUserInTeam",
-                preferences,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONArray subdivisionArray = new JSONArray(response);
-                            for (int i = 0; i < subdivisionArray.length(); i++) {
-                                JSONObject subdivisionObject = subdivisionArray.getJSONObject(i);
-                                subdivisions.put(
-                                        subdivisionObject.getString("name"),
-                                        subdivisionObject.getString("_id")
-                                );
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        System.out.println(error);
-                    }
-                }
-        );
-        queue.add(subdivisionsRequest);
-        queue.add(usersRequest);
-
         return view;
     }
 
     private void populateChoiceSpinner() {
         choices = new ArrayList<>();
         choices.add("Everyone");
-        for(String subdivision : subdivisions.keySet()) {
+        for(String subdivision : MainActivity.yourSubs.keySet()) {
             choices.add(subdivision);
         }
         choices.add("Custom");
