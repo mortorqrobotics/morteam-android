@@ -61,7 +61,7 @@ public class SubdivisionActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         userList = (RecyclerView) findViewById(R.id.subdivision_userlist);
-        LinearLayoutManager userLayoutManager = new org.solovyev.android.views.llm.LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        LinearLayoutManager userLayoutManager = new LinearLayoutManager(this);
         userList.setLayoutManager(userLayoutManager);
         userAdapter = new UserListAdapter();
         userList.setAdapter(userAdapter);
@@ -72,7 +72,7 @@ public class SubdivisionActivity extends AppCompatActivity {
 
         //Get users in subdivision
         Map<String, String> params = new HashMap<>();
-        params.put("_id", id);
+        params.put("subdivision_id", id);
         CookieRequest userRequest = new CookieRequest(Request.Method.POST,
                 "/f/getUsersInSubdivision",
                 params,
@@ -80,17 +80,37 @@ public class SubdivisionActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                System.out.println(response);
                 users = new ArrayList<>();
                 try {
                     JSONArray userArray = new JSONArray(response);
                     for(int i = 0; i < userArray.length(); i++) {
                         JSONObject userObject = userArray.getJSONObject(i);
-                        users.add(new User(userObject.getString("firstname") + " " + userObject.getString("lastname"),
+                        String profPicPath = userObject.getString("profpicpath") + "-60";
+                        profPicPath = profPicPath.replace(" ", "%20");
+                        final User user = new User(userObject.getString("firstname") + " " + userObject.getString("lastname"),
                                 userObject.getString("_id"),
-                                userObject.getString(("profPicPath"))));
+                                profPicPath);
+
+                        ImageCookieRequest profPicRequest = new ImageCookieRequest("http://www.morteam.com" + profPicPath,
+                                preferences,
+                                new Response.Listener<Bitmap>() {
+                                    @Override
+                                    public void onResponse(Bitmap response) {
+                                        user.setProfPic(response);
+                                        users.add(user);
+                                    }
+                                }, 0, 0, null, Bitmap.Config.RGB_565,
+                                new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        users.add(user);
+                                        System.out.println(user.profPicPath + " does not work correctly. Will be fixed soon...hopefully.");
+                                        System.out.println(error);
+                                    }
+                                }
+                        );
+                        queue.add(profPicRequest);
                     }
-                    userAdapter.setUsers(users);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -100,6 +120,12 @@ public class SubdivisionActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 System.out.println(error);
+            }
+        });
+        queue.addRequestFinishedListener(new RequestQueue.RequestFinishedListener<Object>() {
+            @Override
+            public void onRequestFinished(Request<Object> request) {
+                userAdapter.setUsers(users);
             }
         });
         queue.add(userRequest);
@@ -141,28 +167,7 @@ public class SubdivisionActivity extends AppCompatActivity {
             final User currentUser = users.get(position);
 
             final ImageView icon = (ImageView) holder.layout.findViewById(R.id.userlist_icon);
-
-            if (currentUser.profPicPath.isEmpty()) {
-                currentUser.profPicPath = MainActivity.BLANK_PIC_PATH;
-            } else {
-                currentUser.profPicPath += "-60";
-            }
-            ImageCookieRequest profPicRequest = new ImageCookieRequest("www.morteam.com/" + currentUser.profPicPath,
-                    preferences,
-                    new Response.Listener<Bitmap>() {
-                        @Override
-                        public void onResponse(Bitmap response) {
-                            icon.setImageBitmap(response);
-                        }
-                    }, 0, 0, null, Bitmap.Config.RGB_565,
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            System.out.println(error);
-                        }
-                    }
-            );
-            queue.add(profPicRequest);
+            icon.setImageBitmap(currentUser.profPic);
 
             TextView name = (TextView) holder.layout.findViewById(R.id.userlist_name);
             name.setText(currentUser.name);
@@ -193,11 +198,17 @@ public class SubdivisionActivity extends AppCompatActivity {
         public String name;
         public String id;
         public String profPicPath;
+        public Bitmap profPic;
 
         public User(String name, String id, String profPicPath) {
             this.name = name;
             this.id = id;
             this.profPicPath = profPicPath;
+            profPic = null;
+        }
+
+        public void setProfPic(Bitmap profPic) {
+            this.profPic = profPic;
         }
     }
 }

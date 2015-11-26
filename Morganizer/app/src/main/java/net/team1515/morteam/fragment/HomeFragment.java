@@ -222,12 +222,7 @@ public class HomeFragment extends Fragment {
 
                             final int announcementNum = i;
 
-                            String profPicPath = announcements.get(i).picSrc;
-                            if(profPicPath.isEmpty()) {
-                                profPicPath = MainActivity.BLANK_PIC_PATH;
-                            } else {
-                                profPicPath += "-60";
-                            }
+                            String profPicPath = announcements.get(i).picSrc + "-60";
                             ImageCookieRequest profPicRequest = new ImageCookieRequest("http://www.morteam.com" + profPicPath,
                                     preferences,
                                     new Response.Listener<Bitmap>() {

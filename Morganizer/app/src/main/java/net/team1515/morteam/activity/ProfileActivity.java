@@ -37,12 +37,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         //Set up profile picture, name, and email
         final ImageView profilePic = (ImageView)findViewById(R.id.profile_picture);
-        String profPicPath = preferences.getString("profpicpath", "");
-        if(profPicPath.isEmpty()) {
-            profPicPath = MainActivity.BLANK_PIC_PATH;
-        } else {
-            profPicPath += "-300";
-        }
+        String profPicPath = preferences.getString("profpicpath", "") + "-300";
         ImageCookieRequest profilePicRequest = new ImageCookieRequest("http://www.morteam.com" + profPicPath,
                 preferences, new Response.Listener<Bitmap>() {
             @Override

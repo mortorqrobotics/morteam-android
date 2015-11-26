@@ -55,8 +55,6 @@ import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-    public static final String BLANK_PIC_PATH = "/images/user.jpg";
-
     SectionPagerAdapter sectionPagerAdapter;
 
     SharedPreferences preferences;
@@ -93,13 +91,7 @@ public class MainActivity extends AppCompatActivity {
         final ImageButton profilePic = (ImageButton) toolbar.findViewById(R.id.actionbar_pic);
         profilePic.setClickable(true);
         profilePic.setVisibility(View.VISIBLE);
-        String profPicPath = preferences.getString("profpicpath", "");
-        if (profPicPath.isEmpty()) {
-            profPicPath = BLANK_PIC_PATH;
-        } else {
-            profPicPath += "-60";
-        }
-        ImageCookieRequest profilePicRequest = new ImageCookieRequest("http://www.morteam.com" + profPicPath,
+        ImageCookieRequest profilePicRequest = new ImageCookieRequest("http://www.morteam.com" + preferences.getString("profpicpath", "") + "-60",
                 preferences, new Response.Listener<Bitmap>() {
             @Override
             public void onResponse(Bitmap response) {
