@@ -2,6 +2,7 @@ package net.team1515.morteam.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,6 +23,11 @@ import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
 import net.team1515.morteam.network.CookieRequest;
+import net.team1515.morteam.network.ImageCookieRequest;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,8 +43,8 @@ public class SubdivisionActivity extends AppCompatActivity {
     String id;
 
     RecyclerView userList;
-    UserListAdapter adapter;
-    Map<String, String> users;
+    UserListAdapter userAdapter;
+    List<User> users;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +63,7 @@ public class SubdivisionActivity extends AppCompatActivity {
         userList = (RecyclerView) findViewById(R.id.subdivision_userlist);
         LinearLayoutManager userLayoutManager = new org.solovyev.android.views.llm.LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         userList.setLayoutManager(userLayoutManager);
-        UserListAdapter userAdapter = new UserListAdapter();
+        userAdapter = new UserListAdapter();
         userList.setAdapter(userAdapter);
 
         Intent intent = getIntent();
@@ -75,7 +81,19 @@ public class SubdivisionActivity extends AppCompatActivity {
             @Override
             public void onResponse(String response) {
                 System.out.println(response);
-                users = new HashMap<>();
+                users = new ArrayList<>();
+                try {
+                    JSONArray userArray = new JSONArray(response);
+                    for(int i = 0; i < userArray.length(); i++) {
+                        JSONObject userObject = userArray.getJSONObject(i);
+                        users.add(new User(userObject.getString("firstname") + " " + userObject.getString("lastname"),
+                                userObject.getString("_id"),
+                                userObject.getString(("profPicPath"))));
+                    }
+                    userAdapter.setUsers(users);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         },
                 new Response.ErrorListener() {
@@ -97,10 +115,8 @@ public class SubdivisionActivity extends AppCompatActivity {
             this.users = new ArrayList<>();
         }
 
-        public void setUsers(Map<String, String> users) {
-            for(Map.Entry<String, String> user : users.entrySet()) {
-                this.users.add(new User(user.getKey(), user.getValue()));
-            }
+        public void setUsers(List<User> users) {
+            this.users = users;
             notifyDataSetChanged();
         }
 
@@ -124,8 +140,29 @@ public class SubdivisionActivity extends AppCompatActivity {
         public void onBindViewHolder(ViewHolder holder, final int position) {
             final User currentUser = users.get(position);
 
-            ImageView icon = (ImageView) holder.layout.findViewById(R.id.userlist_icon);
-            //TODO: set user icon
+            final ImageView icon = (ImageView) holder.layout.findViewById(R.id.userlist_icon);
+
+            if (currentUser.profPicPath.isEmpty()) {
+                currentUser.profPicPath = MainActivity.BLANK_PIC_PATH;
+            } else {
+                currentUser.profPicPath += "-60";
+            }
+            ImageCookieRequest profPicRequest = new ImageCookieRequest("www.morteam.com/" + currentUser.profPicPath,
+                    preferences,
+                    new Response.Listener<Bitmap>() {
+                        @Override
+                        public void onResponse(Bitmap response) {
+                            icon.setImageBitmap(response);
+                        }
+                    }, 0, 0, null, Bitmap.Config.RGB_565,
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            System.out.println(error);
+                        }
+                    }
+            );
+            queue.add(profPicRequest);
 
             TextView name = (TextView) holder.layout.findViewById(R.id.userlist_name);
             name.setText(currentUser.name);
@@ -149,15 +186,18 @@ public class SubdivisionActivity extends AppCompatActivity {
             return users.size();
         }
 
-        private class User {
-            public final String name;
-            public final String id;
 
-            public User(String name, String id) {
-                this.name = name;
-                this.id = id;
-            }
-        }
     }
 
+    public class User {
+        public String name;
+        public String id;
+        public String profPicPath;
+
+        public User(String name, String id, String profPicPath) {
+            this.name = name;
+            this.id = id;
+            this.profPicPath = profPicPath;
+        }
+    }
 }
