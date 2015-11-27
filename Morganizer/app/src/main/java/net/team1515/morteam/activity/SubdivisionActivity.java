@@ -59,6 +59,8 @@ public class SubdivisionActivity extends AppCompatActivity {
         //Set up action bar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         userList = (RecyclerView) findViewById(R.id.subdivision_userlist);
         LinearLayoutManager userLayoutManager = new LinearLayoutManager(this);
@@ -132,6 +134,11 @@ public class SubdivisionActivity extends AppCompatActivity {
 
         TextView subName = (TextView) findViewById(R.id.subdivision_name);
         subName.setText(name);
+    }
+
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHolder> {

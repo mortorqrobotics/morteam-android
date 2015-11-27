@@ -26,10 +26,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -69,6 +72,14 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView publicSubList;
     SubdivisionListAdapter publicSubAdapter;
 
+
+    //New announcement alert
+    public AlertDialog.Builder announcementBuilder;
+    public View newAnnouncementView;
+    private Spinner choiceSpinner;
+    private String currentPostGroup;
+    private List<String> choices = new ArrayList<>();
+
     public static final Map<String, String> teamUsers = new HashMap<>();
     public static final Map<String, String> yourSubs = new HashMap<>();
     public static final Map<String, String> publicSubs = new HashMap<>();
@@ -81,7 +92,6 @@ public class MainActivity extends AppCompatActivity {
 
         preferences = getSharedPreferences(null, 0);
         queue = Volley.newRequestQueue(this);
-
 
         //Set up action bar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -188,6 +198,16 @@ public class MainActivity extends AppCompatActivity {
         publicSubList.setAdapter(publicSubAdapter);
 
 
+        //Create new announcement dialog
+        announcementBuilder = new AlertDialog.Builder(this);
+        announcementBuilder.setPositiveButton("Post", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                postAnnouncement();
+            }
+        });
+        announcementBuilder.setNegativeButton("Cancel", null);
+
         //Get users and subdivisions
         CookieRequest usersRequest = new CookieRequest(
                 Request.Method.POST,
@@ -280,38 +300,124 @@ public class MainActivity extends AppCompatActivity {
         queue.add(usersRequest);
     }
 
+    public void showAnnouncementDialog() {
+        //Create new announcement dialog
+        newAnnouncementView = getLayoutInflater().inflate(R.layout.dialog_newannouncement, null);
+
+        //Populate choice spinner
+        choiceSpinner = (Spinner) newAnnouncementView.findViewById(R.id.announcement_choicespinner);
+        choiceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String item = parent.getItemAtPosition(position).toString();
+                if (item.equals("Everyone")) {
+                    currentPostGroup = "everyone";
+                } else if (!item.equals("Custom")) {
+                    currentPostGroup = MainActivity.yourSubs.get(item);
+                } else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("Choose an audience");
+                    final List<String> subdivisionIds = new ArrayList<>();
+                    final List<String> userIds = new ArrayList<>();
+                    final List<CharSequence> audiences = new ArrayList<>();
+                    for (String subdivision : MainActivity.yourSubs.keySet()) {
+                        audiences.add(subdivision);
+                    }
+                    for (String user : MainActivity.teamUsers.keySet()) {
+                        audiences.add(user);
+                    }
+                    builder.setMultiChoiceItems(audiences.toArray(new CharSequence[audiences.size()]), null, new DialogInterface.OnMultiChoiceClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                            if (isChecked) {
+                                String key = audiences.get(which).toString();
+                                if (MainActivity.yourSubs.containsKey(key)) {
+                                    subdivisionIds.add(MainActivity.yourSubs.get(key));
+                                } else {
+                                    userIds.add(MainActivity.teamUsers.get(key));
+                                }
+                            }
+                        }
+                    });
+                    builder.setPositiveButton("Choose", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            currentPostGroup = "{\"subdivisionMembers\":[";
+                            for (String id : subdivisionIds) {
+                                currentPostGroup += "\"" + id + "\",";
+                            }
+                            if (!subdivisionIds.isEmpty()) {
+                                currentPostGroup = currentPostGroup.substring(0, currentPostGroup.length() - 1);
+                            }
+                            currentPostGroup += "],\"userMembers\":[\"" + preferences.getString("_id", "") + "\",";
+                            for (String id : userIds) {
+                                currentPostGroup += "\"" + id + "\",";
+                            }
+                            currentPostGroup = currentPostGroup.substring(0, currentPostGroup.length() - 1);
+                            currentPostGroup += "]}";
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", null);
+                    builder.create().show();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        populateChoiceSpinner();
+
+        announcementBuilder.setView(newAnnouncementView);
+        announcementBuilder.create().show();
+    }
+
+    private void populateChoiceSpinner() {
+        choices = new ArrayList<>();
+        choices.add("Everyone");
+        for(String subdivision : MainActivity.yourSubs.keySet()) {
+            choices.add(subdivision);
+        }
+        choices.add("Custom");
+        choiceSpinner.setAdapter(
+                new ArrayAdapter<>(
+                        this,
+                        R.layout.support_simple_spinner_dropdown_item,
+                        choices)
+        );
+    }
+
+    public String getCurrentPostGroup() {
+        return currentPostGroup;
+    }
+
     public void profilePictureClick(View view) {
         popupMenu.show();
     }
 
     public void newAnnouncement(View view) {
-        sectionPagerAdapter.homeFragment.openNewAnnouncement();
+        showAnnouncementDialog();
     }
 
-    public void collapseNewAnnouncement(View view) {
-        sectionPagerAdapter.homeFragment.collapseNewAnnouncement();
-    }
-
-    public void postAnnouncement(View view) {
+    public void postAnnouncement() {
         //Hide keyboard
         InputMethodManager imm = (InputMethodManager) getSystemService(
                 INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
 
         //Get message from edittext
-        EditText messageBox = (EditText) sectionPagerAdapter.homeFragment.getView().findViewById(R.id.new_message);
+        EditText messageBox = (EditText) newAnnouncementView.findViewById(R.id.announcement_message);
         String message = messageBox.getText().toString();
 
         if (!message.isEmpty()) {
             Map<String, String> params = new HashMap<>();
             params.put("content", message);
-            params.put("audience", sectionPagerAdapter.homeFragment.getCurrentPostGroup());
-            System.out.println(sectionPagerAdapter.homeFragment.getCurrentPostGroup());
+            params.put("audience", getCurrentPostGroup());
             CookieRequest request = new CookieRequest(Request.Method.POST, "/f/postAnnouncement", params, preferences, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     sectionPagerAdapter.homeFragment.requestAnnouncements();
-                    sectionPagerAdapter.homeFragment.collapseNewAnnouncement();
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -354,15 +460,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (sectionPagerAdapter.homeFragment.getNewAnnouncementStatus() != SlidingUpPanelLayout.PanelState.COLLAPSED) {
-            sectionPagerAdapter.homeFragment.collapseNewAnnouncement();
-        } else {
-            super.onBackPressed();
-        }
     }
 
     private class SectionPagerAdapter extends FragmentPagerAdapter {

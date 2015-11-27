@@ -1,7 +1,6 @@
 package net.team1515.morteam.activity;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -40,7 +39,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void registerPressed(View view){
-        final Button registerButton = (Button)findViewById(R.id.register_button);
+        final Button registerButton = (Button)findViewById(R.id.login_registerbutton);
 
         //Add all user info to post parameters
         Map<String, String> params = new HashMap<>();

@@ -34,6 +34,8 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         //Set up profile picture, name, and email
         final ImageView profilePic = (ImageView)findViewById(R.id.profile_picture);
@@ -59,6 +61,11 @@ public class ProfileActivity extends AppCompatActivity {
         TextView emailView = (TextView)findViewById(R.id.profile_email);
         String email = preferences.getString("email", "");
         emailView.setText(email);
+    }
+
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     public void editProfileClicked(View view) {

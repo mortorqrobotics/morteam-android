@@ -52,11 +52,6 @@ public class HomeFragment extends Fragment {
     private SharedPreferences preferences;
     private AnnouncementAdapter announcementAdapter;
     private SwipeRefreshLayout refreshLayout;
-    private SlidingUpPanelLayout slidingLayout;
-
-    private Spinner choiceSpinner;
-    private String currentPostGroup;
-    private List<String> choices = new ArrayList<>();
 
 
     @Override
@@ -69,7 +64,6 @@ public class HomeFragment extends Fragment {
             @Override
             public void onRequestFinished(Request<Object> request) {
                 announcementAdapter.notifyDataSetChanged();
-                populateChoiceSpinner();
             }
         });
 
@@ -88,110 +82,10 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        slidingLayout = (SlidingUpPanelLayout) view.findViewById(R.id.slidingLayout);
-        slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-        slidingLayout.setTouchEnabled(false);
-
-        //Populate choice spinner
-        choiceSpinner = (Spinner) slidingLayout.findViewById(R.id.new_choicespinner);
-        choiceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String item = parent.getItemAtPosition(position).toString();
-                if (item.equals("Everyone")) {
-                    currentPostGroup = "everyone";
-                } else if (!item.equals("Custom")) {
-                    currentPostGroup = MainActivity.yourSubs.get(item);
-                } else {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(HomeFragment.this.getContext());
-                    builder.setTitle("Choose an audience");
-                    final List<String> subdivisionIds = new ArrayList<String>();
-                    final List<String> userIds = new ArrayList<String>();
-                    final List<CharSequence> audiences = new ArrayList<CharSequence>();
-                    for (String subdivision : MainActivity.yourSubs.keySet()) {
-                        audiences.add(subdivision);
-                    }
-                    for (String user : MainActivity.teamUsers.keySet()) {
-                        audiences.add(user);
-                    }
-                    builder.setMultiChoiceItems(audiences.toArray(new CharSequence[audiences.size()]), null, new DialogInterface.OnMultiChoiceClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                            if (isChecked) {
-                                String key = audiences.get(which).toString();
-                                if (MainActivity.yourSubs.containsKey(key)) {
-                                    subdivisionIds.add(MainActivity.yourSubs.get(key));
-                                } else {
-                                    userIds.add(MainActivity.teamUsers.get(key));
-                                }
-                            }
-                        }
-                    });
-                    builder.setPositiveButton("Choose", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            currentPostGroup = "{\"subdivisionMembers\":[";
-                            for(String id : subdivisionIds) {
-                                currentPostGroup += "\"" + id + "\",";
-                            }
-                            if(!subdivisionIds.isEmpty()) {
-                                currentPostGroup = currentPostGroup.substring(0, currentPostGroup.length() - 1);
-                            }
-                            currentPostGroup += "],\"userMembers\":[\"" + preferences.getString("_id", "") + "\",";
-                            for(String id : userIds) {
-                                currentPostGroup += "\"" + id  + "\",";
-                            }
-                            currentPostGroup = currentPostGroup.substring(0, currentPostGroup.length() - 1);
-                            currentPostGroup += "]}";
-                        }
-                    });
-                    builder.setNegativeButton("Cancel", null);
-                    builder.create().show();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
         return view;
     }
 
-    private void populateChoiceSpinner() {
-        choices = new ArrayList<>();
-        choices.add("Everyone");
-        for(String subdivision : MainActivity.yourSubs.keySet()) {
-            choices.add(subdivision);
-        }
-        choices.add("Custom");
-        choiceSpinner.setAdapter(
-                new ArrayAdapter<>(
-                        getContext(),
-                        R.layout.support_simple_spinner_dropdown_item,
-                        choices)
-        );
-    }
 
-    public String getCurrentPostGroup() {
-        return currentPostGroup;
-    }
-
-    public void openNewAnnouncement() {
-        slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-    }
-
-    public void collapseNewAnnouncement() {
-        slidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-
-        TextView message = (TextView) getView().findViewById(R.id.new_message);
-        message.setText("");
-    }
-
-    public SlidingUpPanelLayout.PanelState getNewAnnouncementStatus() {
-        return slidingLayout.getPanelState();
-    }
 
     public void requestAnnouncements() {
         announcementAdapter.requestAnnouncements();
@@ -269,7 +163,7 @@ public class HomeFragment extends Fragment {
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            CardView view = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.announcement, parent, false);
+            CardView view = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.announcementlist_item, parent, false);
             ViewHolder viewHolder = new ViewHolder(view);
             return viewHolder;
         }

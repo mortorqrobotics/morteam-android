@@ -1,24 +1,19 @@
 package net.team1515.morteam.activity;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
@@ -64,11 +59,11 @@ public class LoginActivity extends AppCompatActivity {
 
     public void loginPressed(View view) {
         //Make sure the user cannot press the button twice
-        final Button loginButton = (Button) findViewById(R.id.login_button);
+        final Button loginButton = (Button) findViewById(R.id.login_loginbutton);
         loginButton.setClickable(false);
 
-        EditText userBox = (EditText) findViewById(R.id.username_box);
-        EditText passBox = (EditText) findViewById(R.id.password_box);
+        EditText userBox = (EditText) findViewById(R.id.login_username);
+        EditText passBox = (EditText) findViewById(R.id.login_password);
         final String user = userBox.getText().toString();
         final String pass = passBox.getText().toString();
 
