@@ -94,8 +94,7 @@ public class HomeFragment extends Fragment {
     public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapter.ViewHolder> {
 
         private CookieRequest announcementsRequest;
-
-        private ArrayList<Announcement> announcements;
+        private List<Announcement> announcements;
 
         public AnnouncementAdapter() {
             announcements = new ArrayList<>();
@@ -127,7 +126,7 @@ public class HomeFragment extends Fragment {
                                     }, 0, 0, null, Bitmap.Config.RGB_565, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
-                                    System.out.println(error.networkResponse.data);
+                                    System.out.println(error);
                                 }
                             });
                             queue.add(profPicRequest);
