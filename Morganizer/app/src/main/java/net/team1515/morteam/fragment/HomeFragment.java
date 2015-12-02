@@ -79,6 +79,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onRefresh() {
                 announcementAdapter.requestAnnouncements();
+                System.out.println("stuffss");
             }
         });
 
@@ -131,17 +132,19 @@ public class HomeFragment extends Fragment {
                             });
                             queue.add(profPicRequest);
                         }
-
-                        //Tell adapter to update once request is finished
-                        refreshLayout.setRefreshing(false);
                     } catch (JSONException e) {
                         e.printStackTrace();
+                    } finally {
+                        //Tell adapter to update once request is finished
+                        //Do so whether it fails or succeeds
+                        refreshLayout.setRefreshing(false);
                     }
                 }
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    //System.out.println(error);
+                    refreshLayout.setRefreshing(false);
+                    System.out.println(error);
                 }
             });
             requestAnnouncements();
