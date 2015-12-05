@@ -406,7 +406,7 @@ public class MainActivity extends AppCompatActivity {
                 INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
 
-        //Get message from edittext
+        //Get content from edittext
         EditText messageBox = (EditText) newAnnouncementView.findViewById(R.id.announcement_message);
         String message = messageBox.getText().toString();
 
