@@ -15,11 +15,8 @@ import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -27,10 +24,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import net.team1515.morteam.R;
-import net.team1515.morteam.activity.MainActivity;
 import net.team1515.morteam.network.CookieRequest;
 import net.team1515.morteam.network.ImageCookieRequest;
 
@@ -78,8 +73,7 @@ public class HomeFragment extends Fragment {
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                announcementAdapter.requestAnnouncements();
-                System.out.println("stuffss");
+                requestAnnouncements();
             }
         });
 
@@ -99,6 +93,10 @@ public class HomeFragment extends Fragment {
 
         public AnnouncementAdapter() {
             announcements = new ArrayList<>();
+            requestAnnouncements();
+        }
+
+        public void requestAnnouncements() {
             announcementsRequest = new CookieRequest(Request.Method.POST, "/f/getAnnouncementsForUser", preferences, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
@@ -124,7 +122,7 @@ public class HomeFragment extends Fragment {
                                         public void onResponse(Bitmap response) {
                                             announcements.get(announcementNum).setPic(response);
                                         }
-                                    }, 0, 0, null, Bitmap.Config.RGB_565, new Response.ErrorListener() {
+                                    }, 0, 0, null, null, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
                                     System.out.println(error);
@@ -147,10 +145,6 @@ public class HomeFragment extends Fragment {
                     System.out.println(error);
                 }
             });
-            requestAnnouncements();
-        }
-
-        public void requestAnnouncements() {
             queue.add(announcementsRequest);
         }
 
