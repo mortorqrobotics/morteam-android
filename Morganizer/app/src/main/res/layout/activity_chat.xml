@@ -34,7 +34,7 @@
                 android:text="Send"
                 android:paddingLeft="0dp"
                 android:paddingRight="0dp"
-                android:onClick="sendClick"/>
+                android:onClick="sendClick" />
 
         </LinearLayout>
 

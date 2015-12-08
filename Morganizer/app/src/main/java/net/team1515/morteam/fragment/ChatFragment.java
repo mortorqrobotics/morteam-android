@@ -76,7 +76,8 @@ public class ChatFragment extends Fragment {
                                     String id = chatObject.getString("_id");
                                     String name = "";
                                     String picPath = "";
-                                    if(chatObject.getBoolean("group")) {
+                                    boolean isGroup = chatObject.getBoolean("group");
+                                    if(isGroup) {
                                         name = chatObject.getString("name");
                                         picPath = "/images/group.png";
                                     } else {
@@ -92,7 +93,7 @@ public class ChatFragment extends Fragment {
                                         }
                                     }
 
-                                    Chat chat = new Chat(name, id, picPath);
+                                    Chat chat = new Chat(name, id, picPath, isGroup);
 
                                     chats.add(chat);
                                 }
@@ -129,6 +130,7 @@ public class ChatFragment extends Fragment {
                     Intent intent = new Intent(getContext(), ChatActivity.class);
                     intent.putExtra("name", currentChat.name);
                     intent.putExtra("_id", currentChat.id);
+                    intent.putExtra("isGroup", currentChat.isGroup);
                     startActivity(intent);
                 }
             });
@@ -173,11 +175,13 @@ public class ChatFragment extends Fragment {
         public String name;
         public String id;
         public String picPath;
+        public boolean isGroup;
 
-        public Chat(String name, String id, String picPath) {
+        public Chat(String name, String id, String picPath, boolean isGroup) {
             this.name = name;
             this.id = id;
             this.picPath = picPath;
+            this.isGroup = isGroup;
         }
     }
 }

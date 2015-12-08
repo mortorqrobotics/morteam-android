@@ -1,12 +1,13 @@
 package net.team1515.morteam.activity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -69,8 +70,19 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     public void editProfileClicked(View view) {
-        Toast.makeText(this, "Coming soon", Toast.LENGTH_SHORT).show();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(R.layout.dialog_editprofile);
+        builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //TODO: change profile
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.setTitle("Edit Profile");
+        builder.create().show();
     }
+
 
     public void changePasswordClicked(View view) {
         Toast.makeText(this, "Coming soon", Toast.LENGTH_SHORT).show();
