@@ -1,5 +1,6 @@
 package net.team1515.morteam.activity;
 
+import android.app.ActionBar;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -10,12 +11,16 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.Html;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -23,7 +28,10 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.engineio.client.Transport;
 import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Manager;
 import com.github.nkzawa.socketio.client.Socket;
 
 import net.team1515.morteam.R;
@@ -36,9 +44,12 @@ import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -54,13 +65,8 @@ public class ChatActivity extends AppCompatActivity {
     LinearLayoutManager layoutManager;
 
     private Socket socket;
-    {
-        try {
-            socket = IO.socket("http://www.morteam.com");
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-    }
+
+    private boolean isClearingText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +76,10 @@ public class ChatActivity extends AppCompatActivity {
         queue = Volley.newRequestQueue(this);
 
         setContentView(R.layout.activity_chat);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         //Get messages
         Intent intent = getIntent();
@@ -82,16 +90,123 @@ public class ChatActivity extends AppCompatActivity {
         messageList = (RecyclerView) findViewById(R.id.chat_messagelist);
         messageAdapter = new MessageAdapter();
         layoutManager = new LinearLayoutManager(this);
+
         messageList.setLayoutManager(layoutManager);
         messageList.setAdapter(messageAdapter);
 
-        socket = socket.connect();
-        System.out.println(socket.connected());
+        isClearingText = false;
+        final EditText messageBox = (EditText) findViewById(R.id.chat_message);
+        messageBox.addTextChangedListener(new TextWatcher() {
+            Date lastTypeTime = null;
+
+            @Override
+            public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+                if(!isClearingText) {
+                    try {
+                        JSONObject typingObject = new JSONObject();
+                        typingObject.put("chat_id", chatId);
+                        socket.emit("start typing", typingObject);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                lastTypeTime = new Date();
+            }
+
+            @Override
+            public void afterTextChanged(Editable arg0) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+                // Dispatch after done typing (1 sec after)
+                Timer timer = new Timer();
+                TimerTask timerTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        Date runTime = new Date();
+
+                        if ((lastTypeTime.getTime() + 1000) <= runTime.getTime()) {
+                            try {
+                                JSONObject typingObject = new JSONObject();
+                                typingObject.put("chat_id", chatId);
+                                socket.emit("stop typing", typingObject);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    }
+                };
+                timer.schedule(timerTask, 1000);
+            }
+        });
+
+
+        try {
+            final String sessionId = preferences.getString(CookieRequest.SESSION_COOKIE, "");
+            socket = IO.socket("http://www.morteam.com");
+            socket.io().on(Manager.EVENT_TRANSPORT, new Emitter.Listener() {
+                @Override
+                public void call(Object... args) {
+                    Transport transport = (Transport) args[0];
+                    transport.on(Transport.EVENT_REQUEST_HEADERS, new Emitter.Listener() {
+                        @Override
+                        public void call(Object... args) {
+                            @SuppressWarnings("unchecked")
+                            Map<String, String> headers = (Map<String, String>) args[0];
+
+                            // set header
+                            //Insert session-id cookie into header
+                            if (sessionId.length() > 0) {
+                                StringBuilder builder = new StringBuilder();
+                                builder.append(CookieRequest.SESSION_COOKIE);
+                                builder.append("=");
+                                builder.append(sessionId);
+                                if (headers.containsKey(CookieRequest.COOKIE_KEY)) {
+                                    builder.append("; ");
+                                    builder.append(headers.get(CookieRequest.COOKIE_KEY));
+                                }
+                                headers.put(CookieRequest.COOKIE_KEY, builder.toString());
+                            }
+                        }
+                    }).on(Transport.EVENT_RESPONSE_HEADERS, new Emitter.Listener() {
+                        @Override
+                        public void call(Object... args) {
+                            @SuppressWarnings("unchecked")
+                            Map<String, String> headers = (Map<String, String>) args[0];
+                            //No headers to get here at the moment
+                        }
+                    });
+                }
+            });
+            socket = socket.connect();
+            socket.emit("get clients");
+            socket.on("get clients", new Emitter.Listener() {
+                @Override
+                public void call(Object... args) {
+                    System.out.println(args[0]);
+                }
+            });
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        socket.disconnect();
+    }
+
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
 
     public void sendClick(View view) {
-        EditText messageText = (EditText) findViewById(R.id.chat_message);
+        final EditText messageText = (EditText) findViewById(R.id.chat_message);
         final String messageContent = messageText.getText().toString();
 
         Map<String, String> params = new HashMap<>();
@@ -102,25 +217,44 @@ public class ChatActivity extends AppCompatActivity {
                 params,
                 preferences,
                 new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                JSONObject messageObject = new JSONObject();
-                try {
-                    messageObject.put("chat_id", chatId);
-                    messageObject.put("content", messageContent);
-                    if(isGroup) {
-                        messageObject.put("type", "group");
-                        messageObject.put("chat_name", chatName);
-                    } else {
-                        messageObject.put("type", "private");
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject typingObject = new JSONObject();
+                            typingObject.put("chat_id", chatId);
+                            socket.emit("stop typing", typingObject);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        JSONObject messageObject = new JSONObject();
+                        try {
+                            messageObject.put("chat_id", chatId);
+                            messageObject.put("content", messageContent);
+                            if (isGroup) {
+                                messageObject.put("type", "group");
+                                messageObject.put("chat_name", chatName);
+                            } else {
+                                messageObject.put("type", "private");
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        socket.emit("message", messageObject);
+
+                        isClearingText = true;
+                        messageText.setText("");
+                        isClearingText = false;
+
+                        messageAdapter.addMessage(
+                                preferences.getString("firstname", "") + preferences.getString("lastname", ""),
+                                messageContent,
+                                chatId,
+                                preferences.getString("profpicpath", ""),
+                                true
+                        );
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                System.out.println(messageObject);
-                socket.emit("message", messageObject.toString());
-            }
-        }, new Response.ErrorListener() {
+                }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 System.out.println(error);
@@ -148,7 +282,7 @@ public class ChatActivity extends AppCompatActivity {
                         public void onResponse(String response) {
                             try {
                                 JSONArray messageArray = new JSONArray(response);
-                                for(int i = messageArray.length() - 1; i >= 0; i--) {
+                                for (int i = messageArray.length() - 1; i >= 0; i--) {
                                     JSONObject messageObject = messageArray.getJSONObject(i);
                                     String id = messageObject.getString("_id");
                                     String content = messageObject.getString("content");
@@ -157,7 +291,7 @@ public class ChatActivity extends AppCompatActivity {
                                     String name = authorObject.getString("firstname") + " " + authorObject.getString("lastname");
                                     String picPath = authorObject.getString("profpicpath") + "-60";
                                     boolean isMyChat = false;
-                                    if(authorObject.getString("_id").equals(preferences.getString("_id", ""))) {
+                                    if (authorObject.getString("_id").equals(preferences.getString("_id", ""))) {
                                         isMyChat = true;
                                     }
 
@@ -201,8 +335,8 @@ public class ChatActivity extends AppCompatActivity {
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            CardView cardView = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.messagelist_item, parent, false);
-            ViewHolder viewHolder = new ViewHolder(cardView);
+            RelativeLayout relativeLayout = (RelativeLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.messagelist_item, parent, false);
+            ViewHolder viewHolder = new ViewHolder(relativeLayout);
             return viewHolder;
         }
 
@@ -210,16 +344,40 @@ public class ChatActivity extends AppCompatActivity {
         public void onBindViewHolder(ViewHolder holder, int position) {
             final Message currentMessage = messages.get(position);
 
-            TextView message = (TextView) holder.cardView.findViewById(R.id.messagelist_message);
+            TextView message = (TextView) holder.relativeLayout.findViewById(R.id.messagelist_message);
             message.setText(Html.fromHtml(currentMessage.content));
 
-            final ImageView messagePic = (ImageView) holder.cardView.findViewById(R.id.messagelist_pic);
+            final ImageView messagePic = (ImageView) holder.relativeLayout.findViewById(R.id.messagelist_pic);
             messagePic.setImageBitmap(currentMessage.pic);
 
-            if(currentMessage.isMyChat) {
-                holder.cardView.setCardBackgroundColor(Color.argb(255, 255, 197, 71));
+            CardView cardView = (CardView) holder.relativeLayout.findViewById(R.id.messagelist_cardview);
+            if (currentMessage.isMyChat) {
+                //Change background color and align to right
+                cardView.setCardBackgroundColor(Color.argb(255, 255, 197, 71));
+
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) cardView.getLayoutParams();
+                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
+                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+
+                //Reverse picture and message
+                LinearLayout layout = (LinearLayout) holder.relativeLayout.findViewById(R.id.messagelist_layout);
+                layout.removeAllViews();
+                layout.addView(message);
+                layout.addView(messagePic);
+
             } else {
-                holder.cardView.setCardBackgroundColor(Color.WHITE);
+                cardView.setCardBackgroundColor(Color.WHITE);
+
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) cardView.getLayoutParams();
+                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
+                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+
+                //Undo reversal
+                LinearLayout layout = (LinearLayout) holder.relativeLayout.findViewById(R.id.messagelist_layout);
+                layout.removeAllViews();
+                layout.addView(messagePic);
+                layout.addView(message);
+
             }
         }
 
@@ -229,14 +387,20 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
-            public CardView cardView;
+            public RelativeLayout relativeLayout;
 
-            public ViewHolder(CardView cardView) {
-                super(cardView);
-                this.cardView = cardView;
+            public ViewHolder(RelativeLayout relativeLayout) {
+                super(relativeLayout);
+                this.relativeLayout = relativeLayout;
             }
         }
+
+        public void addMessage(String name, String content, String id, String picPath, boolean isMyChat) {
+            messages.add(new Message(name, content, id, picPath, isMyChat));
+            notifyDataSetChanged();
+        }
     }
+
 
     public class Message {
         public String name;
