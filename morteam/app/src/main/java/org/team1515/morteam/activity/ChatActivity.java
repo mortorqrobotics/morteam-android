@@ -185,7 +185,36 @@ public class ChatActivity extends AppCompatActivity {
             socket.on("get clients", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    System.out.println(args[0]);
+                    //TODO: Get online clients
+                }
+            });
+
+            //TODO: move this to a service or the like
+            socket.on("message", new Emitter.Listener() {
+                @Override
+                public void call(Object... args) {
+                    for(Object arg : args) {
+                        System.out.println(arg);
+                    }
+                    try {
+                        JSONObject messageObject = new JSONObject(args[0].toString());
+
+                        String type = messageObject.getString("type");
+                        String chatId = messageObject.getString("chat_id");
+                        String content = messageObject.getString("content");
+
+
+//                        messageAdapter.addMessage(
+//                                messageObject.getString("firstname") + " " + messageObject.getString("lastname"),
+//                                messageObject.getString("content"),
+//                                messageObject.getString("chat_id"),
+//                                messageObject.getString("profpicpath"),
+//                                false
+//                        );
+                        messageAdapter.scrollToBottom();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
         } catch (URISyntaxException e) {
@@ -252,6 +281,7 @@ public class ChatActivity extends AppCompatActivity {
                                 preferences.getString("profpicpath", ""),
                                 true
                         );
+                        messageAdapter.scrollToBottom();
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -289,6 +319,7 @@ public class ChatActivity extends AppCompatActivity {
                                     JSONObject authorObject = messageObject.getJSONObject("author");
                                     String name = authorObject.getString("firstname") + " " + authorObject.getString("lastname");
                                     String picPath = authorObject.getString("profpicpath") + "-60";
+                                    picPath = picPath.replace(" ", "+");
                                     boolean isMyChat = false;
                                     if (authorObject.getString("_id").equals(preferences.getString("_id", ""))) {
                                         isMyChat = true;
@@ -296,27 +327,12 @@ public class ChatActivity extends AppCompatActivity {
 
                                     final Message message = new Message(name, content, id, picPath, isMyChat);
 
-                                    ImageCookieRequest messagePicRequest = new ImageCookieRequest(
-                                            "http://www.morteam.com" + message.picPath,
-                                            preferences,
-                                            new Response.Listener<Bitmap>() {
-                                                @Override
-                                                public void onResponse(Bitmap response) {
-                                                    message.pic = response;
-                                                    notifyDataSetChanged();
-                                                }
-                                            }, 0, 0, null, Bitmap.Config.RGB_565, new Response.ErrorListener() {
-                                        @Override
-                                        public void onErrorResponse(VolleyError error) {
-                                            System.out.println(error);
-                                        }
-                                    });
-                                    queue.add(messagePicRequest);
-
                                     messages.add(message);
+
+                                    requestImage(messageArray.length() - 1 - i);
                                 }
                                 notifyDataSetChanged();
-                                messageList.scrollToPosition(messages.size() - 1);
+                                scrollToBottom();
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -396,7 +412,33 @@ public class ChatActivity extends AppCompatActivity {
 
         public void addMessage(String name, String content, String id, String picPath, boolean isMyChat) {
             messages.add(new Message(name, content, id, picPath, isMyChat));
+            requestImage(messages.size() - 1);
             notifyDataSetChanged();
+        }
+
+        public void scrollToBottom() {
+            messageList.scrollToPosition(messages.size() - 1);
+        }
+
+        public void requestImage(int position) {
+            final Message message = messages.get(position);
+
+            ImageCookieRequest messagePicRequest = new ImageCookieRequest(
+                    "http://www.morteam.com" + message.picPath,
+                    preferences,
+                    new Response.Listener<Bitmap>() {
+                        @Override
+                        public void onResponse(Bitmap response) {
+                            message.pic = response;
+                            notifyDataSetChanged();
+                        }
+                    }, 0, 0, null, Bitmap.Config.RGB_565, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    System.out.println(error);
+                }
+            });
+            queue.add(messagePicRequest);
         }
     }
 
