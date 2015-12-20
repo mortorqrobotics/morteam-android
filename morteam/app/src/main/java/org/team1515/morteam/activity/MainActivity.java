@@ -49,6 +49,7 @@ import org.team1515.morteam.network.ImageCookieRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.team1515.morteam.service.NotifierService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,6 +82,8 @@ public class MainActivity extends AppCompatActivity {
     public static final Map<String, String> teamUsers = new HashMap<>();
     public static final Map<String, String> yourSubs = new HashMap<>();
     public static final Map<String, String> publicSubs = new HashMap<>();
+
+    private Intent notifierIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

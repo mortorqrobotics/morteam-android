@@ -1,10 +1,14 @@
 package org.team1515.morteam.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -34,12 +38,12 @@ import com.github.nkzawa.socketio.client.Manager;
 import com.github.nkzawa.socketio.client.Socket;
 
 import net.team1515.morteam.R;
-import org.team1515.morteam.network.CookieRequest;
-import org.team1515.morteam.network.ImageCookieRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.team1515.morteam.network.CookieRequest;
+import org.team1515.morteam.network.ImageCookieRequest;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -100,7 +104,7 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
-                if(!isClearingText) {
+                if (!isClearingText) {
                     try {
                         JSONObject typingObject = new JSONObject();
                         typingObject.put("chat_id", chatId);
@@ -181,48 +185,32 @@ public class ChatActivity extends AppCompatActivity {
                 }
             });
             socket = socket.connect();
-            socket.emit("get clients");
-            socket.on("get clients", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    //TODO: Get online clients
-                }
-            });
-
-            //TODO: move this to a service or the like
-            socket.on("message", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    try {
-                        JSONObject messageObject = new JSONObject(args[0].toString());
-
-                        final String name = messageObject.getString("author_fn") + " " + messageObject.getString("author_ln");
-                        final String content = messageObject.getString("content");
-                        final String chatId = messageObject.getString("chat_id");
-                        final String profPicPath = messageObject.getString("author_profpicpath");
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                messageAdapter.addMessage(
-                                        name,
-                                        content,
-                                        chatId,
-                                        profPicPath,
-                                        false
-                                );
-
-                                messageAdapter.scrollToBottom();
-                            }
-                        });
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
+
+        socket.emit("get clients");
+        socket.on("get clients", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                //TODO: Get online clients
+            }
+        });
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                messageAdapter.addMessage(
+                        intent.getStringExtra("name"),
+                        intent.getStringExtra("content"),
+                        intent.getStringExtra("chatId"),
+                        intent.getStringExtra("profPicPath"),
+                        false
+                );
+
+                messageAdapter.scrollToBottom();
+            }
+        }, new IntentFilter("message"));
     }
 
     @Override
