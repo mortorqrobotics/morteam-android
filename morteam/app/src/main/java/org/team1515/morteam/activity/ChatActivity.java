@@ -193,25 +193,28 @@ public class ChatActivity extends AppCompatActivity {
             socket.on("message", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    for(Object arg : args) {
-                        System.out.println(arg);
-                    }
                     try {
                         JSONObject messageObject = new JSONObject(args[0].toString());
 
-                        String type = messageObject.getString("type");
-                        String chatId = messageObject.getString("chat_id");
-                        String content = messageObject.getString("content");
+                        final String name = messageObject.getString("author_fn") + " " + messageObject.getString("author_ln");
+                        final String content = messageObject.getString("content");
+                        final String chatId = messageObject.getString("chat_id");
+                        final String profPicPath = messageObject.getString("author_profpicpath");
 
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                messageAdapter.addMessage(
+                                        name,
+                                        content,
+                                        chatId,
+                                        profPicPath,
+                                        false
+                                );
 
-//                        messageAdapter.addMessage(
-//                                messageObject.getString("firstname") + " " + messageObject.getString("lastname"),
-//                                messageObject.getString("content"),
-//                                messageObject.getString("chat_id"),
-//                                messageObject.getString("profpicpath"),
-//                                false
-//                        );
-                        messageAdapter.scrollToBottom();
+                                messageAdapter.scrollToBottom();
+                            }
+                        });
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

@@ -49,6 +49,9 @@ public class JoinTeamActivity extends AppCompatActivity {
             @Override
             public void onResponse(String response) {
                 if(response.equals("success")) {
+                    preferences.edit().
+                            putBoolean("isOnTeam", true)
+                            .apply();
                     Intent intent = new Intent(JoinTeamActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();

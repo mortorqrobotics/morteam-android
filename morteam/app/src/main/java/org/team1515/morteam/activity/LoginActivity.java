@@ -84,8 +84,8 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(String response) {
                     try {
+                        System.out.println(response);
                         JSONObject json = new JSONObject(response);
-                        System.out.println(json);
                         JSONArray teams = json.getJSONArray("teams");
                         preferences.edit()
                                 .putString("_id", json.getString("_id"))
@@ -94,7 +94,6 @@ public class LoginActivity extends AppCompatActivity {
                                 .putString("lastname", json.getString("lastname"))
                                 .putString("email", json.getString("email"))
                                 .putString("profpicpath", json.getString("profpicpath"))
-                                .putString("position", json.getJSONObject("current_team").getString("position"))
                                 .apply();
                         if(teams.length() <= 0) {
                             preferences.edit().putBoolean("isOnTeam", false).apply();
@@ -102,7 +101,10 @@ public class LoginActivity extends AppCompatActivity {
                             startActivity(intent);
                             finish();
                         } else {
-                            preferences.edit().putBoolean("isOnTeam", true).apply();
+                            preferences.edit().
+                                    putBoolean("isOnTeam", true)
+                                    .putString("position", json.getJSONObject("current_team").getString("position"))
+                                    .apply();
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
                             finish();
