@@ -208,10 +208,11 @@ public class ChatActivity extends AppCompatActivity {
                 try {
                     JSONObject messageObject = new JSONObject(args[0].toString());
 
-                    final String name = messageObject.getString("author_fn") + " " + messageObject.getString("author_ln");
-                    final String content = messageObject.getString("content");
-                    final String chatId = messageObject.getString("chat_id");
-                    final String profPicPath = messageObject.getString("author_profpicpath");
+                    String name = messageObject.getString("author_fn") + " " + messageObject.getString("author_ln");
+                    String content = messageObject.getString("content");
+                    String chatId = messageObject.getString("chat_id");
+                    String profPicPath = messageObject.getString("author_profpicpath") + "-60";
+                    profPicPath = profPicPath.replace(" ", "+");
 
                     NotificationCompat.Builder builder = new NotificationCompat.Builder(ChatActivity.this);
                     builder.setSmallIcon(R.mipmap.ic_launcher);
@@ -231,7 +232,7 @@ public class ChatActivity extends AppCompatActivity {
                     builder.setContentIntent(pendingIntent);
 
                     NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                    notificationManager.notify(1, builder.build());
+//                    notificationManager.notify(1, builder.build());
 
 
                     Intent intent = new Intent("message");
@@ -257,6 +258,7 @@ public class ChatActivity extends AppCompatActivity {
                         false
                 );
 
+                messageAdapter.requestImage(messageAdapter.getItemCount() - 1);
                 messageAdapter.scrollToBottom();
             }
         }, new IntentFilter("message"));
