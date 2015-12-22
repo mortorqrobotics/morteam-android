@@ -1,6 +1,7 @@
 package org.team1515.morteam.service;
 
 import android.app.IntentService;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -13,6 +14,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.text.Html;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -48,6 +50,7 @@ public class NotifierService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.d("MORTEAM", "SERVICE STARTED");
     }
 
     @Nullable
@@ -120,6 +123,8 @@ public class NotifierService extends IntentService {
                             NotificationCompat.Builder builder = new NotificationCompat.Builder(NotifierService.this);
                             builder.setSmallIcon(R.drawable.ic_floating_button);
                             builder.setPriority(0);
+                            builder.setAutoCancel(true);
+                            builder.setDefaults(Notification.DEFAULT_SOUND);
 
                             if(newAnnouncements.size() == 1) {
                                 builder.setContentText(Html.fromHtml(newAnnouncements.get(0).getContent()));
@@ -150,12 +155,15 @@ public class NotifierService extends IntentService {
                     preferences.edit().putString("announcements", gson.toJson(serverAnnouncements)).apply();
                 } catch (JSONException e) {
                     e.printStackTrace();
+                } finally {
+                    wakeLock.release();
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 System.out.println(error);
+                wakeLock.release();
             }
         });
         queue.add(announcementsRequest);
