@@ -1,6 +1,9 @@
 package org.team1515.morteam.activity;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -22,6 +25,7 @@ import org.team1515.morteam.network.CookieRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.team1515.morteam.service.NotifierService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -105,6 +109,15 @@ public class LoginActivity extends AppCompatActivity {
                                     putBoolean("isOnTeam", true)
                                     .putString("position", json.getJSONObject("current_team").getString("position"))
                                     .apply();
+
+                            PendingIntent pendingIntent;
+                            Intent alarmIntent = new Intent(LoginActivity.this, NotifierService.class);
+                            pendingIntent = PendingIntent.getBroadcast(LoginActivity.this, 0, alarmIntent, 0);
+
+                            AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                            alarm.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                                    5 * 1000, 60 * 1000, pendingIntent);
+
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
                             finish();

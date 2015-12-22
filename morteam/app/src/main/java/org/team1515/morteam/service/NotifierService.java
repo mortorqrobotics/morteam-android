@@ -6,35 +6,40 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.NotificationCompat;
+import android.text.Html;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
-import com.github.nkzawa.emitter.Emitter;
-import com.github.nkzawa.engineio.client.Transport;
-import com.github.nkzawa.socketio.client.IO;
-import com.github.nkzawa.socketio.client.Manager;
-import com.github.nkzawa.socketio.client.Socket;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import net.team1515.morteam.R;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.team1515.morteam.activity.ChatActivity;
+import org.team1515.morteam.activity.MainActivity;
+import org.team1515.morteam.entities.Announcement;
+import org.team1515.morteam.entities.User;
 import org.team1515.morteam.network.CookieRequest;
 
-import java.net.URISyntaxException;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NotifierService extends IntentService {
     private RequestQueue queue;
     private SharedPreferences preferences;
 
-    private Socket socket;
+    private PowerManager.WakeLock wakeLock;
 
     public NotifierService() {
         super("MorTeam Notifier");
@@ -43,116 +48,117 @@ public class NotifierService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        queue = Volley.newRequestQueue(this);
-        preferences = getSharedPreferences(null, 0);
-
-        try {
-            final String sessionId = preferences.getString(CookieRequest.SESSION_COOKIE, "");
-            socket = IO.socket("http://www.morteam.com");
-            socket.io().on(Manager.EVENT_TRANSPORT, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    Transport transport = (Transport) args[0];
-                    transport.on(Transport.EVENT_REQUEST_HEADERS, new Emitter.Listener() {
-                        @Override
-                        public void call(Object... args) {
-                            @SuppressWarnings("unchecked")
-                            Map<String, String> headers = (Map<String, String>) args[0];
-
-                            // set header
-                            //Insert session-id cookie into header
-                            if (sessionId.length() > 0) {
-                                StringBuilder builder = new StringBuilder();
-                                builder.append(CookieRequest.SESSION_COOKIE);
-                                builder.append("=");
-                                builder.append(sessionId);
-                                if (headers.containsKey(CookieRequest.COOKIE_KEY)) {
-                                    builder.append("; ");
-                                    builder.append(headers.get(CookieRequest.COOKIE_KEY));
-                                }
-                                headers.put(CookieRequest.COOKIE_KEY, builder.toString());
-                            }
-                        }
-                    }).on(Transport.EVENT_RESPONSE_HEADERS, new Emitter.Listener() {
-                        @Override
-                        public void call(Object... args) {
-                            @SuppressWarnings("unchecked")
-                            Map<String, String> headers = (Map<String, String>) args[0];
-                            //No headers to get here at the moment
-                        }
-                    });
-                }
-            });
-            socket = socket.connect();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-        socket.on("message", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                try {
-                    JSONObject messageObject = new JSONObject(args[0].toString());
-
-                    final String name = messageObject.getString("author_fn") + " " + messageObject.getString("author_ln");
-                    final String content = messageObject.getString("content");
-                    final String chatId = messageObject.getString("chat_id");
-                    final String profPicPath = messageObject.getString("author_profpicpath");
-
-                    NotificationCompat.Builder builder = new NotificationCompat.Builder(NotifierService.this);
-                    builder.setSmallIcon(R.mipmap.ic_launcher);
-                    builder.setContentTitle("New Message");
-                    builder.setContentText(content);
-
-                    Intent notificationIntent = new Intent(NotifierService.this, ChatActivity.class);
-                    notificationIntent.putExtra("name", name);
-                    notificationIntent.putExtra("_id", chatId);
-                    notificationIntent.putExtra("isGroup", false);
-
-                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(NotifierService.this);
-                    stackBuilder.addParentStack(ChatActivity.class);
-                    stackBuilder.addNextIntent(notificationIntent);
-
-                    PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-                    builder.setContentIntent(pendingIntent);
-
-                    NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                    notificationManager.notify(1, builder.build());
-
-
-                    Intent intent = new Intent("message");
-                    intent.putExtra("name", name);
-                    intent.putExtra("content", content);
-                    intent.putExtra("chatId", chatId);
-                    intent.putExtra("profPicPath", profPicPath);
-                    LocalBroadcastManager.getInstance(NotifierService.this).sendBroadcast(intent);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        System.out.println("Created service");
-    }
-
-    @Override
-    public void onStart(Intent intent, int startId) {
-        super.onStart(intent, startId);
-        System.out.println("STARTED");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        System.out.println("STOPPED");
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        System.out.println("Bound service");
         return null;
+    }
+
+    @Override
+    public void onStart(Intent intent, int startId) {
+        super.onStart(intent, startId);
+
+        PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "morteam");
+        wakeLock.acquire();
+
+        // check the global background data setting
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        if (!connectivityManager.getBackgroundDataSetting()) {
+            stopSelf();
+            return;
+        }
+
+        preferences = getSharedPreferences(null, 0);
+        queue = Volley.newRequestQueue(this);
+        final Gson gson = new Gson();
+
+
+        CookieRequest announcementsRequest = new CookieRequest(Request.Method.POST, "/f/getAnnouncementsForUser", preferences, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try {
+                    //Transfer json into announcement array
+                    JSONArray announcementArray = new JSONArray(response);
+                    ArrayList<Announcement> serverAnnouncements = new ArrayList<>();
+                    for (int i = 0; i < announcementArray.length(); i++) {
+                        JSONObject announcementObject = announcementArray.getJSONObject(i);
+                        serverAnnouncements.add(new Announcement(
+                                new User(announcementObject.getJSONObject("author").getString("firstname"),
+                                        announcementObject.getJSONObject("author").getString("lastname"),
+                                        announcementObject.getJSONObject("author").getString("profpicpath")),
+                                announcementObject.getString("content"),
+                                announcementObject.getString("timestamp"),
+                                announcementObject.getString("_id")
+                        ));
+                    }
+
+                    //Get local announcements in json and convert to object list
+                    List<Announcement> localAnnouncements = null;
+                    String localJsonAnnouncements = preferences.getString("announcements", null);
+                    if (localJsonAnnouncements != null) {
+                        localAnnouncements = gson.fromJson(localJsonAnnouncements, new TypeToken<ArrayList<Announcement>>() {
+                        }.getType());
+
+                        //Check if new announcements are found
+                        List<Announcement> newAnnouncements;
+                        if (localAnnouncements.isEmpty()) {
+                            newAnnouncements = serverAnnouncements;
+                        } else {
+                            newAnnouncements = new ArrayList<>();
+                            for (Announcement announcement : serverAnnouncements) {
+                                if (!announcement.getDate().equals(localAnnouncements.get(0).getDate()) && announcement.getRawDate().after(localAnnouncements.get(0).getRawDate())) {
+                                    newAnnouncements.add(announcement);
+                                }
+                            }
+                        }
+
+                        //Create notification with new announcements
+                        if (!newAnnouncements.isEmpty()) {
+                            NotificationCompat.Builder builder = new NotificationCompat.Builder(NotifierService.this);
+                            builder.setSmallIcon(R.drawable.ic_floating_button);
+                            builder.setPriority(0);
+
+                            if(newAnnouncements.size() == 1) {
+                                builder.setContentText(Html.fromHtml(newAnnouncements.get(0).getContent()));
+                                builder.setContentTitle("New Announcement");
+                            } else {
+                                builder.setContentTitle("New Announcements");
+                                builder.setContentText(newAnnouncements.size() + " " + "Announcements");
+                                NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+                                inboxStyle.setBigContentTitle("New Announcements");
+                                for (Announcement announcement : newAnnouncements) {
+                                    inboxStyle.addLine(Html.fromHtml(announcement.getContent()));
+                                }
+                                builder.setStyle(inboxStyle);
+                            }
+
+                            Intent resultIntent = new Intent(NotifierService.this, MainActivity.class);
+                            TaskStackBuilder stackBuilder = TaskStackBuilder.create(NotifierService.this);
+                            stackBuilder.addParentStack(MainActivity.class);
+                            stackBuilder.addNextIntent(resultIntent);
+                            PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                            builder.setContentIntent(resultPendingIntent);
+                            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                            notificationManager.notify(0, builder.build());
+                        }
+                    }
+
+                    //Update local copy of announcements with server copy
+                    preferences.edit().putString("announcements", gson.toJson(serverAnnouncements)).apply();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                System.out.println(error);
+            }
+        });
+        queue.add(announcementsRequest);
     }
 
     @Override

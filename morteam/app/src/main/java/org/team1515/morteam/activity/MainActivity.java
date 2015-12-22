@@ -1,12 +1,15 @@
 package org.team1515.morteam.activity;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -299,6 +302,17 @@ public class MainActivity extends AppCompatActivity {
         queue.add(yourSubsRequest);
         queue.add(publicSubsRequest);
         queue.add(usersRequest);
+    }
+
+    public void onResume() {
+        super.onResume();
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        Intent intent = new Intent(this, NotifierService.class);
+        PendingIntent pIntent = PendingIntent.getService(this, 0, intent, 0);
+        alarmManager.cancel(pIntent);
+        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + 5 * 1000,
+                60 * 1000, pIntent);
     }
 
     public void showAnnouncementDialog() {

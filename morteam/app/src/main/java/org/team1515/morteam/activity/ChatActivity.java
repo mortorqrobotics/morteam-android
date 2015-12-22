@@ -1,5 +1,7 @@
 package org.team1515.morteam.activity;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -8,8 +10,10 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -148,52 +152,97 @@ public class ChatActivity extends AppCompatActivity {
 
 
         try {
-            final String sessionId = preferences.getString(CookieRequest.SESSION_COOKIE, "");
             socket = IO.socket("http://www.morteam.com");
-            socket.io().on(Manager.EVENT_TRANSPORT, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    Transport transport = (Transport) args[0];
-                    transport.on(Transport.EVENT_REQUEST_HEADERS, new Emitter.Listener() {
-                        @Override
-                        public void call(Object... args) {
-                            @SuppressWarnings("unchecked")
-                            Map<String, String> headers = (Map<String, String>) args[0];
-
-                            // set header
-                            //Insert session-id cookie into header
-                            if (sessionId.length() > 0) {
-                                StringBuilder builder = new StringBuilder();
-                                builder.append(CookieRequest.SESSION_COOKIE);
-                                builder.append("=");
-                                builder.append(sessionId);
-                                if (headers.containsKey(CookieRequest.COOKIE_KEY)) {
-                                    builder.append("; ");
-                                    builder.append(headers.get(CookieRequest.COOKIE_KEY));
-                                }
-                                headers.put(CookieRequest.COOKIE_KEY, builder.toString());
-                            }
-                        }
-                    }).on(Transport.EVENT_RESPONSE_HEADERS, new Emitter.Listener() {
-                        @Override
-                        public void call(Object... args) {
-                            @SuppressWarnings("unchecked")
-                            Map<String, String> headers = (Map<String, String>) args[0];
-                            //No headers to get here at the moment
-                        }
-                    });
-                }
-            });
-            socket = socket.connect();
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
+        final String sessionId = preferences.getString(CookieRequest.SESSION_COOKIE, "");
+
+        socket.io().on(Manager.EVENT_TRANSPORT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Transport transport = (Transport) args[0];
+                transport.on(Transport.EVENT_REQUEST_HEADERS, new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, String> headers = (Map<String, String>) args[0];
+
+                        // set header
+                        //Insert session-id cookie into header
+                        if (sessionId.length() > 0) {
+                            StringBuilder builder = new StringBuilder();
+                            builder.append(CookieRequest.SESSION_COOKIE);
+                            builder.append("=");
+                            builder.append(sessionId);
+                            if (headers.containsKey(CookieRequest.COOKIE_KEY)) {
+                                builder.append("; ");
+                                builder.append(headers.get(CookieRequest.COOKIE_KEY));
+                            }
+                            headers.put(CookieRequest.COOKIE_KEY, builder.toString());
+                        }
+                    }
+                }).on(Transport.EVENT_RESPONSE_HEADERS, new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, String> headers = (Map<String, String>) args[0];
+                        //No headers to get here at the moment
+                    }
+                });
+            }
+        });
+        socket = socket.connect();
 
         socket.emit("get clients");
         socket.on("get clients", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 //TODO: Get online clients
+            }
+        });
+
+        socket.on("message", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                try {
+                    JSONObject messageObject = new JSONObject(args[0].toString());
+
+                    final String name = messageObject.getString("author_fn") + " " + messageObject.getString("author_ln");
+                    final String content = messageObject.getString("content");
+                    final String chatId = messageObject.getString("chat_id");
+                    final String profPicPath = messageObject.getString("author_profpicpath");
+
+                    NotificationCompat.Builder builder = new NotificationCompat.Builder(ChatActivity.this);
+                    builder.setSmallIcon(R.mipmap.ic_launcher);
+                    builder.setContentTitle("New Message");
+                    builder.setContentText(content);
+
+                    Intent notificationIntent = new Intent(ChatActivity.this, ChatActivity.class);
+                    notificationIntent.putExtra("name", name);
+                    notificationIntent.putExtra("_id", chatId);
+                    notificationIntent.putExtra("isGroup", false);
+
+                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(ChatActivity.this);
+                    stackBuilder.addParentStack(ChatActivity.class);
+                    stackBuilder.addNextIntent(notificationIntent);
+
+                    PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                    builder.setContentIntent(pendingIntent);
+
+                    NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    notificationManager.notify(1, builder.build());
+
+
+                    Intent intent = new Intent("message");
+                    intent.putExtra("name", name);
+                    intent.putExtra("content", content);
+                    intent.putExtra("chatId", chatId);
+                    intent.putExtra("profPicPath", profPicPath);
+                    LocalBroadcastManager.getInstance(ChatActivity.this).sendBroadcast(intent);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
