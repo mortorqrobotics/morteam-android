@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -40,6 +41,8 @@ public class ChatFragment extends Fragment {
     private RecyclerView chatList;
     private ChatAdapter chatAdapter;
 
+    private SwipeRefreshLayout refreshLayout;
+
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
@@ -53,16 +56,28 @@ public class ChatFragment extends Fragment {
         chatList.setLayoutManager(layoutManager);
         chatList.setAdapter(chatAdapter);
 
+        refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.chatlist_swipelayout);
+        refreshLayout.setColorSchemeResources(R.color.orange_theme);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                chatAdapter.getChats();
+            }
+        });
+
         return view;
     }
 
     public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
-        private CookieRequest chatRequest;
         private List<Chat> chats;
 
         public ChatAdapter() {
             chats = new ArrayList<>();
-            chatRequest = new CookieRequest(
+            getChats();
+        }
+
+        public void getChats() {
+            CookieRequest chatRequest = new CookieRequest(
                     Request.Method.POST,
                     "/f/getChatsForUser",
                     preferences,
@@ -70,6 +85,7 @@ public class ChatFragment extends Fragment {
                         @Override
                         public void onResponse(String response) {
                             try {
+                                chats = new ArrayList<>();
                                 JSONArray chatArray = new JSONArray(response);
                                 for(int i = 0; i < chatArray.length(); i++) {
                                     JSONObject chatObject = chatArray.getJSONObject(i);
@@ -100,6 +116,8 @@ public class ChatFragment extends Fragment {
                                 notifyDataSetChanged();
                             } catch (JSONException e) {
                                 e.printStackTrace();
+                            } finally {
+                                refreshLayout.setRefreshing(false);
                             }
                         }
                     },
@@ -107,6 +125,7 @@ public class ChatFragment extends Fragment {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             System.out.println("ERROR: " + error);
+                            refreshLayout.setRefreshing(false);
                         }
                     }
             );

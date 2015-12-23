@@ -47,12 +47,6 @@ public class NotifierService extends IntentService {
         super("MorTeam Notifier");
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.d("MORTEAM", "SERVICE STARTED");
-    }
-
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {

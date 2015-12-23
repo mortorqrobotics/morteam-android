@@ -21,6 +21,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,9 +68,12 @@ public class ChatActivity extends AppCompatActivity {
     private String chatId;
     private boolean isGroup;
 
-    RecyclerView messageList;
-    MessageAdapter messageAdapter;
-    LinearLayoutManager layoutManager;
+    private RecyclerView messageList;
+    private MessageAdapter messageAdapter;
+    private LinearLayoutManager layoutManager;
+    private boolean loading = false;
+    private int firstItem, visibleItemCount, totalItemCount;
+    private int skip;
 
     private Socket socket;
 
@@ -97,9 +101,30 @@ public class ChatActivity extends AppCompatActivity {
         messageList = (RecyclerView) findViewById(R.id.chat_messagelist);
         messageAdapter = new MessageAdapter();
         layoutManager = new LinearLayoutManager(this);
-
         messageList.setLayoutManager(layoutManager);
         messageList.setAdapter(messageAdapter);
+
+
+        messageList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy < 0) //check for scroll up
+                {
+                    if (!loading) {
+                        visibleItemCount = layoutManager.getChildCount();
+                        totalItemCount = layoutManager.getItemCount();
+                        firstItem = layoutManager.findFirstVisibleItemPosition();
+
+                        System.out.println(firstItem);
+                        if (firstItem <= 0) {
+                            loading = true;
+                            System.out.println(skip);
+                            messageAdapter.getChats();
+                        }
+                    }
+                }
+            }
+        });
 
         isClearingText = false;
         final EditText messageBox = (EditText) findViewById(R.id.chat_message);
@@ -267,7 +292,9 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
         socket.disconnect();
+        socket.off();
     }
 
     public boolean onSupportNavigateUp() {
@@ -320,7 +347,7 @@ public class ChatActivity extends AppCompatActivity {
                                 preferences.getString("firstname", "") + preferences.getString("lastname", ""),
                                 messageContent,
                                 chatId,
-                                preferences.getString("profpicpath", ""),
+                                preferences.getString("profpicpath", "") + "-60",
                                 true
                         );
                         messageAdapter.scrollToBottom();
@@ -335,15 +362,20 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
-        private CookieRequest messageRequest;
-        private Map<String, String> params;
         private List<Message> messages;
 
         public MessageAdapter() {
             messages = new ArrayList<>();
-            params = new HashMap<>();
+            getChats();
+        }
+
+        public void getChats() {
+            Map<String, String> params = new HashMap<>();
             params.put("chat_id", chatId);
-            messageRequest = new CookieRequest(
+            if (skip > 0) {
+                params.put("skip", skip + "");
+            }
+            CookieRequest messageRequest = new CookieRequest(
                     Request.Method.POST,
                     "/f/loadMessagesForChat",
                     params,
@@ -353,7 +385,7 @@ public class ChatActivity extends AppCompatActivity {
                         public void onResponse(String response) {
                             try {
                                 JSONArray messageArray = new JSONArray(response);
-                                for (int i = messageArray.length() - 1; i >= 0; i--) {
+                                for (int i = 0; i < messageArray.length(); i++) {
                                     JSONObject messageObject = messageArray.getJSONObject(i);
                                     String id = messageObject.getString("_id");
                                     String content = messageObject.getString("content");
@@ -369,12 +401,22 @@ public class ChatActivity extends AppCompatActivity {
 
                                     final Message message = new Message(name, content, id, picPath, isMyChat);
 
-                                    messages.add(message);
-
-                                    requestImage(messageArray.length() - 1 - i);
+                                    if (skip > 0) {
+                                        messages.add(messages.size() - 1, message);
+                                        requestImage(messages.size() - 1);
+                                    } else {
+                                        messages.add(message);
+                                        requestImage(i);
+                                    }
                                 }
                                 notifyDataSetChanged();
-                                scrollToBottom();
+                                if (skip == 0) {
+                                    scrollToBottom();
+                                } else {
+                                    layoutManager.scrollToPosition(totalItemCount + visibleItemCount - 1);
+                                }
+                                skip += 20;
+                                loading = false;
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -399,42 +441,60 @@ public class ChatActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            final Message currentMessage = messages.get(position);
-
-            TextView message = (TextView) holder.relativeLayout.findViewById(R.id.messagelist_message);
-            message.setText(Html.fromHtml(currentMessage.content));
-
-            final ImageView messagePic = (ImageView) holder.relativeLayout.findViewById(R.id.messagelist_pic);
-            messagePic.setImageBitmap(currentMessage.pic);
-
             CardView cardView = (CardView) holder.relativeLayout.findViewById(R.id.messagelist_cardview);
-            if (currentMessage.isMyChat) {
-                //Change background color and align to right
-                cardView.setCardBackgroundColor(Color.argb(255, 255, 197, 71));
+            TextView message = (TextView) holder.relativeLayout.findViewById(R.id.messagelist_message);
+            final ImageView messagePic = (ImageView) holder.relativeLayout.findViewById(R.id.messagelist_pic);
 
-                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) cardView.getLayoutParams();
-                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
-                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-
-                //Reverse picture and message
-                LinearLayout layout = (LinearLayout) holder.relativeLayout.findViewById(R.id.messagelist_layout);
-                layout.removeAllViews();
-                layout.addView(message);
-                layout.addView(messagePic);
-
-            } else {
-                cardView.setCardBackgroundColor(Color.WHITE);
-
+            if(position == getItemCount()) {
                 RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) cardView.getLayoutParams();
                 params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
-                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
+                params.addRule(RelativeLayout.TEXT_ALIGNMENT_CENTER);
 
-                //Undo reversal
-                LinearLayout layout = (LinearLayout) holder.relativeLayout.findViewById(R.id.messagelist_layout);
-                layout.removeAllViews();
-                layout.addView(messagePic);
-                layout.addView(message);
+                message.setText("Loading more messages...");
 
+                messagePic.setVisibility(View.GONE);
+            } else {
+                final Message currentMessage = messages.get(messages.size() - 1 - position);
+
+                message.setText(Html.fromHtml(currentMessage.content));
+
+                if (currentMessage.isMyChat) {
+                    messagePic.setVisibility(View.INVISIBLE);
+                    messagePic.getLayoutParams().width = 0;
+
+                    //Change background color and align to right
+                    cardView.setCardBackgroundColor(Color.argb(255, 255, 197, 71));
+
+                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) cardView.getLayoutParams();
+                    params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
+                    params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+
+                    //Reverse picture and message
+                    LinearLayout layout = (LinearLayout) holder.relativeLayout.findViewById(R.id.messagelist_layout);
+                    layout.removeAllViews();
+                    layout.addView(message);
+                    layout.addView(messagePic);
+
+                } else {
+                    messagePic.setImageBitmap(currentMessage.pic);
+                    messagePic.setVisibility(View.VISIBLE);
+                    messagePic.getLayoutParams().width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, getResources().getDisplayMetrics());
+
+
+                    cardView.setCardBackgroundColor(Color.WHITE);
+
+                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) cardView.getLayoutParams();
+                    params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
+                    params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+
+                    //Undo reversal
+                    LinearLayout layout = (LinearLayout) holder.relativeLayout.findViewById(R.id.messagelist_layout);
+                    layout.removeAllViews();
+                    layout.addView(messagePic);
+                    layout.addView(message);
+
+                }
             }
         }
 
@@ -460,6 +520,10 @@ public class ChatActivity extends AppCompatActivity {
 
         public void scrollToBottom() {
             messageList.scrollToPosition(messages.size() - 1);
+        }
+
+        public void scrollToPosition(int position) {
+            messageList.scrollToPosition(position);
         }
 
         public void requestImage(int position) {
