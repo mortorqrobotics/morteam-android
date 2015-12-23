@@ -26,7 +26,7 @@ public class Announcement {
     }
 
     public String getUserName() {
-        return user.getName();
+        return user.getFullName();
     }
 
     public String getProfPicPath() {

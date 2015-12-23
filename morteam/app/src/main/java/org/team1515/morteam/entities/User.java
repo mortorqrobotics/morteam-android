@@ -23,8 +23,16 @@ public class User {
         this.email = "";
     }
 
-    public String getName() {
+    public String getFullName() {
         return firstName + " " + lastName;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
     }
 
     public String getId() {

@@ -159,7 +159,7 @@ public class HomeFragment extends Fragment {
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            CardView view = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.announcementlist_item, parent, false);
+            CardView view = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.list_announcement, parent, false);
             ViewHolder viewHolder = new ViewHolder(view);
             return viewHolder;
         }

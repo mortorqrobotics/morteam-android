@@ -374,7 +374,6 @@ public class ChatActivity extends AppCompatActivity {
             final int skip;
             if (!messages.isEmpty()) {
                 skip = ((messages.size() - 1) / 20 + 1) * 20;
-                System.out.println(skip);
                 params.put("skip", skip + "");
             } else {
                 skip = 0;
@@ -389,7 +388,7 @@ public class ChatActivity extends AppCompatActivity {
                         public void onResponse(String response) {
                             try {
                                 JSONArray messageArray = new JSONArray(response);
-                                if(skip - messages.size() >= messageArray.length()) {
+                                if (skip - messages.size() >= messageArray.length()) {
                                     //No more messages are left in the chat - cease fire(ing request!)
                                     canLoadMore = false;
                                 } else {
@@ -437,67 +436,48 @@ public class ChatActivity extends AppCompatActivity {
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            RelativeLayout relativeLayout = (RelativeLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.messagelist_item, parent, false);
+            RelativeLayout relativeLayout = (RelativeLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.list_message, parent, false);
             ViewHolder viewHolder = new ViewHolder(relativeLayout);
             return viewHolder;
         }
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
+            final Message currentMessage = messages.get(position);
+
             CardView cardView = (CardView) holder.relativeLayout.findViewById(R.id.messagelist_cardview);
             TextView message = (TextView) holder.relativeLayout.findViewById(R.id.messagelist_message);
+            TextView name = (TextView) holder.relativeLayout.findViewById(R.id.messagelist_name);
             final ImageView messagePic = (ImageView) holder.relativeLayout.findViewById(R.id.messagelist_pic);
 
-            if(position == getItemCount()) {
+            message.setText(Html.fromHtml(currentMessage.content));
+
+            if (currentMessage.isMyChat) {
+                name.setText("");
+
+                messagePic.setVisibility(View.INVISIBLE);
+                messagePic.getLayoutParams().width = 0;
+
+                //Change background color and align to right
+                cardView.setCardBackgroundColor(Color.argb(255, 255, 197, 71));
+
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) cardView.getLayoutParams();
+                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
+                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            } else {
+                String nameString = currentMessage.name + ": ";
+                name.setText(nameString);
+
+                messagePic.setImageBitmap(currentMessage.pic);
+                messagePic.setVisibility(View.VISIBLE);
+                messagePic.getLayoutParams().width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, getResources().getDisplayMetrics());
+
+
+                cardView.setCardBackgroundColor(Color.WHITE);
+
                 RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) cardView.getLayoutParams();
                 params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
-                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
-                params.addRule(RelativeLayout.TEXT_ALIGNMENT_CENTER);
-
-                message.setText("Loading more messages...");
-
-                messagePic.setVisibility(View.GONE);
-            } else {
-                final Message currentMessage = messages.get(position);
-
-                message.setText(Html.fromHtml(currentMessage.content));
-
-                if (currentMessage.isMyChat) {
-                    messagePic.setVisibility(View.INVISIBLE);
-                    messagePic.getLayoutParams().width = 0;
-
-                    //Change background color and align to right
-                    cardView.setCardBackgroundColor(Color.argb(255, 255, 197, 71));
-
-                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) cardView.getLayoutParams();
-                    params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
-                    params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-
-                    //Reverse picture and message
-                    LinearLayout layout = (LinearLayout) holder.relativeLayout.findViewById(R.id.messagelist_layout);
-                    layout.removeAllViews();
-                    layout.addView(message);
-                    layout.addView(messagePic);
-
-                } else {
-                    messagePic.setImageBitmap(currentMessage.pic);
-                    messagePic.setVisibility(View.VISIBLE);
-                    messagePic.getLayoutParams().width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, getResources().getDisplayMetrics());
-
-
-                    cardView.setCardBackgroundColor(Color.WHITE);
-
-                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) cardView.getLayoutParams();
-                    params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
-                    params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-
-                    //Undo reversal
-                    LinearLayout layout = (LinearLayout) holder.relativeLayout.findViewById(R.id.messagelist_layout);
-                    layout.removeAllViews();
-                    layout.addView(messagePic);
-                    layout.addView(message);
-
-                }
+                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
             }
         }
 
