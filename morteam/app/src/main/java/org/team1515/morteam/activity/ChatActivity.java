@@ -72,8 +72,8 @@ public class ChatActivity extends AppCompatActivity {
     private MessageAdapter messageAdapter;
     private LinearLayoutManager layoutManager;
     private boolean loading = false;
+    private boolean canLoadMore = true;
     private int firstItem, visibleItemCount, totalItemCount;
-    private int skip;
 
     private Socket socket;
 
@@ -101,6 +101,7 @@ public class ChatActivity extends AppCompatActivity {
         messageList = (RecyclerView) findViewById(R.id.chat_messagelist);
         messageAdapter = new MessageAdapter();
         layoutManager = new LinearLayoutManager(this);
+        layoutManager.setReverseLayout(true);
         messageList.setLayoutManager(layoutManager);
         messageList.setAdapter(messageAdapter);
 
@@ -110,15 +111,13 @@ public class ChatActivity extends AppCompatActivity {
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 if (dy < 0) //check for scroll up
                 {
-                    if (!loading) {
+                    if (!loading && canLoadMore) {
                         visibleItemCount = layoutManager.getChildCount();
                         totalItemCount = layoutManager.getItemCount();
                         firstItem = layoutManager.findFirstVisibleItemPosition();
 
-                        System.out.println(firstItem);
-                        if (firstItem <= 0) {
+                        if (visibleItemCount + firstItem >= totalItemCount - 2) {
                             loading = true;
-                            System.out.println(skip);
                             messageAdapter.getChats();
                         }
                     }
@@ -372,8 +371,13 @@ public class ChatActivity extends AppCompatActivity {
         public void getChats() {
             Map<String, String> params = new HashMap<>();
             params.put("chat_id", chatId);
-            if (skip > 0) {
+            final int skip;
+            if (!messages.isEmpty()) {
+                skip = ((messages.size() - 1) / 20 + 1) * 20;
+                System.out.println(skip);
                 params.put("skip", skip + "");
+            } else {
+                skip = 0;
             }
             CookieRequest messageRequest = new CookieRequest(
                     Request.Method.POST,
@@ -385,37 +389,36 @@ public class ChatActivity extends AppCompatActivity {
                         public void onResponse(String response) {
                             try {
                                 JSONArray messageArray = new JSONArray(response);
-                                for (int i = 0; i < messageArray.length(); i++) {
-                                    JSONObject messageObject = messageArray.getJSONObject(i);
-                                    String id = messageObject.getString("_id");
-                                    String content = messageObject.getString("content");
-
-                                    JSONObject authorObject = messageObject.getJSONObject("author");
-                                    String name = authorObject.getString("firstname") + " " + authorObject.getString("lastname");
-                                    String picPath = authorObject.getString("profpicpath") + "-60";
-                                    picPath = picPath.replace(" ", "+");
-                                    boolean isMyChat = false;
-                                    if (authorObject.getString("_id").equals(preferences.getString("_id", ""))) {
-                                        isMyChat = true;
-                                    }
-
-                                    final Message message = new Message(name, content, id, picPath, isMyChat);
-
-                                    if (skip > 0) {
-                                        messages.add(messages.size() - 1, message);
-                                        requestImage(messages.size() - 1);
-                                    } else {
-                                        messages.add(message);
-                                        requestImage(i);
-                                    }
-                                }
-                                notifyDataSetChanged();
-                                if (skip == 0) {
-                                    scrollToBottom();
+                                if(skip - messages.size() >= messageArray.length()) {
+                                    //No more messages are left in the chat - cease fire(ing request!)
+                                    canLoadMore = false;
                                 } else {
-                                    layoutManager.scrollToPosition(totalItemCount + visibleItemCount - 1);
+                                    for (int i = (skip == 0 ? 0 : skip - messages.size()); i < messageArray.length(); i++) {
+                                        JSONObject messageObject = messageArray.getJSONObject(i);
+                                        String id = messageObject.getString("_id");
+                                        String content = messageObject.getString("content");
+
+                                        JSONObject authorObject = messageObject.getJSONObject("author");
+                                        String name = authorObject.getString("firstname") + " " + authorObject.getString("lastname");
+                                        String picPath = authorObject.getString("profpicpath") + "-60";
+                                        picPath = picPath.replace(" ", "+");
+                                        boolean isMyChat = false;
+                                        if (authorObject.getString("_id").equals(preferences.getString("_id", ""))) {
+                                            isMyChat = true;
+                                        }
+
+                                        final Message message = new Message(name, content, id, picPath, isMyChat);
+
+                                        if (skip > 0) {
+                                            messages.add(message);
+                                            requestImage(messages.size() - 1);
+                                        } else {
+                                            messages.add(message);
+                                            requestImage(i);
+                                        }
+                                    }
+                                    notifyDataSetChanged();
                                 }
-                                skip += 20;
                                 loading = false;
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -455,7 +458,7 @@ public class ChatActivity extends AppCompatActivity {
 
                 messagePic.setVisibility(View.GONE);
             } else {
-                final Message currentMessage = messages.get(messages.size() - 1 - position);
+                final Message currentMessage = messages.get(position);
 
                 message.setText(Html.fromHtml(currentMessage.content));
 
@@ -513,17 +516,13 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         public void addMessage(String name, String content, String id, String picPath, boolean isMyChat) {
-            messages.add(new Message(name, content, id, picPath, isMyChat));
+            messages.add(0, new Message(name, content, id, picPath, isMyChat));
             requestImage(messages.size() - 1);
             notifyDataSetChanged();
         }
 
         public void scrollToBottom() {
-            messageList.scrollToPosition(messages.size() - 1);
-        }
-
-        public void scrollToPosition(int position) {
-            messageList.scrollToPosition(position);
+            messageList.smoothScrollToPosition(0);
         }
 
         public void requestImage(int position) {
