@@ -22,6 +22,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
+
+import org.team1515.morteam.entities.User;
 import org.team1515.morteam.network.CookieRequest;
 import org.team1515.morteam.network.ImageCookieRequest;
 
@@ -89,29 +91,13 @@ public class SubdivisionActivity extends AppCompatActivity {
                         JSONObject userObject = userArray.getJSONObject(i);
                         String profPicPath = userObject.getString("profpicpath") + "-60";
                         profPicPath = profPicPath.replace(" ", "+");
-                        final User user = new User(userObject.getString("firstname") + " " + userObject.getString("lastname"),
+                        final User user = new User(userObject.getString("firstname"),
+                                userObject.getString("lastname"),
                                 userObject.getString("_id"),
                                 profPicPath);
+                        user.requestProfPic(queue, preferences, null);
 
-                        ImageCookieRequest profPicRequest = new ImageCookieRequest("http://www.morteam.com" + profPicPath,
-                                preferences,
-                                new Response.Listener<Bitmap>() {
-                                    @Override
-                                    public void onResponse(Bitmap response) {
-                                        user.setProfPic(response);
-                                        users.add(user);
-                                    }
-                                }, 0, 0, null, Bitmap.Config.RGB_565,
-                                new Response.ErrorListener() {
-                                    @Override
-                                    public void onErrorResponse(VolleyError error) {
-                                        users.add(user);
-                                        System.out.println(user.profPicPath + " does not work correctly. Will be fixed soon...hopefully.");
-                                        System.out.println(error);
-                                    }
-                                }
-                        );
-                        queue.add(profPicRequest);
+                        users.add(user);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -174,10 +160,10 @@ public class SubdivisionActivity extends AppCompatActivity {
             final User currentUser = users.get(position);
 
             final ImageView icon = (ImageView) holder.layout.findViewById(R.id.userlist_icon);
-            icon.setImageBitmap(currentUser.profPic);
+            icon.setImageBitmap(currentUser.getProfPic());
 
             TextView name = (TextView) holder.layout.findViewById(R.id.userlist_name);
-            name.setText(currentUser.name);
+            name.setText(currentUser.getFullName());
 
             holder.layout.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -199,23 +185,5 @@ public class SubdivisionActivity extends AppCompatActivity {
         }
 
 
-    }
-
-    public class User {
-        public String name;
-        public String id;
-        public String profPicPath;
-        public Bitmap profPic;
-
-        public User(String name, String id, String profPicPath) {
-            this.name = name;
-            this.id = id;
-            this.profPicPath = profPicPath;
-            profPic = null;
-        }
-
-        public void setProfPic(Bitmap profPic) {
-            this.profPic = profPic;
-        }
     }
 }

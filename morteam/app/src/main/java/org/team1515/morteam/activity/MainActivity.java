@@ -44,6 +44,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
+
+import org.team1515.morteam.entities.Subdivision;
 import org.team1515.morteam.fragment.ChatFragment;
 import org.team1515.morteam.fragment.HomeFragment;
 import org.team1515.morteam.network.CookieRequest;
@@ -558,14 +560,14 @@ public class MainActivity extends AppCompatActivity {
             //TODO: set subdivision icon
 
             TextView name = (TextView) holder.layout.findViewById(R.id.subdivisionlist_name);
-            name.setText(currentSubdivision.name);
+            name.setText(currentSubdivision.getName());
 
             holder.layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(MainActivity.this, SubdivisionActivity.class);
-                    intent.putExtra("name", currentSubdivision.name);
-                    intent.putExtra("id", currentSubdivision.id);
+                    intent.putExtra("name", currentSubdivision.getName());
+                    intent.putExtra("id", currentSubdivision.getId());
                     startActivity(intent);
                 }
             });
@@ -574,16 +576,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public int getItemCount() {
             return subdivisions.size();
-        }
-
-        private class Subdivision {
-            public final String name;
-            public final String id;
-
-            public Subdivision(String name, String id) {
-                this.name = name;
-                this.id = id;
-            }
         }
     }
 }

@@ -26,6 +26,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
+
+import org.team1515.morteam.entities.Announcement;
+import org.team1515.morteam.entities.User;
 import org.team1515.morteam.network.CookieRequest;
 import org.team1515.morteam.network.ImageCookieRequest;
 
@@ -81,7 +84,6 @@ public class HomeFragment extends Fragment {
     }
 
 
-
     public void requestAnnouncements() {
         announcementAdapter.requestAnnouncements();
     }
@@ -105,30 +107,20 @@ public class HomeFragment extends Fragment {
                         announcements = new ArrayList<>();
                         for (int i = 0; i < array.length(); i++) {
                             JSONObject object = array.getJSONObject(i);
-                            announcements.add(new Announcement(
-                                    object.getJSONObject("author").getString("firstname") + " " + object.getJSONObject("author").getString("lastname"),
+                            Announcement announcement = new Announcement(
+                                    new User(
+                                            object.getJSONObject("author").getString("firstname"),
+                                            object.getJSONObject("author").getString("lastname"),
+                                            object.getJSONObject("author").getString("profpicpath") + "-60"
+                                    ),
                                     object.getString("content"),
                                     object.getString("timestamp"),
-                                    object.getString("_id"),
-                                    object.getJSONObject("author").getString("profpicpath")));
+                                    object.getString("_id")
+                            );
 
-                            final int announcementNum = i;
+                            announcement.requestProfPic(queue, preferences, null);
 
-                            String profPicPath = announcements.get(i).picSrc + "-60";
-                            ImageCookieRequest profPicRequest = new ImageCookieRequest("http://www.morteam.com" + profPicPath,
-                                    preferences,
-                                    new Response.Listener<Bitmap>() {
-                                        @Override
-                                        public void onResponse(Bitmap response) {
-                                            announcements.get(announcementNum).setPic(response);
-                                        }
-                                    }, 0, 0, null, null, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    System.out.println(error);
-                                }
-                            });
-                            queue.add(profPicRequest);
+                            announcements.add(announcement);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -167,29 +159,21 @@ public class HomeFragment extends Fragment {
         @Override
         public void onBindViewHolder(ViewHolder holder, final int position) {
             ImageView profPic = (ImageView) holder.cardView.findViewById(R.id.announcement_pic);
-            profPic.setImageBitmap(announcements.get(position).pic);
+            profPic.setImageBitmap(announcements.get(position).getProfPic());
 
             TextView author = (TextView) holder.cardView.findViewById(R.id.author);
-            author.setText(announcements.get(position).author);
+            author.setText(announcements.get(position).getUserName());
 
             TextView date = (TextView) holder.cardView.findViewById(R.id.date);
-            //Fix up the iso date format string for parsing
-            String dateString = announcements.get(position).date.replace("Z", "+0000");
-
-            try {
-                CharSequence formattedDate = DateFormat.format("h:mm a - MMMM d, yyyy", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US).parse(dateString));
-                date.setText(formattedDate);
-            } catch (ParseException e) {
-                date.setText("error");
-            }
+            date.setText(announcements.get(position).getDate());
 
             TextView message = (TextView) holder.cardView.findViewById(R.id.message);
-            message.setText(Html.fromHtml(announcements.get(position).message));
+            message.setText(Html.fromHtml(announcements.get(position).getContent()));
 
             ImageButton deleteButton = (ImageButton) holder.cardView.findViewById(R.id.delete_button);
 
             //Don't show delete announcement buttons if not admin
-            if(!preferences.getString("position", "").equals("admin")) {
+            if (!preferences.getString("position", "").equals("admin")) {
                 deleteButton.setClickable(false);
                 deleteButton.setVisibility(View.INVISIBLE);
             } else {
@@ -203,7 +187,7 @@ public class HomeFragment extends Fragment {
                             public void onClick(DialogInterface dialogInterface, int i) {
 
                                 Map<String, String> params = new HashMap<>();
-                                params.put("_id", announcements.get(position).id);
+                                params.put("_id", announcements.get(position).getId());
 
                                 CookieRequest request = new CookieRequest(Request.Method.POST, "/f/deleteAnnouncement", params, preferences, new Response.Listener<String>() {
                                     @Override
@@ -230,28 +214,6 @@ public class HomeFragment extends Fragment {
         @Override
         public int getItemCount() {
             return announcements.size();
-        }
-
-        private class Announcement {
-            public final String author;
-            public final String message;
-            public final String date;
-            public final String picSrc;
-            public final String id;
-            public Bitmap pic;
-
-            public Announcement(String author, String message, String date, String id, String picSrc) {
-                this.author = author;
-                this.message = message;
-                this.date = date;
-                this.picSrc = picSrc;
-                this.id = id;
-                this.pic = null;
-            }
-
-            public void setPic(Bitmap pic) {
-                this.pic = pic;
-            }
         }
     }
 }

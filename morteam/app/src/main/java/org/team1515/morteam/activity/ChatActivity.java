@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
@@ -20,7 +21,10 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.Html;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
+import android.text.style.StyleSpan;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,6 +51,9 @@ import net.team1515.morteam.R;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.team1515.morteam.entities.Message;
+import org.team1515.morteam.entities.PictureCallBack;
+import org.team1515.morteam.entities.User;
 import org.team1515.morteam.network.CookieRequest;
 import org.team1515.morteam.network.ImageCookieRequest;
 
@@ -232,7 +239,8 @@ public class ChatActivity extends AppCompatActivity {
                 try {
                     JSONObject messageObject = new JSONObject(args[0].toString());
 
-                    String name = messageObject.getString("author_fn") + " " + messageObject.getString("author_ln");
+                    String firstName = messageObject.getString("author_fn");
+                    String lastName = messageObject.getString("author_ln");
                     String content = messageObject.getString("content");
                     String chatId = messageObject.getString("chat_id");
                     String profPicPath = messageObject.getString("author_profpicpath") + "-60";
@@ -244,7 +252,8 @@ public class ChatActivity extends AppCompatActivity {
                     builder.setContentText(content);
 
                     Intent notificationIntent = new Intent(ChatActivity.this, ChatActivity.class);
-                    notificationIntent.putExtra("name", name);
+                    notificationIntent.putExtra("firstname", firstName);
+                    notificationIntent.putExtra("lastname", lastName);
                     notificationIntent.putExtra("_id", chatId);
                     notificationIntent.putExtra("isGroup", false);
 
@@ -260,7 +269,8 @@ public class ChatActivity extends AppCompatActivity {
 
 
                     Intent intent = new Intent("message");
-                    intent.putExtra("name", name);
+                    intent.putExtra("firstname", firstName);
+                    intent.putExtra("lastname", lastName);
                     intent.putExtra("content", content);
                     intent.putExtra("chatId", chatId);
                     intent.putExtra("profPicPath", profPicPath);
@@ -275,7 +285,8 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 messageAdapter.addMessage(
-                        intent.getStringExtra("name"),
+                        intent.getStringExtra("firstname"),
+                        intent.getStringExtra("lastname"),
                         intent.getStringExtra("content"),
                         intent.getStringExtra("chatId"),
                         intent.getStringExtra("profPicPath"),
@@ -343,7 +354,8 @@ public class ChatActivity extends AppCompatActivity {
                         isClearingText = false;
 
                         messageAdapter.addMessage(
-                                preferences.getString("firstname", "") + preferences.getString("lastname", ""),
+                                preferences.getString("firstname", ""),
+                                preferences.getString("lastname", ""),
                                 messageContent,
                                 chatId,
                                 preferences.getString("profpicpath", "") + "-60",
@@ -398,15 +410,16 @@ public class ChatActivity extends AppCompatActivity {
                                         String content = messageObject.getString("content");
 
                                         JSONObject authorObject = messageObject.getJSONObject("author");
-                                        String name = authorObject.getString("firstname") + " " + authorObject.getString("lastname");
-                                        String picPath = authorObject.getString("profpicpath") + "-60";
-                                        picPath = picPath.replace(" ", "+");
+                                        String firstName = authorObject.getString("firstname");
+                                        String lastName = authorObject.getString("lastname");
+                                        String profPicPath = authorObject.getString("profpicpath") + "-60";
+                                        profPicPath = profPicPath.replace(" ", "+");
                                         boolean isMyChat = false;
                                         if (authorObject.getString("_id").equals(preferences.getString("_id", ""))) {
                                             isMyChat = true;
                                         }
 
-                                        final Message message = new Message(name, content, id, picPath, isMyChat);
+                                        final Message message = new Message(new User(firstName, lastName, null, profPicPath), content, chatId, isMyChat);
 
                                         if (skip > 0) {
                                             messages.add(message);
@@ -447,14 +460,14 @@ public class ChatActivity extends AppCompatActivity {
 
             CardView cardView = (CardView) holder.relativeLayout.findViewById(R.id.messagelist_cardview);
             TextView message = (TextView) holder.relativeLayout.findViewById(R.id.messagelist_message);
-            TextView name = (TextView) holder.relativeLayout.findViewById(R.id.messagelist_name);
             final ImageView messagePic = (ImageView) holder.relativeLayout.findViewById(R.id.messagelist_pic);
 
-            message.setText(Html.fromHtml(currentMessage.content));
+            message.setText(Html.fromHtml(currentMessage.getContent()));
 
-            if (currentMessage.isMyChat) {
-                name.setText("");
+            SpannableStringBuilder messageString = new SpannableStringBuilder();
+            SpannableString contentString = new SpannableString(currentMessage.getContent());
 
+            if (currentMessage.isMyMessage) {
                 messagePic.setVisibility(View.INVISIBLE);
                 messagePic.getLayoutParams().width = 0;
 
@@ -465,10 +478,11 @@ public class ChatActivity extends AppCompatActivity {
                 params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
                 params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
             } else {
-                String nameString = currentMessage.name + ": ";
-                name.setText(nameString);
+                SpannableString nameString = new SpannableString(currentMessage.getFirstName() + ": ");
+                nameString.setSpan(new StyleSpan(Typeface.BOLD), 0, nameString.length(), 0);
+                messageString.append(nameString);
 
-                messagePic.setImageBitmap(currentMessage.pic);
+                messagePic.setImageBitmap(currentMessage.getProfPic());
                 messagePic.setVisibility(View.VISIBLE);
                 messagePic.getLayoutParams().width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, getResources().getDisplayMetrics());
 
@@ -479,6 +493,9 @@ public class ChatActivity extends AppCompatActivity {
                 params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
                 params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
             }
+
+            messageString.append(contentString);
+            message.setText(messageString, TextView.BufferType.SPANNABLE);
         }
 
         @Override
@@ -495,8 +512,8 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
 
-        public void addMessage(String name, String content, String id, String picPath, boolean isMyChat) {
-            messages.add(0, new Message(name, content, id, picPath, isMyChat));
+        public void addMessage(String firstName, String lastName, String content, String chatId, String profPicPath, boolean isMyChat) {
+            messages.add(0, new Message(new User(firstName, lastName, null, profPicPath), content, chatId, isMyChat));
             requestImage(messages.size() - 1);
             notifyDataSetChanged();
         }
@@ -508,40 +525,12 @@ public class ChatActivity extends AppCompatActivity {
         public void requestImage(int position) {
             final Message message = messages.get(position);
 
-            ImageCookieRequest messagePicRequest = new ImageCookieRequest(
-                    "http://www.morteam.com" + message.picPath,
-                    preferences,
-                    new Response.Listener<Bitmap>() {
-                        @Override
-                        public void onResponse(Bitmap response) {
-                            message.pic = response;
-                            notifyDataSetChanged();
-                        }
-                    }, 0, 0, null, Bitmap.Config.RGB_565, new Response.ErrorListener() {
+            message.requestProfPic(queue, preferences, new PictureCallBack() {
                 @Override
-                public void onErrorResponse(VolleyError error) {
-                    System.out.println(error);
+                public void onComplete() {
+                    notifyDataSetChanged();
                 }
             });
-            queue.add(messagePicRequest);
-        }
-    }
-
-
-    public class Message {
-        public String name;
-        public String content;
-        public String id;
-        public String picPath;
-        public Bitmap pic;
-        public boolean isMyChat;
-
-        public Message(String name, String content, String id, String picPath, boolean isMyChat) {
-            this.name = name;
-            this.content = content;
-            this.id = id;
-            this.picPath = picPath;
-            this.isMyChat = isMyChat;
         }
     }
 }

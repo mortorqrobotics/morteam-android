@@ -23,6 +23,8 @@ import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
 import org.team1515.morteam.activity.ChatActivity;
+import org.team1515.morteam.entities.Chat;
+import org.team1515.morteam.entities.PictureCallBack;
 import org.team1515.morteam.network.CookieRequest;
 import org.team1515.morteam.network.ImageCookieRequest;
 
@@ -147,32 +149,23 @@ public class ChatFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(getContext(), ChatActivity.class);
-                    intent.putExtra("name", currentChat.name);
-                    intent.putExtra("_id", currentChat.id);
+                    intent.putExtra("name", currentChat.getName());
+                    intent.putExtra("_id", currentChat.getId());
                     intent.putExtra("isGroup", currentChat.isGroup);
                     startActivity(intent);
                 }
             });
 
             final ImageView chatPic = (ImageView) holder.linearLayout.findViewById(R.id.chatlist_pic);
-            ImageCookieRequest chatPicRequest = new ImageCookieRequest(
-                    "http://www.morteam.com" + currentChat.picPath,
-                    preferences,
-                    new Response.Listener<Bitmap>() {
-                        @Override
-                        public void onResponse(Bitmap response) {
-                            chatPic.setImageBitmap(response);
-                        }
-                    }, 0, 0, null, Bitmap.Config.RGB_565, new Response.ErrorListener() {
+            currentChat.requestProfPic(queue, preferences, new PictureCallBack() {
                 @Override
-                public void onErrorResponse(VolleyError error) {
-                    System.out.println(error);
+                public void onComplete() {
+                    chatPic.setImageBitmap(currentChat.getPic());
                 }
             });
-            queue.add(chatPicRequest);
 
             TextView name = (TextView) holder.linearLayout.findViewById(R.id.chatlist_name);
-            name.setText(currentChat.name);
+            name.setText(currentChat.getName());
         }
 
         @Override
@@ -187,20 +180,6 @@ public class ChatFragment extends Fragment {
                 super(linearLayout);
                 this.linearLayout = linearLayout;
             }
-        }
-    }
-
-    public class Chat {
-        public String name;
-        public String id;
-        public String picPath;
-        public boolean isGroup;
-
-        public Chat(String name, String id, String picPath, boolean isGroup) {
-            this.name = name;
-            this.id = id;
-            this.picPath = picPath;
-            this.isGroup = isGroup;
         }
     }
 }

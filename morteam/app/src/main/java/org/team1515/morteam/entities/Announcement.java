@@ -1,6 +1,10 @@
 package org.team1515.morteam.entities;
 
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.text.format.DateFormat;
+
+import com.android.volley.RequestQueue;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,8 +33,12 @@ public class Announcement {
         return user.getFullName();
     }
 
-    public String getProfPicPath() {
-        return user.getProfPicPath();
+    public void requestProfPic(RequestQueue queue, SharedPreferences preferences, PictureCallBack callBack) {
+        user.requestProfPic(queue, preferences, callBack);
+    }
+
+    public Bitmap getProfPic() {
+        return user.getProfPic();
     }
 
     public String getContent() {
