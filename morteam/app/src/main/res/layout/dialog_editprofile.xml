@@ -10,21 +10,27 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="First Name"/>
+            android:hint="First Name"
+            android:id="@+id/editprofile_firstname"/>
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Last Name"/>
+            android:hint="Last Name"
+            android:id="@+id/editprofile_lastname"/>
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Email"/>
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:id="@+id/editprofile_email"/>
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Phone Number"/>
+            android:hint="Phone Number"
+            android:inputType="phone"
+            android:id="@+id/editprofile_phone"/>
 
 </LinearLayout>

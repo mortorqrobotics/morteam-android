@@ -20,6 +20,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
+
 import org.team1515.morteam.network.CookieRequest;
 
 import org.json.JSONArray;
@@ -44,21 +45,32 @@ public class LoginActivity extends AppCompatActivity {
         String sessionId = preferences.getString(CookieRequest.SESSION_COOKIE, "");
         boolean isOnTeam = preferences.getBoolean("isOnTeam", false);
         if (!sessionId.isEmpty()) {
-            if(isOnTeam) {
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-                finish();
+            //Essentially logout user if a value is missing
+            if (preferences.contains("username")
+                    && preferences.contains("firstname")
+                    && preferences.contains("lastname")
+                    && preferences.contains("email")
+                    && preferences.contains("phone")
+                    && preferences.contains("profpicpath")) {
+                if (isOnTeam) {
+                    Intent intent = new Intent(this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
 
+                } else {
+                    Intent intent = new Intent(LoginActivity.this, JoinTeamActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+                return;
             } else {
-                Intent intent = new Intent(LoginActivity.this, JoinTeamActivity.class);
-                startActivity(intent);
-                finish();
+                preferences.edit().clear().apply();
             }
-        } else {
-            setContentView(R.layout.activity_login);
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
         }
+
+        setContentView(R.layout.activity_login);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
     }
 
     public void loginPressed(View view) {
@@ -97,9 +109,10 @@ public class LoginActivity extends AppCompatActivity {
                                 .putString("firstname", json.getString("firstname"))
                                 .putString("lastname", json.getString("lastname"))
                                 .putString("email", json.getString("email"))
+                                .putString("phone", json.getString("phone"))
                                 .putString("profpicpath", json.getString("profpicpath"))
                                 .apply();
-                        if(teams.length() <= 0) {
+                        if (teams.length() <= 0) {
                             preferences.edit().putBoolean("isOnTeam", false).apply();
                             Intent intent = new Intent(LoginActivity.this, JoinTeamActivity.class);
                             startActivity(intent);

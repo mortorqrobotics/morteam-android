@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <include layout="@layout/actionbar" />
 
@@ -12,28 +12,28 @@
         android:layout_height="wrap_content">
 
         <ImageView
+            android:id="@+id/profile_picture"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_margin="10dp"
-            android:scaleType="centerCrop"
-            android:id="@+id/profile_picture"/>
+            android:scaleType="centerCrop" />
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:id="@+id/profile_name"
-            android:text="Name"
-            android:textSize="30sp"
-            android:layout_toRightOf="@id/profile_picture"/>
-
-        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/profile_email"
             android:layout_toRightOf="@id/profile_picture"
+            android:text="Name"
+            android:textSize="30sp" />
+
+        <TextView
+            android:id="@+id/profile_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_below="@id/profile_name"
+            android:layout_toRightOf="@id/profile_picture"
             android:text="Email"
-            android:textSize="20sp"/>
+            android:textSize="20sp" />
 
     </RelativeLayout>
 
@@ -45,33 +45,33 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Edit Profile"
             android:layout_weight="0.5"
-            android:onClick="editProfileClicked"/>
+            android:onClick="editProfileClicked"
+            android:text="Edit Profile" />
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
-            android:text="Change Password"
-            android:onClick="changePasswordClicked"/>
+            android:onClick="changePasswordClicked"
+            android:text="Change Password" />
 
     </LinearLayout>
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        card_view:cardCornerRadius="4dp" >
+        android:layout_marginTop="5dp"
+        card_view:cardCornerRadius="4dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_margin="5dp">
+            android:layout_margin="5dp"
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -79,20 +79,52 @@
                 android:text="Attendence"
                 android:textSize="25sp" />
 
-            <TextView
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Unexcused absences: 0" />
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Unexcused absences: " />
+
+                <TextView
+                    android:id="@+id/profile_unexcused"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Presence percentage: " />
+
+                <TextView
+                    android:id="@+id/profile_presence"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="100%" />
+
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Presence percentage: N/A"/>
+                android:text="Dates of unexcused absences: " />
 
             <TextView
+                android:id="@+id/profile_dates"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Dates of unexcused absences: N/A"/>
+                android:text=""/>
 
         </LinearLayout>
 
@@ -102,17 +134,17 @@
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
+        android:layout_marginTop="5dp"
         card_view:cardCornerRadius="4dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_margin="5dp">
+            android:layout_margin="5dp"
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
