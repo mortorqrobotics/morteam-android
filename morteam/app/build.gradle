@@ -6,10 +6,10 @@ android {
 
     defaultConfig {
         applicationId "net.mortorq.morteam"
-        minSdkVersion 13
+        minSdkVersion 11
         targetSdkVersion 23
-        versionCode 8
-        versionName "0.52"
+        versionCode 9
+        versionName "0.6"
     }
     buildTypes {
         release {

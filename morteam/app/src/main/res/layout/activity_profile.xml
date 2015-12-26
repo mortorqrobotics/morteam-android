@@ -35,6 +35,15 @@
             android:text="Email"
             android:textSize="20sp" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/profile_phone"
+            android:layout_toRightOf="@id/profile_picture"
+            android:layout_below="@id/profile_email"
+            android:text="Phone Number"
+            android:textSize="20sp"/>
+
     </RelativeLayout>
 
     <LinearLayout

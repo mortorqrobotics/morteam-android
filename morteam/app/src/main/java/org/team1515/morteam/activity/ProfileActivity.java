@@ -83,6 +83,9 @@ public class ProfileActivity extends AppCompatActivity {
         String email = preferences.getString("email", "");
         emailView.setText(email);
 
+        TextView phoneView = (TextView) findViewById(R.id.profile_phone);
+        phoneView.setText(formatPhoneNumber(preferences.getString("phone", "")));
+
         //Get attendance
         final TextView unexcusedView = (TextView) findViewById(R.id.profile_unexcused);
         final TextView presenceView = (TextView) findViewById(R.id.profile_presence);
@@ -162,6 +165,11 @@ public class ProfileActivity extends AppCompatActivity {
         return true;
     }
 
+    public String formatPhoneNumber(String number) {
+        String phoneString = "(" + number.substring(0, 3) + ") " + number.substring(3, 6) + "-" + number.substring(6, number.length());
+        return phoneString;
+    }
+
     public void editProfileClicked(View view) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(getLayoutInflater().inflate(R.layout.dialog_editprofile, null));
@@ -231,10 +239,14 @@ public class ProfileActivity extends AppCompatActivity {
                                     }
                                     if(!phone.isEmpty()) {
                                         editor.putString("phone", phone);
+                                        TextView phoneView = (TextView) ProfileActivity.this.findViewById(R.id.profile_phone);
+                                        phoneView.setText(formatPhoneNumber(phone));
                                     }
                                     editor.apply();
                                     TextView nameView = (TextView)ProfileActivity.this.findViewById(R.id.profile_name);
                                     nameView.setText(newName);
+                                } else {
+                                    Toast.makeText(ProfileActivity.this, "Failed to change profile.", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         },
