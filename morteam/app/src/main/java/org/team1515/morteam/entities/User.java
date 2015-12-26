@@ -16,23 +16,24 @@ public class User {
     private String profPicPath;
     private Bitmap profPic;
     private String email;
+    private String phone;
 
-    public User(String firstName, String lastName, String id, String profPicPath) {
+    public User(String firstName, String lastName, String id, String profPicPath, String email, String phone) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.id = id;
         this.profPicPath = profPicPath;
         profPic = null;
-        this.email = "";
+        this.email = email;
+        this.phone = phone;
+    }
+
+    public User(String firstName, String lastName, String id, String profPicPath) {
+        this(firstName, lastName, id, profPicPath, "", "");
     }
 
     public User(String firstName, String lastName, String profPicPath) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.id = "";
-        this.profPicPath = profPicPath;
-        profPic = null;
-        this.email = "";
+        this(firstName, lastName, "", profPicPath);
     }
 
     public String getFullName() {
@@ -76,5 +77,21 @@ public class User {
             }
         });
         queue.add(messagePicRequest);
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String formatPhoneNumber(String number) {
+        return "(" + number.substring(0, 3) + ") " + number.substring(3, 6) + "-" + number.substring(6, number.length());
+    }
+
+    public String getPhoneFormatted() {
+        return formatPhoneNumber(phone);
     }
 }

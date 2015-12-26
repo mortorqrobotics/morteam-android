@@ -3,6 +3,7 @@ package org.team1515.morteam.activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -28,6 +30,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.team1515.morteam.entities.PictureCallBack;
+import org.team1515.morteam.entities.User;
 import org.team1515.morteam.network.CookieRequest;
 import org.team1515.morteam.network.ImageCookieRequest;
 import org.w3c.dom.Text;
@@ -44,6 +47,8 @@ public class ProfileActivity extends AppCompatActivity {
     SharedPreferences preferences;
     RequestQueue queue;
 
+    User user;
+    boolean isCurrentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,76 +63,24 @@ public class ProfileActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        //Set up profile picture, name, and email
-        final ImageView profilePic = (ImageView) findViewById(R.id.profile_picture);
-        String profPicPath = preferences.getString("profpicpath", "") + "-300";
-        ImageCookieRequest profilePicRequest = new ImageCookieRequest("http://www.morteam.com" + profPicPath,
-                preferences, new Response.Listener<Bitmap>() {
-            @Override
-            public void onResponse(Bitmap response) {
-                profilePic.setImageBitmap(response);
-            }
-        }, 0, 0, null, Bitmap.Config.RGB_565, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.println(error);
-            }
-        });
-        queue.add(profilePicRequest);
+        //Get data from intent
+        Intent intent = getIntent();
+        final String id = intent.getStringExtra("_id");
+        isCurrentUser = intent.getBooleanExtra("isCurrentUser", false);
 
-        TextView nameView = (TextView) findViewById(R.id.profile_name);
-        String name = preferences.getString("firstname", "") + " " + preferences.getString("lastname", "");
-        nameView.setText(name);
+        if (!isCurrentUser) {
+            Button editProfileButton = (Button) findViewById(R.id.profile_editprofile);
+            editProfileButton.setVisibility(View.GONE);
 
-        TextView emailView = (TextView) findViewById(R.id.profile_email);
-        String email = preferences.getString("email", "");
-        emailView.setText(email);
+            Button changePasswordButton = (Button) findViewById(R.id.profile_changepassword);
+            changePasswordButton.setVisibility(View.GONE);
+        }
 
-        TextView phoneView = (TextView) findViewById(R.id.profile_phone);
-        phoneView.setText(formatPhoneNumber(preferences.getString("phone", "")));
-
-        //Get attendance
-        final TextView unexcusedView = (TextView) findViewById(R.id.profile_unexcused);
-        final TextView presenceView = (TextView) findViewById(R.id.profile_presence);
-        final TextView datesView = (TextView) findViewById(R.id.profile_dates);
-
-        getAttendence(preferences.getString("_id", ""), new AttendenceListener() {
-            @Override
-            public void onResponse(double presences, JSONArray absences) {
-                String unexcusedString = absences.length() + "";
-                unexcusedView.setText(unexcusedString);
-
-                String presenceText = (int) ((presences / (presences + absences.length())) * 100) + "%";
-                presenceView.setText(presenceText);
-
-                String datesText = "";
-                for (int i = 0; i < absences.length(); i++) {
-                    try {
-                        JSONObject dateObject = absences.getJSONObject(i);
-                        String formattedDate = DateFormat.format("MMMM d, yyyy", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US).parse(dateObject.getString("date").replace("Z", "+0000"))).toString();
-                        datesText += "\t" + dateObject.getString("name") + " (" + formattedDate + ")";
-                        if (i != absences.length() - 1) {
-                            datesText += "\n";
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-                datesView.setText(datesText);
-
-            }
-        });
-    }
-
-    public void getAttendence(String id, final AttendenceListener listener) {
         Map<String, String> params = new HashMap<>();
-        params.put("user_id", id);
+        params.put("_id", id);
 
-        CookieRequest attendanceRequest = new CookieRequest(Request.Method.POST,
-                "/f/getUserAbsences",
+        CookieRequest userRequest = new CookieRequest(Request.Method.POST,
+                "/f/getUser",
                 params,
                 preferences,
                 new Response.Listener<String>() {
@@ -135,39 +88,105 @@ public class ProfileActivity extends AppCompatActivity {
                     public void onResponse(String response) {
                         System.out.println(response);
                         try {
-                            JSONObject object = new JSONObject(response);
-                            int presences = object.getInt("present");
-                            JSONArray absences = object.getJSONArray("absences");
-                            listener.onResponse(presences, absences);
+                            JSONObject userObject = new JSONObject(response);
+                            user = new User(userObject.getString("firstname"),
+                                    userObject.getString("lastname"),
+                                    id,
+                                    userObject.getString("profpicpath") + "-300",
+                                    userObject.getString("email"),
+                                    userObject.getString("phone")
+                            );
+
+                            //Set up profile picture, name, and email
+                            user.requestProfPic(queue, preferences, new PictureCallBack() {
+                                @Override
+                                public void onComplete() {
+                                    ImageView profilePic = (ImageView) findViewById(R.id.profile_picture);
+                                    profilePic.setImageBitmap(user.getProfPic());
+                                }
+                            });
+
+                            TextView nameView = (TextView) findViewById(R.id.profile_name);
+                            nameView.setText(user.getFullName());
+
+                            TextView emailView = (TextView) findViewById(R.id.profile_email);
+                            emailView.setText(user.getEmail());
+
+                            TextView phoneView = (TextView) findViewById(R.id.profile_phone);
+                            phoneView.setText(user.getPhoneFormatted());
+
+                            //Get attendance
+                            final TextView unexcusedView = (TextView) findViewById(R.id.profile_unexcused);
+                            final TextView presenceView = (TextView) findViewById(R.id.profile_presence);
+                            final TextView datesView = (TextView) findViewById(R.id.profile_dates);
+
+                            Map<String, String> params = new HashMap<>();
+                            params.put("user_id", user.getId());
+
+                            CookieRequest attendanceRequest = new CookieRequest(Request.Method.POST,
+                                    "/f/getUserAbsences",
+                                    params,
+                                    preferences,
+                                    new Response.Listener<String>() {
+                                        @Override
+                                        public void onResponse(String response) {
+                                            try {
+                                                JSONObject object = new JSONObject(response);
+                                                double presences = object.getInt("present");
+                                                JSONArray absences = object.getJSONArray("absences");
+
+                                                String unexcusedString = absences.length() + "";
+                                                unexcusedView.setText(unexcusedString);
+
+                                                String presenceText = (int)((presences / (presences + absences.length())) * 100) + "%";
+                                                presenceView.setText(presenceText);
+
+                                                String datesText = "";
+                                                for (int i = 0; i < absences.length(); i++) {
+                                                    try {
+                                                        JSONObject dateObject = absences.getJSONObject(i);
+                                                        String formattedDate = DateFormat.format("MMMM d, yyyy", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US).parse(dateObject.getString("date").replace("Z", "+0000"))).toString();
+                                                        datesText += "\t" + dateObject.getString("name") + " (" + formattedDate + ")";
+                                                        if (i != absences.length() - 1) {
+                                                            datesText += "\n";
+                                                        }
+                                                    } catch (JSONException|ParseException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                }
+                                                datesView.setText(datesText);
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    },
+                                    new Response.ErrorListener() {
+                                        @Override
+                                        public void onErrorResponse(VolleyError error) {
+                                            error.printStackTrace();
+                                        }
+                                    }
+                            );
+                            queue.add(attendanceRequest);
                         } catch (JSONException e) {
                             e.printStackTrace();
-                        } catch (NullPointerException e) {
-
                         }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        System.out.println(error);
+                        error.printStackTrace();
                     }
                 }
         );
-        queue.add(attendanceRequest);
+        queue.add(userRequest);
     }
 
-    private interface AttendenceListener {
-        void onResponse(double presences, JSONArray absences);
-    }
 
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
-    }
-
-    public String formatPhoneNumber(String number) {
-        String phoneString = "(" + number.substring(0, 3) + ") " + number.substring(3, 6) + "-" + number.substring(6, number.length());
-        return phoneString;
     }
 
     public void editProfileClicked(View view) {
@@ -188,22 +207,22 @@ public class ProfileActivity extends AppCompatActivity {
                 //This is horrible
                 Map<String, String> params = new HashMap<>();
                 if (firstName.isEmpty()) {
-                    params.put("firstname", preferences.getString("firstname", ""));
+                    params.put("firstname", user.getFirstName());
                 } else {
                     params.put("firstname", firstName);
                 }
                 if (lastName.isEmpty()) {
-                    params.put("lastname", preferences.getString("lastname", ""));
+                    params.put("lastname", user.getLastName());
                 } else {
                     params.put("lastname", lastName);
                 }
                 if (email.isEmpty()) {
-                    params.put("email", preferences.getString("email", ""));
+                    params.put("email", user.getEmail());
                 } else {
                     params.put("email", email);
                 }
                 if (phone.isEmpty()) { //BUT WHO WAS PHONE????!!//?1/1
-                    params.put("phone", preferences.getString("phone", ""));
+                    params.put("phone", user.getPhone());
                 } else {
                     params.put("phone", phone);
                 }
@@ -215,35 +234,35 @@ public class ProfileActivity extends AppCompatActivity {
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
-                                if(response.equals("success")) {
+                                if (response.equals("success")) {
                                     Toast.makeText(ProfileActivity.this, "Profile changed successfully.", Toast.LENGTH_SHORT).show();
                                     SharedPreferences.Editor editor = preferences.edit();
                                     String newName = "";
-                                    if(!firstName.isEmpty()) {
+                                    if (!firstName.isEmpty()) {
                                         editor.putString("firstname", firstName);
                                         newName += firstName;
                                     } else {
-                                        newName += preferences.getString("firstname", "");
+                                        newName += user.getFirstName();
                                     }
                                     newName += " ";
-                                    if(!lastName.isEmpty()) {
+                                    if (!lastName.isEmpty()) {
                                         editor.putString("lastname", lastName);
                                         newName += lastName;
                                     } else {
-                                        newName += preferences.getString("lastname", "");
+                                        newName += user.getLastName();
                                     }
-                                    if(!email.isEmpty()) {
+                                    if (!email.isEmpty()) {
                                         editor.putString("email", email);
-                                        TextView emailView = (TextView)ProfileActivity.this.findViewById(R.id.profile_email);
+                                        TextView emailView = (TextView) ProfileActivity.this.findViewById(R.id.profile_email);
                                         emailView.setText(email);
                                     }
-                                    if(!phone.isEmpty()) {
+                                    if (!phone.isEmpty()) {
                                         editor.putString("phone", phone);
                                         TextView phoneView = (TextView) ProfileActivity.this.findViewById(R.id.profile_phone);
-                                        phoneView.setText(formatPhoneNumber(phone));
+                                        phoneView.setText(user.formatPhoneNumber(phone));
                                     }
                                     editor.apply();
-                                    TextView nameView = (TextView)ProfileActivity.this.findViewById(R.id.profile_name);
+                                    TextView nameView = (TextView) ProfileActivity.this.findViewById(R.id.profile_name);
                                     nameView.setText(newName);
                                 } else {
                                     Toast.makeText(ProfileActivity.this, "Failed to change profile.", Toast.LENGTH_SHORT).show();
@@ -294,11 +313,11 @@ public class ProfileActivity extends AppCompatActivity {
                             new Response.Listener<String>() {
                                 @Override
                                 public void onResponse(String response) {
-                                    if(response.equals("success")) {
+                                    if (response.equals("success")) {
                                         Toast.makeText(ProfileActivity.this, "Password changes successfully.", Toast.LENGTH_SHORT).show();
-                                    } else if(response.equals("fail: incorrect password")) {
+                                    } else if (response.equals("fail: incorrect password")) {
                                         Toast.makeText(ProfileActivity.this, "Failed to change password. You entered an incorrect old password.", Toast.LENGTH_SHORT).show();
-                                    } else if(response.equals("fail: new passwords do not match")) {
+                                    } else if (response.equals("fail: new passwords do not match")) {
                                         Toast.makeText(ProfileActivity.this, "Failed to change password. Your new passwords did not match.", Toast.LENGTH_SHORT).show();
                                     } else {
                                         Toast.makeText(ProfileActivity.this, "Failed to change password.", Toast.LENGTH_SHORT).show();

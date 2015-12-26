@@ -159,6 +159,8 @@ public class MainActivity extends AppCompatActivity {
                         return true;
                     case R.id.view_profile:
                         Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                        intent.putExtra("_id", preferences.getString("_id", ""));
+                        intent.putExtra("isCurrentUser", true);
                         startActivity(intent);
                         return true;
                     default:

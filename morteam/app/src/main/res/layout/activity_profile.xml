@@ -23,7 +23,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/profile_picture"
-            android:text="Name"
             android:textSize="30sp" />
 
         <TextView
@@ -32,7 +31,6 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/profile_name"
             android:layout_toRightOf="@id/profile_picture"
-            android:text="Email"
             android:textSize="20sp" />
 
         <TextView
@@ -41,7 +39,6 @@
             android:id="@+id/profile_phone"
             android:layout_toRightOf="@id/profile_picture"
             android:layout_below="@id/profile_email"
-            android:text="Phone Number"
             android:textSize="20sp"/>
 
     </RelativeLayout>
@@ -56,14 +53,16 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:onClick="editProfileClicked"
-            android:text="Edit Profile" />
+            android:text="Edit Profile"
+            android:id="@+id/profile_editprofile"/>
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:onClick="changePasswordClicked"
-            android:text="Change Password" />
+            android:text="Change Password"
+            android:id="@+id/profile_changepassword"/>
 
     </LinearLayout>
 
@@ -101,8 +100,7 @@
                 <TextView
                     android:id="@+id/profile_unexcused"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0" />
+                    android:layout_height="wrap_content" />
 
             </LinearLayout>
 
@@ -119,8 +117,7 @@
                 <TextView
                     android:id="@+id/profile_presence"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="100%" />
+                    android:layout_height="wrap_content" />
 
             </LinearLayout>
 
@@ -132,8 +129,7 @@
             <TextView
                 android:id="@+id/profile_dates"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=""/>
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 

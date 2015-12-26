@@ -168,13 +168,14 @@ public class SubdivisionActivity extends AppCompatActivity {
             holder.layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //TODO: implement user activity
-                    /*
-                    Intent intent = new Intent(SubdivisionActivity.this, UserActivity.class);
-                    intent.putExtra("name", currentUser.name);
-                    intent.putExtra("id", currentUser.id);
+                    Intent intent = new Intent(SubdivisionActivity.this, ProfileActivity.class);
+                    intent.putExtra("_id", currentUser.getId());
+                    if(currentUser.getId().equals(preferences.getString("_id", ""))) {
+                        intent.putExtra("isCurrentUser", true);
+                    } else {
+                        intent.putExtra("isCurrentUser", false);
+                    }
                     startActivity(intent);
-                    */
                 }
             });
         }
