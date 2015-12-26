@@ -12,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.format.DateFormat;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -168,6 +169,7 @@ public class HomeFragment extends Fragment {
             date.setText(announcements.get(position).getDate());
 
             TextView message = (TextView) holder.cardView.findViewById(R.id.message);
+            message.setMovementMethod(LinkMovementMethod.getInstance());
             message.setText(Html.fromHtml(announcements.get(position).getContent()));
 
             ImageButton deleteButton = (ImageButton) holder.cardView.findViewById(R.id.delete_button);

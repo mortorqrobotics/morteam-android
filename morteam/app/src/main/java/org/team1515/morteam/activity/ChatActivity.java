@@ -24,6 +24,7 @@ import android.text.Html;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
+import android.text.method.LinkMovementMethod;
 import android.text.style.StyleSpan;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -458,14 +459,13 @@ public class ChatActivity extends AppCompatActivity {
         public void onBindViewHolder(ViewHolder holder, int position) {
             final Message currentMessage = messages.get(position);
 
-            CardView cardView = (CardView) holder.relativeLayout.findViewById(R.id.messagelist_cardview);
             TextView message = (TextView) holder.relativeLayout.findViewById(R.id.messagelist_message);
+            message.setMovementMethod(LinkMovementMethod.getInstance());
+            CardView cardView = (CardView) holder.relativeLayout.findViewById(R.id.messagelist_cardview);
             final ImageView messagePic = (ImageView) holder.relativeLayout.findViewById(R.id.messagelist_pic);
 
-            message.setText(Html.fromHtml(currentMessage.getContent()));
-
             SpannableStringBuilder messageString = new SpannableStringBuilder();
-            SpannableString contentString = new SpannableString(currentMessage.getContent());
+            SpannableString contentString = new SpannableString(Html.fromHtml(currentMessage.getContent()));
 
             if (currentMessage.isMyMessage) {
                 messagePic.setVisibility(View.INVISIBLE);

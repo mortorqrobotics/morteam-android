@@ -26,7 +26,7 @@ public class Message {
     }
 
     public String getContent() {
-        return  content;
+        return content;
     }
 
     public String getId() {
