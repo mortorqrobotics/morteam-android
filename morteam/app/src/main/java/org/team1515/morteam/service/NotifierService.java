@@ -55,6 +55,8 @@ public class NotifierService extends IntentService {
 
     @Override
     public void onStart(Intent intent, int startId) {
+        Log.d("MorTeam", "Notifier Service Started");
+
         super.onStart(intent, startId);
 
         PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);

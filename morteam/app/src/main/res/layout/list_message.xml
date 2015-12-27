@@ -1,49 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content">
 
-<android.support.v7.widget.CardView
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/messagelist_cardview"
-    android:layout_gravity="center"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="5dp"
-    android:layout_marginBottom="5dp"
-    android:layout_marginLeft="8dp"
-    android:layout_marginRight="8dp"
-    card_view:cardCornerRadius="8dp">
-
-    <LinearLayout
+    <TextView
+        android:id="@+id/messagelist_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="5dp"
-        android:id="@+id/messagelist_layout"
-        android:gravity="center_vertical">
+        android:layout_marginTop="5dp"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"
+        android:textSize="12sp" />
 
-        <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:id="@+id/messagelist_pic"
-            android:scaleType="centerCrop"
-            android:layout_marginRight="5dp"
-            android:layout_marginLeft="5dp" />
+    <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/messagelist_cardview"
+        android:layout_below="@id/messagelist_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="5dp"
+        card_view:cardCornerRadius="8dp">
 
-        <TextView
+        <LinearLayout
+            android:id="@+id/messagelist_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/messagelist_message"
-            android:singleLine="false"
-            android:scrollHorizontally="false"
-            android:maxLines="100"
-            android:ellipsize="end"/>
+            android:gravity="center_vertical|start"
+            android:orientation="horizontal"
+            android:padding="5dp">
 
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/messagelist_pic"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:scaleType="centerCrop" />
 
-</android.support.v7.widget.CardView>
+            <TextView
+                android:id="@+id/messagelist_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:ellipsize="end"
+                android:gravity="start"
+                android:maxLines="100"
+                android:scrollHorizontally="false"
+                android:singleLine="false" />
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
 
 </RelativeLayout>

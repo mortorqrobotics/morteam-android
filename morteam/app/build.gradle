@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 23
@@ -29,4 +30,5 @@ dependencies {
     compile 'com.github.nkzawa:socket.io-client:0.3.0'
     compile 'org.solovyev.android.views:linear-layout-manager:0.5@aar'
     compile 'com.google.code.gson:gson:2.5'
+    compile "com.google.android.gms:play-services:8.3.0"
 }

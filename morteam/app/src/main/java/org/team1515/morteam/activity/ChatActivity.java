@@ -27,6 +27,7 @@ import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.text.style.StyleSpan;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,11 +60,14 @@ import org.team1515.morteam.network.CookieRequest;
 import org.team1515.morteam.network.ImageCookieRequest;
 
 import java.net.URISyntaxException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -243,6 +247,7 @@ public class ChatActivity extends AppCompatActivity {
                     String firstName = messageObject.getString("author_fn");
                     String lastName = messageObject.getString("author_ln");
                     String content = messageObject.getString("content");
+                    String date = messageObject.getString("timestamp");
                     String chatId = messageObject.getString("chat_id");
                     String profPicPath = messageObject.getString("author_profpicpath") + "-60";
                     profPicPath = profPicPath.replace(" ", "+");
@@ -273,6 +278,7 @@ public class ChatActivity extends AppCompatActivity {
                     intent.putExtra("firstname", firstName);
                     intent.putExtra("lastname", lastName);
                     intent.putExtra("content", content);
+                    intent.putExtra("date", date);
                     intent.putExtra("chatId", chatId);
                     intent.putExtra("profPicPath", profPicPath);
                     LocalBroadcastManager.getInstance(ChatActivity.this).sendBroadcast(intent);
@@ -289,6 +295,7 @@ public class ChatActivity extends AppCompatActivity {
                         intent.getStringExtra("firstname"),
                         intent.getStringExtra("lastname"),
                         intent.getStringExtra("content"),
+                        intent.getStringExtra("date"),
                         intent.getStringExtra("chatId"),
                         intent.getStringExtra("profPicPath"),
                         false
@@ -317,60 +324,67 @@ public class ChatActivity extends AppCompatActivity {
         final EditText messageText = (EditText) findViewById(R.id.chat_message);
         final String messageContent = messageText.getText().toString();
 
-        Map<String, String> params = new HashMap<>();
-        params.put("chat_id", chatId);
-        params.put("content", messageContent);
+        if (!messageContent.isEmpty()) {
 
-        CookieRequest sendRequest = new CookieRequest(Request.Method.POST, "/f/sendMessage",
-                params,
-                preferences,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONObject typingObject = new JSONObject();
-                            typingObject.put("chat_id", chatId);
-                            socket.emit("stop typing", typingObject);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+            Map<String, String> params = new HashMap<>();
+            params.put("chat_id", chatId);
+            params.put("content", messageContent);
 
-                        JSONObject messageObject = new JSONObject();
-                        try {
-                            messageObject.put("chat_id", chatId);
-                            messageObject.put("content", messageContent);
-                            if (isGroup) {
-                                messageObject.put("type", "group");
-                                messageObject.put("chat_name", chatName);
-                            } else {
-                                messageObject.put("type", "private");
+            CookieRequest sendRequest = new CookieRequest(Request.Method.POST, "/f/sendMessage",
+                    params,
+                    preferences,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            try {
+                                JSONObject typingObject = new JSONObject();
+                                typingObject.put("chat_id", chatId);
+                                socket.emit("stop typing", typingObject);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+
+                            JSONObject messageObject = new JSONObject();
+                            try {
+                                messageObject.put("chat_id", chatId);
+                                messageObject.put("content", messageContent);
+                                if (isGroup) {
+                                    messageObject.put("type", "group");
+                                    messageObject.put("chat_name", chatName);
+                                } else {
+                                    messageObject.put("type", "private");
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            socket.emit("message", messageObject);
+
+                            isClearingText = true;
+                            messageText.setText("");
+                            isClearingText = false;
+
+                            TimeZone tz = TimeZone.getTimeZone("UTC");
+                            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+                            System.out.println(df.format(new Date()));
+                            messageAdapter.addMessage(
+                                    preferences.getString("firstname", ""),
+                                    preferences.getString("lastname", ""),
+                                    messageContent,
+                                    df.format(new Date()),
+                                    chatId,
+                                    preferences.getString("profpicpath", "") + "-60",
+                                    true
+                            );
+                            messageAdapter.scrollToBottom();
                         }
-                        socket.emit("message", messageObject);
-
-                        isClearingText = true;
-                        messageText.setText("");
-                        isClearingText = false;
-
-                        messageAdapter.addMessage(
-                                preferences.getString("firstname", ""),
-                                preferences.getString("lastname", ""),
-                                messageContent,
-                                chatId,
-                                preferences.getString("profpicpath", "") + "-60",
-                                true
-                        );
-                        messageAdapter.scrollToBottom();
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
-            }
-        });
-        queue.add(sendRequest);
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    error.printStackTrace();
+                }
+            });
+            queue.add(sendRequest);
+        }
     }
 
     public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
@@ -409,6 +423,7 @@ public class ChatActivity extends AppCompatActivity {
                                         JSONObject messageObject = messageArray.getJSONObject(i);
                                         String id = messageObject.getString("_id");
                                         String content = messageObject.getString("content");
+                                        String date = messageObject.getString("timestamp");
 
                                         JSONObject authorObject = messageObject.getJSONObject("author");
                                         String firstName = authorObject.getString("firstname");
@@ -420,7 +435,7 @@ public class ChatActivity extends AppCompatActivity {
                                             isMyChat = true;
                                         }
 
-                                        final Message message = new Message(new User(firstName, lastName, null, profPicPath), content, chatId, isMyChat);
+                                        final Message message = new Message(new User(firstName, lastName, null, profPicPath), content, date, chatId, isMyChat);
 
                                         if (skip > 0) {
                                             messages.add(message);
@@ -461,8 +476,25 @@ public class ChatActivity extends AppCompatActivity {
 
             TextView message = (TextView) holder.relativeLayout.findViewById(R.id.messagelist_message);
             message.setMovementMethod(LinkMovementMethod.getInstance());
+
+            final TextView date = (TextView) holder.relativeLayout.findViewById(R.id.messagelist_date);
+            date.setText(currentMessage.getDate());
+
             CardView cardView = (CardView) holder.relativeLayout.findViewById(R.id.messagelist_cardview);
             final ImageView messagePic = (ImageView) holder.relativeLayout.findViewById(R.id.messagelist_pic);
+
+            View.OnClickListener dateClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (date.getVisibility() == View.GONE) {
+                        date.setVisibility(View.VISIBLE);
+                    } else {
+                        date.setVisibility(View.GONE);
+                    }
+                }
+            };
+            cardView.setOnClickListener(dateClickListener);
+            message.setOnClickListener(dateClickListener);
 
             SpannableStringBuilder messageString = new SpannableStringBuilder();
             SpannableString contentString = new SpannableString(Html.fromHtml(currentMessage.getContent()));
@@ -512,8 +544,8 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
 
-        public void addMessage(String firstName, String lastName, String content, String chatId, String profPicPath, boolean isMyChat) {
-            messages.add(0, new Message(new User(firstName, lastName, null, profPicPath), content, chatId, isMyChat));
+        public void addMessage(String firstName, String lastName, String content, String date, String chatId, String profPicPath, boolean isMyChat) {
+            messages.add(0, new Message(new User(firstName, lastName, null, profPicPath), content, date, chatId, isMyChat));
             requestImage(messages.size() - 1);
             notifyDataSetChanged();
         }
