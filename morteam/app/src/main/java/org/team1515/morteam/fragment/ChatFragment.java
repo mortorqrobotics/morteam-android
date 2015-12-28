@@ -70,6 +70,10 @@ public class ChatFragment extends Fragment {
         return view;
     }
 
+    public void getChats() {
+        chatAdapter.getChats();
+    }
+
     public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         private List<Chat> chats;
 

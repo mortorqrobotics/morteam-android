@@ -1,15 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/chatlist_swipelayout"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="org.team1515.morteam.fragment.ChatFragment"
-    android:padding="8dp">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <android.support.v7.widget.RecyclerView
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/chatlist_swipelayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/chat_chatlist"/>
+        android:layout_height="match_parent"
+        android:padding="8dp">
 
-</android.support.v4.widget.SwipeRefreshLayout>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/chat_chatlist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/buttonView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+        </LinearLayout>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:clickable="true"
+            android:onClick="newChat"
+            android:src="@drawable/ic_floating_button"
+            app:backgroundTint="@color/orange_theme"
+            app:layout_anchor="@id/buttonView"
+            app:layout_anchorGravity="bottom|right|end"
+            app:rippleColor="#FFF" />
+
+    </android.support.design.widget.CoordinatorLayout>
+
+</RelativeLayout>

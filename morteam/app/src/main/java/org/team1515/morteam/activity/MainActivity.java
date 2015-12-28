@@ -30,6 +30,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -89,8 +90,6 @@ public class MainActivity extends AppCompatActivity {
     public static final Map<String, String> teamUsers = new HashMap<>();
     public static final Map<String, String> yourSubs = new HashMap<>();
     public static final Map<String, String> publicSubs = new HashMap<>();
-
-    private Intent notifierIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -186,6 +185,7 @@ public class MainActivity extends AppCompatActivity {
                 super.onDrawerClosed(view);
                 supportInvalidateOptionsMenu();
             }
+
             public void onDrawerOpened(View view) {
                 super.onDrawerOpened(view);
                 supportInvalidateOptionsMenu();
@@ -350,12 +350,18 @@ public class MainActivity extends AppCompatActivity {
                     builder.setMultiChoiceItems(audiences.toArray(new CharSequence[audiences.size()]), null, new DialogInterface.OnMultiChoiceClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                            String key = audiences.get(which).toString();
                             if (isChecked) {
-                                String key = audiences.get(which).toString();
                                 if (MainActivity.yourSubs.containsKey(key)) {
                                     subdivisionIds.add(MainActivity.yourSubs.get(key));
                                 } else {
                                     userIds.add(MainActivity.teamUsers.get(key));
+                                }
+                            } else {
+                                if (MainActivity.yourSubs.containsKey(key)) {
+                                    subdivisionIds.remove(MainActivity.yourSubs.get(key));
+                                } else {
+                                    userIds.remove(MainActivity.teamUsers.get(key));
                                 }
                             }
                         }
@@ -397,7 +403,7 @@ public class MainActivity extends AppCompatActivity {
     private void populateChoiceSpinner() {
         choices = new ArrayList<>();
         choices.add("Everyone");
-        for(String subdivision : MainActivity.yourSubs.keySet()) {
+        for (String subdivision : MainActivity.yourSubs.keySet()) {
             choices.add(subdivision);
         }
         choices.add("Custom");
@@ -419,6 +425,124 @@ public class MainActivity extends AppCompatActivity {
 
     public void newAnnouncement(View view) {
         showAnnouncementDialog();
+    }
+
+    public void newChat(View view) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Choose chat members");
+        final List<String> subdivisionIds = new ArrayList<>();
+        final List<String> userIds = new ArrayList<>();
+        final List<String> audiences = new ArrayList<>();
+        for (String subdivision : MainActivity.yourSubs.keySet()) {
+            audiences.add(subdivision);
+        }
+        for (String user : MainActivity.teamUsers.keySet()) {
+            if (!user.equals(preferences.getString("firstname", "") + " " + preferences.getString("lastname", ""))) {
+                audiences.add(user);
+            }
+        }
+        builder.setMultiChoiceItems(audiences.toArray(new CharSequence[audiences.size()]), null, new DialogInterface.OnMultiChoiceClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                String key = audiences.get(which);
+                if (isChecked) {
+                    if (MainActivity.yourSubs.containsKey(key)) {
+                        subdivisionIds.add(MainActivity.yourSubs.get(key));
+                    } else {
+                        userIds.add(MainActivity.teamUsers.get(key));
+                    }
+                } else {
+                    if (MainActivity.yourSubs.containsKey(key)) {
+                        subdivisionIds.remove(MainActivity.yourSubs.get(key));
+                    } else {
+                        userIds.remove(MainActivity.teamUsers.get(key));
+                    }
+                }
+            }
+        });
+        builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (subdivisionIds.isEmpty() && userIds.isEmpty()) {
+                    return;
+                }
+
+                final Map<String, String> params = new HashMap<>();
+                if (subdivisionIds.isEmpty() && userIds.size() == 1) { //If is not a group chat
+                    params.put("user2", userIds.get(0));
+                    params.put("type", "private");
+
+                    createNewChat(params);
+                } else {
+                    params.put("type", "group");
+
+                    JSONArray subdivisionsArray = new JSONArray();
+                    for (String id : subdivisionIds) {
+                        subdivisionsArray.put(id);
+                    }
+                    params.put("subdivisionMembers", subdivisionsArray.toString());
+
+                    JSONArray userArray = new JSONArray();
+                    for (String id : userIds) {
+                        userArray.put(id);
+                    }
+                    userArray.put(preferences.getString("_id", ""));
+                    params.put("userMembers", userArray.toString());
+
+                    AlertDialog.Builder nameBuilder = new AlertDialog.Builder(MainActivity.this);
+                    nameBuilder.setView(getLayoutInflater().inflate(R.layout.dialog_chatname, null));
+                    nameBuilder.setTitle("Type a name for your group chat");
+                    nameBuilder.setNegativeButton("Cancel", null);
+                    nameBuilder.setPositiveButton("Okay", null);
+                    final AlertDialog nameDialog = nameBuilder.create();
+                    nameDialog.show();
+                    Button positiveButton = nameDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                    positiveButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            EditText nameView = (EditText) ((AlertDialog) nameDialog).findViewById(R.id.chatname_name);
+                            String name = nameView.getText().toString();
+                            if (!name.isEmpty()) {
+                                params.put("name", name);
+                                nameDialog.dismiss();
+                                createNewChat(params);
+                            } else {
+                                nameView.setHint("Please enter a name");
+                                nameView.setHintTextColor(getResources().getColor(R.color.red));
+                            }
+                        }
+                    });
+
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.create().show();
+    }
+
+    public void createNewChat(Map<String, String> params) {
+        System.out.println(params.get("userMembers"));
+        CookieRequest newChatRequest = new CookieRequest(Request.Method.POST,
+                "/f/createChat",
+                params,
+                preferences,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        System.out.println(response);
+                        if (!response.equals("fail")) {
+                            sectionPagerAdapter.chatFragment.getChats();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                    }
+                }
+        );
+        queue.add(newChatRequest);
     }
 
     public void postAnnouncement() {
@@ -534,7 +658,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public void setSubdivisions(Map<String, String> subdivisions) {
-            for(Map.Entry<String, String> subdivision : subdivisions.entrySet()) {
+            for (Map.Entry<String, String> subdivision : subdivisions.entrySet()) {
                 this.subdivisions.add(new Subdivision(subdivision.getKey(), subdivision.getValue()));
             }
             notifyDataSetChanged();
