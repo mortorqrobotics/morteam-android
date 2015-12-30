@@ -72,13 +72,20 @@ public class SubdivisionActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         name = intent.getStringExtra("name");
-        id = intent.getStringExtra("id");
 
-        //Get users in subdivision
+
+        //Get users in subdivision/team
         Map<String, String> params = new HashMap<>();
-        params.put("subdivision_id", id);
+        String path;
+        if(intent.getBooleanExtra("isTeam", false)) {
+            path = "/f/getUsersInTeam";
+        } else {
+            path = "/f/getUsersInSubdivision";
+            id = intent.getStringExtra("id");
+            params.put("subdivision_id", id);
+        }
         CookieRequest userRequest = new CookieRequest(Request.Method.POST,
-                "/f/getUsersInSubdivision",
+                path,
                 params,
                 preferences,
                 new Response.Listener<String>() {

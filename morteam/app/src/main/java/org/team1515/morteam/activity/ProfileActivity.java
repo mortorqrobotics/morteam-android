@@ -1,20 +1,24 @@
 package org.team1515.morteam.activity;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,15 +33,18 @@ import net.team1515.morteam.R;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.solovyev.android.views.llm.LinearLayoutManager;
 import org.team1515.morteam.entities.PictureCallBack;
+import org.team1515.morteam.entities.Task;
 import org.team1515.morteam.entities.User;
 import org.team1515.morteam.network.CookieRequest;
-import org.team1515.morteam.network.ImageCookieRequest;
 import org.w3c.dom.Text;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -49,6 +56,14 @@ public class ProfileActivity extends AppCompatActivity {
 
     User user;
     boolean isCurrentUser;
+
+    RecyclerView pendingView;
+    LinearLayoutManager pendingLayoutManager;
+    TaskAdapter pendingAdapter;
+
+    RecyclerView completedView;
+    LinearLayoutManager completedLayoutManager;
+    TaskAdapter completedAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,7 +153,7 @@ public class ProfileActivity extends AppCompatActivity {
                                                 String unexcusedString = absences.length() + "";
                                                 unexcusedView.setText(unexcusedString);
 
-                                                String presenceText = (int)((presences / (presences + absences.length())) * 100) + "%";
+                                                String presenceText = (int) ((presences / (presences + absences.length())) * 100) + "%";
                                                 presenceView.setText(presenceText);
 
                                                 String datesText = "";
@@ -150,7 +165,7 @@ public class ProfileActivity extends AppCompatActivity {
                                                         if (i != absences.length() - 1) {
                                                             datesText += "\n";
                                                         }
-                                                    } catch (JSONException|ParseException e) {
+                                                    } catch (JSONException | ParseException e) {
                                                         e.printStackTrace();
                                                     }
                                                 }
@@ -168,6 +183,20 @@ public class ProfileActivity extends AppCompatActivity {
                                     }
                             );
                             queue.add(attendanceRequest);
+
+
+                            //Get tasks
+                            pendingView = (RecyclerView) findViewById(R.id.profile_pendingtasks);
+                            pendingLayoutManager = new LinearLayoutManager(ProfileActivity.this);
+                            pendingAdapter = new TaskAdapter(true);
+                            pendingView.setLayoutManager(pendingLayoutManager);
+                            pendingView.setAdapter(pendingAdapter);
+
+                            completedView = (RecyclerView) findViewById(R.id.profile_completedtasks);
+                            completedLayoutManager = new LinearLayoutManager(ProfileActivity.this);
+                            completedAdapter = new TaskAdapter(false);
+                            completedView.setLayoutManager(completedLayoutManager);
+                            completedView.setAdapter(completedAdapter);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -338,5 +367,154 @@ public class ProfileActivity extends AppCompatActivity {
         builder.setNegativeButton("Cancel", null);
         builder.setTitle("Edit Profile");
         builder.create().show();
+    }
+
+    class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
+        List<Task> tasks;
+        boolean isPending;
+        String path;
+        TextView noneView;
+
+        public TaskAdapter(boolean isPending) {
+            tasks = new ArrayList<>();
+            this.isPending = isPending;
+
+            if (isPending) {
+                path = "/f/getPendingUserTasks";
+                noneView = (TextView) ProfileActivity.this.findViewById(R.id.profile_pendingnone);
+            } else {
+                path = "/f/getCompletedUserTasks";
+                noneView = (TextView) ProfileActivity.this.findViewById(R.id.profile_completednone);
+            }
+
+            getTasks();
+        }
+
+        public void getTasks() {
+            Map<String, String> params = new HashMap<>();
+            params.put("user_id", user.getId());
+
+            CookieRequest taskRequest = new CookieRequest(Request.Method.POST,
+                    path,
+                    params,
+                    preferences,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            try {
+                                tasks = new ArrayList<>();
+                                JSONArray taskArray = new JSONArray(response);
+                                if(taskArray.length() == 0) {
+                                    noneView.setVisibility(View.VISIBLE);
+                                } else {
+                                    for (int i = 0; i < taskArray.length(); i++) {
+                                        JSONObject taskObject = taskArray.getJSONObject(i);
+                                        JSONObject creatorObject = taskObject.getJSONObject("creator");
+                                        tasks.add(
+                                                new Task(
+                                                        new User(
+                                                                creatorObject.getString("firstname"),
+                                                                creatorObject.getString("lastname"),
+                                                                creatorObject.getString("_id"),
+                                                                ""
+                                                        ),
+                                                        taskObject.getString("_id"),
+                                                        taskObject.getString("due_date"),
+                                                        taskObject.getString("name"),
+                                                        taskObject.getString("description")
+                                                )
+                                        );
+                                    }
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            notifyDataSetChanged();
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            error.printStackTrace();
+                        }
+                    }
+            );
+            queue.add(taskRequest);
+        }
+
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            LinearLayout layout = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.list_task, parent, false);
+            ViewHolder viewHolder = new ViewHolder(layout);
+            return viewHolder;
+        }
+
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            final Task currentTask = tasks.get(position);
+
+            TextView taskView = (TextView) holder.layout.findViewById(R.id.task_text);
+            String taskString = "&#8226; " + currentTask.getTitle() + " <small>(By " +
+                    currentTask.getDueDate() + ")</small><br/>";
+            taskString += "\t\t<small>" + currentTask.getDescription() + "</small>";
+            taskView.setText(Html.fromHtml(taskString));
+
+            Button completeButton = (Button) holder.layout.findViewById(R.id.task_button);
+            if(isPending && (currentTask.getAssignerId().equals(preferences.getString("_id", "")) || isCurrentUser)) {
+                completeButton.setVisibility(View.VISIBLE);
+            }
+            completeButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
+                    builder.setTitle("Are you sure you want to complete this task?");
+                    builder.setMessage("This action is irreversible.");
+                    builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Map<String, String> params = new HashMap<>();
+                            params.put("target_user", user.getId());
+                            params.put("task_id", currentTask.getId());
+
+                            CookieRequest completeRequest = new CookieRequest(Request.Method.POST,
+                                    "/f/markTaskAsCompleted",
+                                    params,
+                                    preferences,
+                                    new Response.Listener<String>() {
+                                        @Override
+                                        public void onResponse(String response) {
+                                            getTasks();
+                                            completedAdapter.getTasks();
+                                        }
+                                    },
+                                    new Response.ErrorListener() {
+                                        @Override
+                                        public void onErrorResponse(VolleyError error) {
+
+                                        }
+                                    }
+                            );
+                            queue.add(completeRequest);
+                        }
+                    });
+                    builder.setNegativeButton("Cancel", null);
+                    builder.create().show();
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return tasks.size();
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            public LinearLayout layout;
+
+            public ViewHolder(View itemView) {
+                super(itemView);
+                this.layout = (LinearLayout) itemView;
+            }
+        }
     }
 }

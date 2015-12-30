@@ -159,9 +159,17 @@
 
             <android.support.v7.widget.RecyclerView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:id="@+id/profile_pendingtasks">
 
             </android.support.v7.widget.RecyclerView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/profile_pendingnone"
+                android:text="\tNone"
+                android:visibility="gone"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -171,9 +179,17 @@
 
             <android.support.v7.widget.RecyclerView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:id="@+id/profile_completedtasks">
 
             </android.support.v7.widget.RecyclerView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/profile_completednone"
+                android:text="\tNone"
+                android:visibility="gone"/>
 
         </LinearLayout>
 

@@ -31,6 +31,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -321,6 +322,10 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void sendClick(View view) {
+        //Disable send button until message sent
+        final Button sendButton = (Button) findViewById(R.id.chat_send);
+        sendButton.setClickable(false);
+
         final EditText messageText = (EditText) findViewById(R.id.chat_message);
         final String messageContent = messageText.getText().toString();
 
@@ -363,7 +368,6 @@ public class ChatActivity extends AppCompatActivity {
                             messageText.setText("");
                             isClearingText = false;
 
-                            TimeZone tz = TimeZone.getTimeZone("UTC");
                             DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
                             System.out.println(df.format(new Date()));
                             messageAdapter.addMessage(
@@ -376,11 +380,13 @@ public class ChatActivity extends AppCompatActivity {
                                     true
                             );
                             messageAdapter.scrollToBottom();
+                            sendButton.setClickable(true);
                         }
                     }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     error.printStackTrace();
+                    sendButton.setClickable(true);
                 }
             });
             queue.add(sendRequest);

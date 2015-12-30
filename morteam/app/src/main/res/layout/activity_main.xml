@@ -88,6 +88,24 @@
 
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:paddingBottom="3.5dp"
+            android:paddingTop="3.5dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:padding="16dp"
+            android:text="Team"
+            android:textColor="#A8000000"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:background="?attr/selectableItemBackground"
+            android:onClick="teamClick"/>
+
     </LinearLayout>
 
 </android.support.v4.widget.DrawerLayout>

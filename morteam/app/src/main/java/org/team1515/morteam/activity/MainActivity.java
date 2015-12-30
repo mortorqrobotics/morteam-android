@@ -584,6 +584,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void teamClick(View view) {
+        Intent intent = new Intent(this, SubdivisionActivity.class);
+        intent.putExtra("isTeam", true);
+        intent.putExtra("name", "Team");
+        startActivity(intent);
+    }
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
