@@ -406,7 +406,7 @@ public class ProfileActivity extends AppCompatActivity {
                 date.setMinutes(0);
                 date.setMonth(datePicker.getMonth());
                 date.setDate(datePicker.getDayOfMonth());
-                date.setYear(datePicker.getYear());
+                date.setYear(datePicker.getYear() - 1900);
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.US);
                 dateFormat.format(date);
                 String dateString = dateFormat.format(date) + "Z";
@@ -415,7 +415,7 @@ public class ProfileActivity extends AppCompatActivity {
                 Map<String, String> params = new HashMap<>();
                 params.put("task_name", name);
                 params.put("task_description", description);
-                params.put("user_id", preferences.getString("_id", ""));
+                params.put("user_id", user.getId());
                 params.put("due_date", dateString);
                 CookieRequest assignRequest = new CookieRequest(Request.Method.POST,
                         "/f/assignTask",
@@ -424,7 +424,6 @@ public class ProfileActivity extends AppCompatActivity {
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
-                                System.out.println(response + "\tBlah");
                                 pendingAdapter.getTasks();
                             }
                         },
@@ -473,15 +472,22 @@ public class ProfileActivity extends AppCompatActivity {
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
+                            tasks = new ArrayList<>();
                             try {
-                                tasks = new ArrayList<>();
                                 JSONArray taskArray = new JSONArray(response);
                                 if(taskArray.length() == 0) {
                                     noneView.setVisibility(View.VISIBLE);
                                 } else {
+                                    noneView.setVisibility(View.GONE);
                                     for (int i = 0; i < taskArray.length(); i++) {
                                         JSONObject taskObject = taskArray.getJSONObject(i);
                                         JSONObject creatorObject = taskObject.getJSONObject("creator");
+
+                                        String description = "";
+                                        if(taskObject.has("description")) {
+                                            description = taskObject.getString("description");
+                                        }
+
                                         tasks.add(
                                                 new Task(
                                                         new User(
@@ -493,7 +499,7 @@ public class ProfileActivity extends AppCompatActivity {
                                                         taskObject.getString("_id"),
                                                         taskObject.getString("due_date"),
                                                         taskObject.getString("name"),
-                                                        taskObject.getString("description")
+                                                        description
                                                 )
                                         );
                                     }
@@ -527,12 +533,17 @@ public class ProfileActivity extends AppCompatActivity {
 
             TextView taskView = (TextView) holder.layout.findViewById(R.id.task_text);
             String taskString = "&#8226; " + currentTask.getTitle() + " <small>(By " +
-                    currentTask.getDueDate() + ")</small><br/>";
-            taskString += "\t\t<small>" + currentTask.getDescription() + "</small>";
+                    currentTask.getDueDate() + ")</small>";
+            if(!currentTask.getDescription().isEmpty()) {
+                taskString += "<br/>\t\t<small>" + currentTask.getDescription() + "</small>";
+            }
             taskView.setText(Html.fromHtml(taskString));
 
             Button completeButton = (Button) holder.layout.findViewById(R.id.task_button);
-            if(isPending && (currentTask.getAssignerId().equals(preferences.getString("_id", "")) || isCurrentUser)) {
+            if(isPending && (currentTask.getAssignerId().equals(preferences.getString("_id", ""))
+                    || isCurrentUser
+                    || preferences.getString("position", "").equals("leader")
+                    || preferences.getString("position", "").equals("admin"))) {
                 completeButton.setVisibility(View.VISIBLE);
             }
             completeButton.setOnClickListener(new View.OnClickListener() {
