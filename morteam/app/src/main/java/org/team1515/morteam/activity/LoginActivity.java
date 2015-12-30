@@ -51,7 +51,9 @@ public class LoginActivity extends AppCompatActivity {
                     && preferences.contains("lastname")
                     && preferences.contains("email")
                     && preferences.contains("phone")
-                    && preferences.contains("profpicpath")) {
+                    && preferences.contains("profpicpath")
+                    && preferences.contains("isOnTeam")
+                    && preferences.contains("position")) {
                 if (isOnTeam) {
                     Intent intent = new Intent(this, MainActivity.class);
                     startActivity(intent);

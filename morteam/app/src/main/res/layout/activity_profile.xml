@@ -34,12 +34,12 @@
             android:textSize="20sp" />
 
         <TextView
+            android:id="@+id/profile_phone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/profile_phone"
-            android:layout_toRightOf="@id/profile_picture"
             android:layout_below="@id/profile_email"
-            android:textSize="20sp"/>
+            android:layout_toRightOf="@id/profile_picture"
+            android:textSize="20sp" />
 
     </RelativeLayout>
 
@@ -49,20 +49,20 @@
         android:orientation="horizontal">
 
         <Button
+            android:id="@+id/profile_editprofile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:onClick="editProfileClicked"
-            android:text="Edit Profile"
-            android:id="@+id/profile_editprofile"/>
+            android:text="Edit Profile" />
 
         <Button
+            android:id="@+id/profile_changepassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:onClick="changePasswordClicked"
-            android:text="Change Password"
-            android:id="@+id/profile_changepassword"/>
+            android:text="Change Password" />
 
     </LinearLayout>
 
@@ -151,25 +151,43 @@
             android:layout_margin="5dp"
             android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Pending Tasks"
-                android:textSize="25sp" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pending Tasks"
+                    android:textSize="25sp"
+                    android:layout_alignParentLeft="true"/>
+
+                <Button
+                    android:id="@+id/profile_assigntask"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:onClick="assignTask"
+                    android:text="Assign Task"
+                    android:visibility="gone"
+                    android:minHeight="0dp"
+                    android:padding="10dp"/>
+
+            </RelativeLayout>
 
             <android.support.v7.widget.RecyclerView
+                android:id="@+id/profile_pendingtasks"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/profile_pendingtasks">
+                android:layout_height="wrap_content">
 
             </android.support.v7.widget.RecyclerView>
 
             <TextView
+                android:id="@+id/profile_pendingnone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/profile_pendingnone"
                 android:text="\tNone"
-                android:visibility="gone"/>
+                android:visibility="gone" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -178,18 +196,18 @@
                 android:textSize="25sp" />
 
             <android.support.v7.widget.RecyclerView
+                android:id="@+id/profile_completedtasks"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/profile_completedtasks">
+                android:layout_height="wrap_content">
 
             </android.support.v7.widget.RecyclerView>
 
             <TextView
+                android:id="@+id/profile_completednone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/profile_completednone"
                 android:text="\tNone"
-                android:visibility="gone"/>
+                android:visibility="gone" />
 
         </LinearLayout>
 

@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -43,6 +44,7 @@ import org.w3c.dom.Text;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -89,6 +91,12 @@ public class ProfileActivity extends AppCompatActivity {
 
             Button changePasswordButton = (Button) findViewById(R.id.profile_changepassword);
             changePasswordButton.setVisibility(View.GONE);
+
+            Button assignTaskButton = (Button) findViewById(R.id.profile_assigntask);
+            String position = preferences.getString("position", "");
+            if(position.equals("leader") || position.equals("admin")) {
+                assignTaskButton.setVisibility(View.VISIBLE);
+            }
         }
 
         Map<String, String> params = new HashMap<>();
@@ -367,6 +375,70 @@ public class ProfileActivity extends AppCompatActivity {
         builder.setNegativeButton("Cancel", null);
         builder.setTitle("Edit Profile");
         builder.create().show();
+    }
+
+    public void assignTask(View view) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Assign Task");
+        builder.setView(getLayoutInflater().inflate(R.layout.dialog_assigntask, null));
+        builder.setPositiveButton("Assign", null);
+        builder.setNegativeButton("Cancel", null);
+        final AlertDialog dialog = builder.create();
+        dialog.show();
+        Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        positiveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText nameView = (EditText) dialog.findViewById(R.id.task_name);
+                String name = nameView.getText().toString();
+                if(name.isEmpty()) {
+                    nameView.setHint("Please enter a name");
+                    nameView.setHintTextColor(getResources().getColor(R.color.red));
+                    return;
+                }
+
+                EditText descriptionView = (EditText) dialog.findViewById(R.id.task_description);
+                String description = descriptionView.getText().toString();
+
+                DatePicker datePicker = (DatePicker) dialog.findViewById(R.id.task_date);
+                Date date = new Date();
+                date.setHours(0);
+                date.setMinutes(0);
+                date.setMonth(datePicker.getMonth());
+                date.setDate(datePicker.getDayOfMonth());
+                date.setYear(datePicker.getYear());
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.US);
+                dateFormat.format(date);
+                String dateString = dateFormat.format(date) + "Z";
+                System.out.println(dateString);
+
+                Map<String, String> params = new HashMap<>();
+                params.put("task_name", name);
+                params.put("task_description", description);
+                params.put("user_id", preferences.getString("_id", ""));
+                params.put("due_date", dateString);
+                CookieRequest assignRequest = new CookieRequest(Request.Method.POST,
+                        "/f/assignTask",
+                        params,
+                        preferences,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                System.out.println(response + "\tBlah");
+                                pendingAdapter.getTasks();
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                error.printStackTrace();
+                            }
+                        }
+                );
+                queue.add(assignRequest);
+                dialog.dismiss();
+            }
+        });
     }
 
     class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
