@@ -55,114 +55,117 @@ public class NotifierService extends IntentService {
 
     @Override
     public void onStart(Intent intent, int startId) {
-        Log.d("MorTeam", "Notifier Service Started");
-
         super.onStart(intent, startId);
 
-        PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "morteam");
-        wakeLock.acquire();
+        //Hopefully stop crashes? Need better solution
+        try {
+            PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "morteam");
+            wakeLock.acquire();
 
-        // check the global background data setting
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        if (!connectivityManager.getBackgroundDataSetting()) {
-            stopSelf();
-            return;
-        }
+            // check the global background data setting
+            ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+            if (!connectivityManager.getBackgroundDataSetting()) {
+                stopSelf();
+                return;
+            }
 
-        preferences = getSharedPreferences(null, 0);
-        queue = Volley.newRequestQueue(this);
-        final Gson gson = new Gson();
+            preferences = getSharedPreferences(null, 0);
+            queue = Volley.newRequestQueue(this);
+            final Gson gson = new Gson();
 
 
-        CookieRequest announcementsRequest = new CookieRequest(Request.Method.POST, "/f/getAnnouncementsForUser", preferences, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                try {
-                    //Transfer json into announcement array
-                    JSONArray announcementArray = new JSONArray(response);
-                    ArrayList<Announcement> serverAnnouncements = new ArrayList<>();
-                    for (int i = 0; i < announcementArray.length(); i++) {
-                        JSONObject announcementObject = announcementArray.getJSONObject(i);
-                        serverAnnouncements.add(new Announcement(
-                                new User(announcementObject.getJSONObject("author").getString("firstname"),
-                                        announcementObject.getJSONObject("author").getString("lastname"),
-                                        announcementObject.getJSONObject("author").getString("profpicpath")),
-                                announcementObject.getString("content"),
-                                announcementObject.getString("timestamp"),
-                                announcementObject.getString("_id")
-                        ));
-                    }
-
-                    //Get local announcements in json and convert to object list
-                    List<Announcement> localAnnouncements = null;
-                    String localJsonAnnouncements = preferences.getString("announcements", null);
-                    if (localJsonAnnouncements != null) {
-                        localAnnouncements = gson.fromJson(localJsonAnnouncements, new TypeToken<ArrayList<Announcement>>() {
-                        }.getType());
-
-                        //Check if new announcements are found
-                        List<Announcement> newAnnouncements;
-                        if (localAnnouncements.isEmpty()) {
-                            newAnnouncements = serverAnnouncements;
-                        } else {
-                            newAnnouncements = new ArrayList<>();
-                            for (Announcement announcement : serverAnnouncements) {
-                                if (!announcement.getDate().equals(localAnnouncements.get(0).getDate()) && announcement.getRawDate().after(localAnnouncements.get(0).getRawDate())) {
-                                    newAnnouncements.add(announcement);
-                                }
-                            }
+            CookieRequest announcementsRequest = new CookieRequest(Request.Method.POST, "/f/getAnnouncementsForUser", preferences, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    try {
+                        //Transfer json into announcement array
+                        JSONArray announcementArray = new JSONArray(response);
+                        ArrayList<Announcement> serverAnnouncements = new ArrayList<>();
+                        for (int i = 0; i < announcementArray.length(); i++) {
+                            JSONObject announcementObject = announcementArray.getJSONObject(i);
+                            serverAnnouncements.add(new Announcement(
+                                    new User(announcementObject.getJSONObject("author").getString("firstname"),
+                                            announcementObject.getJSONObject("author").getString("lastname"),
+                                            announcementObject.getJSONObject("author").getString("profpicpath")),
+                                    announcementObject.getString("content"),
+                                    announcementObject.getString("timestamp"),
+                                    announcementObject.getString("_id")
+                            ));
                         }
 
-                        //Create notification with new announcements
-                        if (!newAnnouncements.isEmpty()) {
-                            NotificationCompat.Builder builder = new NotificationCompat.Builder(NotifierService.this);
-                            builder.setSmallIcon(R.drawable.ic_floating_button);
-                            builder.setPriority(0);
-                            builder.setAutoCancel(true);
-                            builder.setDefaults(Notification.DEFAULT_SOUND);
+                        //Get local announcements in json and convert to object list
+                        List<Announcement> localAnnouncements = null;
+                        String localJsonAnnouncements = preferences.getString("announcements", null);
+                        if (localJsonAnnouncements != null) {
+                            localAnnouncements = gson.fromJson(localJsonAnnouncements, new TypeToken<ArrayList<Announcement>>() {
+                            }.getType());
 
-                            if(newAnnouncements.size() == 1) {
-                                builder.setContentText(Html.fromHtml(newAnnouncements.get(0).getContent()));
-                                builder.setContentTitle("New Announcement");
+                            //Check if new announcements are found
+                            List<Announcement> newAnnouncements;
+                            if (localAnnouncements.isEmpty()) {
+                                newAnnouncements = serverAnnouncements;
                             } else {
-                                builder.setContentTitle("New Announcements");
-                                builder.setContentText(newAnnouncements.size() + " " + "Announcements");
-                                NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
-                                inboxStyle.setBigContentTitle("New Announcements");
-                                for (Announcement announcement : newAnnouncements) {
-                                    inboxStyle.addLine(Html.fromHtml(announcement.getContent()));
+                                newAnnouncements = new ArrayList<>();
+                                for (Announcement announcement : serverAnnouncements) {
+                                    if (!announcement.getDate().equals(localAnnouncements.get(0).getDate()) && announcement.getRawDate().after(localAnnouncements.get(0).getRawDate())) {
+                                        newAnnouncements.add(announcement);
+                                    }
                                 }
-                                builder.setStyle(inboxStyle);
                             }
 
-                            Intent resultIntent = new Intent(NotifierService.this, MainActivity.class);
-                            TaskStackBuilder stackBuilder = TaskStackBuilder.create(NotifierService.this);
-                            stackBuilder.addParentStack(MainActivity.class);
-                            stackBuilder.addNextIntent(resultIntent);
-                            PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-                            builder.setContentIntent(resultPendingIntent);
-                            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                            notificationManager.notify(0, builder.build());
-                        }
-                    }
+                            //Create notification with new announcements
+                            if (!newAnnouncements.isEmpty()) {
+                                NotificationCompat.Builder builder = new NotificationCompat.Builder(NotifierService.this);
+                                builder.setSmallIcon(R.drawable.ic_floating_button);
+                                builder.setPriority(0);
+                                builder.setAutoCancel(true);
+                                builder.setDefaults(Notification.DEFAULT_SOUND);
 
-                    //Update local copy of announcements with server copy
-                    preferences.edit().putString("announcements", gson.toJson(serverAnnouncements)).apply();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } finally {
+                                if (newAnnouncements.size() == 1) {
+                                    builder.setContentText(Html.fromHtml(newAnnouncements.get(0).getContent()));
+                                    builder.setContentTitle("New Announcement");
+                                } else {
+                                    builder.setContentTitle("New Announcements");
+                                    builder.setContentText(newAnnouncements.size() + " " + "Announcements");
+                                    NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+                                    inboxStyle.setBigContentTitle("New Announcements");
+                                    for (Announcement announcement : newAnnouncements) {
+                                        inboxStyle.addLine(Html.fromHtml(announcement.getContent()));
+                                    }
+                                    builder.setStyle(inboxStyle);
+                                }
+
+                                Intent resultIntent = new Intent(NotifierService.this, MainActivity.class);
+                                TaskStackBuilder stackBuilder = TaskStackBuilder.create(NotifierService.this);
+                                stackBuilder.addParentStack(MainActivity.class);
+                                stackBuilder.addNextIntent(resultIntent);
+                                PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                                builder.setContentIntent(resultPendingIntent);
+                                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                                notificationManager.notify(0, builder.build());
+                            }
+                        }
+
+                        //Update local copy of announcements with server copy
+                        preferences.edit().putString("announcements", gson.toJson(serverAnnouncements)).apply();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } finally {
+                        wakeLock.release();
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    System.out.println(error);
                     wakeLock.release();
                 }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.println(error);
-                wakeLock.release();
-            }
-        });
-        queue.add(announcementsRequest);
+            });
+            queue.add(announcementsRequest);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

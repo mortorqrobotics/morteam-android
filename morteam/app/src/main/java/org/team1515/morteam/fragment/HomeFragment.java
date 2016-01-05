@@ -2,6 +2,7 @@ package org.team1515.morteam.fragment;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
 
+import org.team1515.morteam.activity.ProfileActivity;
 import org.team1515.morteam.entities.Announcement;
 import org.team1515.morteam.entities.User;
 import org.team1515.morteam.network.CookieRequest;
@@ -112,6 +114,7 @@ public class HomeFragment extends Fragment {
                                     new User(
                                             object.getJSONObject("author").getString("firstname"),
                                             object.getJSONObject("author").getString("lastname"),
+                                            object.getJSONObject("author").getString("_id"),
                                             object.getJSONObject("author").getString("profpicpath") + "-60"
                                     ),
                                     object.getString("content"),
@@ -159,18 +162,34 @@ public class HomeFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, final int position) {
+            final Announcement currentAnnouncement = announcements.get(position);
+
             ImageView profPic = (ImageView) holder.cardView.findViewById(R.id.announcement_pic);
-            profPic.setImageBitmap(announcements.get(position).getProfPic());
+            profPic.setImageBitmap(currentAnnouncement.getProfPic());
+            profPic.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(HomeFragment.this.getContext(), ProfileActivity.class);
+                    intent.putExtra("_id", currentAnnouncement.getUserId());
+                    if(currentAnnouncement.getUserId().equals(preferences.getString("_id", ""))) {
+                        intent.putExtra("isCurrentUser", true);
+                    } else {
+                        intent.putExtra("isCurrentUser", false);
+                    }
+                    startActivity(intent);
+
+                }
+            });
 
             TextView author = (TextView) holder.cardView.findViewById(R.id.author);
-            author.setText(announcements.get(position).getUserName());
+            author.setText(currentAnnouncement.getUserName());
 
             TextView date = (TextView) holder.cardView.findViewById(R.id.date);
-            date.setText(announcements.get(position).getDate());
+            date.setText(currentAnnouncement.getDate());
 
             TextView message = (TextView) holder.cardView.findViewById(R.id.message);
             message.setMovementMethod(LinkMovementMethod.getInstance());
-            message.setText(Html.fromHtml(announcements.get(position).getContent()));
+            message.setText(Html.fromHtml(currentAnnouncement.getContent()));
 
             ImageButton deleteButton = (ImageButton) holder.cardView.findViewById(R.id.delete_button);
 
@@ -189,7 +208,7 @@ public class HomeFragment extends Fragment {
                             public void onClick(DialogInterface dialogInterface, int i) {
 
                                 Map<String, String> params = new HashMap<>();
-                                params.put("_id", announcements.get(position).getId());
+                                params.put("_id", currentAnnouncement.getId());
 
                                 CookieRequest request = new CookieRequest(Request.Method.POST, "/f/deleteAnnouncement", params, preferences, new Response.Listener<String>() {
                                     @Override

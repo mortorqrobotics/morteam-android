@@ -56,4 +56,8 @@ public class Announcement {
     public String getId() {
         return id;
     }
+
+    public String getUserId() {
+        return user.getId();
+    }
 }

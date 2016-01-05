@@ -9,8 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,7 +37,6 @@ import org.team1515.morteam.entities.PictureCallBack;
 import org.team1515.morteam.entities.Task;
 import org.team1515.morteam.entities.User;
 import org.team1515.morteam.network.CookieRequest;
-import org.w3c.dom.Text;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
