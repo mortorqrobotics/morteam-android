@@ -164,9 +164,7 @@ public class HomeFragment extends Fragment {
         public void onBindViewHolder(ViewHolder holder, final int position) {
             final Announcement currentAnnouncement = announcements.get(position);
 
-            ImageView profPic = (ImageView) holder.cardView.findViewById(R.id.announcement_pic);
-            profPic.setImageBitmap(currentAnnouncement.getProfPic());
-            profPic.setOnClickListener(new View.OnClickListener() {
+            View.OnClickListener profileListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(HomeFragment.this.getContext(), ProfileActivity.class);
@@ -179,10 +177,15 @@ public class HomeFragment extends Fragment {
                     startActivity(intent);
 
                 }
-            });
+            };
+
+            ImageView profPic = (ImageView) holder.cardView.findViewById(R.id.announcement_pic);
+            profPic.setImageBitmap(currentAnnouncement.getProfPic());
+            profPic.setOnClickListener(profileListener);
 
             TextView author = (TextView) holder.cardView.findViewById(R.id.author);
             author.setText(currentAnnouncement.getUserName());
+            author.setOnClickListener(profileListener);
 
             TextView date = (TextView) holder.cardView.findViewById(R.id.date);
             date.setText(currentAnnouncement.getDate());
