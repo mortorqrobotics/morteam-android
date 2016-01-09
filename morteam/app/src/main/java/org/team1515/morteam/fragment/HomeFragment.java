@@ -122,7 +122,7 @@ public class HomeFragment extends Fragment {
                                     object.getString("_id")
                             );
 
-                            announcement.requestProfPic(queue, preferences, null);
+                            announcement.requestProfPic(preferences, queue, null);
 
                             announcements.add(announcement);
                         }

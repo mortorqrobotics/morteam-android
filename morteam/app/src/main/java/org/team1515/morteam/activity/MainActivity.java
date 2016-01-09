@@ -49,6 +49,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import net.team1515.morteam.R;
 
 import org.team1515.morteam.entities.Subdivision;
+import org.team1515.morteam.fragment.CalendarFragment;
 import org.team1515.morteam.fragment.ChatFragment;
 import org.team1515.morteam.fragment.HomeFragment;
 import org.team1515.morteam.network.CookieRequest;
@@ -618,12 +619,14 @@ public class MainActivity extends AppCompatActivity {
 
         public HomeFragment homeFragment;
         public ChatFragment chatFragment;
+        public CalendarFragment calendarFragment;
 
         public SectionPagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
 
             homeFragment = new HomeFragment();
             chatFragment = new ChatFragment();
+            calendarFragment = new CalendarFragment();
         }
 
         @Override
@@ -633,6 +636,8 @@ public class MainActivity extends AppCompatActivity {
                     return homeFragment;
                 case 1:
                     return chatFragment;
+                case 2:
+                    return calendarFragment;
                 default:
                     return new Fragment();
             }
@@ -640,7 +645,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return 2;
+            return 3;
         }
 
         @Override
@@ -650,6 +655,8 @@ public class MainActivity extends AppCompatActivity {
                     return "Home";
                 case 1:
                     return "Chat";
+                case 2:
+                    return "Calendar";
                 default:
                     return "Home";
             }

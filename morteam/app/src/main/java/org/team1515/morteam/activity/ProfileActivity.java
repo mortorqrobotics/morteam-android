@@ -118,7 +118,7 @@ public class ProfileActivity extends AppCompatActivity {
                             );
 
                             //Set up profile picture, name, and email
-                            user.requestProfPic(queue, preferences, new PictureCallBack() {
+                            user.requestProfPic(preferences, queue, new PictureCallBack() {
                                 @Override
                                 public void onComplete() {
                                     ImageView profilePic = (ImageView) findViewById(R.id.profile_picture);

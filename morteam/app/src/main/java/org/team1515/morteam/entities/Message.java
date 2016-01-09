@@ -55,7 +55,7 @@ public class Message {
         return user.getProfPic();
     }
 
-    public void requestProfPic(RequestQueue queue, SharedPreferences preferences, final PictureCallBack callBack) {
-        user.requestProfPic(queue, preferences, callBack);
+    public void requestProfPic(SharedPreferences preferences, RequestQueue queue, final PictureCallBack callBack) {
+        user.requestProfPic(preferences, queue, callBack);
     }
 }

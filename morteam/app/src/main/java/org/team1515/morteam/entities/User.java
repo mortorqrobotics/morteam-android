@@ -3,11 +3,18 @@ package org.team1515.morteam.entities;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.team1515.morteam.network.CookieRequest;
 import org.team1515.morteam.network.ImageCookieRequest;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class User {
     private String firstName;
@@ -36,6 +43,10 @@ public class User {
         this(firstName, lastName, "", profPicPath);
     }
 
+    public User(String id) {
+        this.id = id;
+    }
+
     public String getFullName() {
         return firstName + " " + lastName;
     }
@@ -56,7 +67,7 @@ public class User {
         return profPic;
     }
 
-    public void requestProfPic(RequestQueue queue, SharedPreferences preferences, final PictureCallBack callBack) {
+    public void requestProfPic(SharedPreferences preferences, RequestQueue queue, final PictureCallBack callBack) {
         ImageCookieRequest messagePicRequest = new ImageCookieRequest(
                 "http://www.morteam.com" + profPicPath,
                 preferences,
@@ -93,5 +104,41 @@ public class User {
 
     public String getPhoneFormatted() {
         return formatPhoneNumber(phone);
+    }
+
+    public void populate(final SharedPreferences preferences, final RequestQueue queue, final boolean getProfPic) {
+        Map<String, String> params = new HashMap<>();
+        params.put("_id", getId());
+        CookieRequest userRequest = new CookieRequest(Request.Method.POST,
+                "/f/getuser",
+                params,
+                preferences,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject userObject = new JSONObject(response);
+                            firstName = userObject.getString("firstname");
+                            lastName = userObject.getString("lastname");
+                            profPicPath = userObject.getString("profpicpath");
+                            email = userObject.getString("email");
+                            phone = userObject.getString("phone");
+                            if(getProfPic) {
+                                requestProfPic(preferences, queue, null);
+                            }
+
+                        } catch(JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                    }
+                }
+        );
+        queue.add(userRequest);
     }
 }

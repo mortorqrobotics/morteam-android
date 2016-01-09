@@ -1,0 +1,277 @@
+package org.team1515.morteam.fragment;
+
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.Volley;
+
+import net.team1515.morteam.R;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.solovyev.android.views.llm.LinearLayoutManager;
+import org.team1515.morteam.activity.MainActivity;
+import org.team1515.morteam.entities.Event;
+import org.team1515.morteam.entities.Subdivision;
+import org.team1515.morteam.entities.User;
+import org.team1515.morteam.network.CookieRequest;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class CalendarFragment extends Fragment {
+    private SharedPreferences preferences;
+    private RequestQueue queue;
+
+    private Spinner monthSpinner;
+    private ArrayAdapter<CharSequence> monthAdapter;
+    protected String selectedMonth;
+    protected int selectedMonthNum;
+
+    private Spinner yearSpinner;
+    private ArrayAdapter<CharSequence> yearAdapter;
+    protected String selectedYear;
+
+    private RecyclerView dayView;
+    private DayAdapter dayAdapter;
+    private LinearLayoutManager dayLayoutManager;
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_calendar, container, false);
+
+        preferences = getActivity().getSharedPreferences(null, 0);
+        queue = Volley.newRequestQueue(getContext());
+
+        monthSpinner = (Spinner) view.findViewById(R.id.calendar_months);
+        selectedMonth = "";
+        selectedMonthNum = 0;
+        monthAdapter = ArrayAdapter.createFromResource(getContext(), R.array.months, android.R.layout.simple_spinner_item);
+        monthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        monthSpinner.setAdapter(monthAdapter);
+        monthSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedMonth = monthAdapter.getItem(position).toString();
+                selectedMonthNum = position;
+                dayAdapter.requestEvents();
+                dayAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        //Get current year and next 5
+        Calendar cal = Calendar.getInstance();
+        int year = cal.get(Calendar.YEAR);
+        List<CharSequence> years = new ArrayList<>();
+        for (int i = 2015; i < year + 5; i++) {
+            years.add(i + "");
+        }
+        yearSpinner = (Spinner) view.findViewById(R.id.calendar_years);
+        selectedYear = "2016";
+        yearAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, years);
+        yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        yearSpinner.setAdapter(yearAdapter);
+        yearSpinner.setSelection(years.indexOf(year + ""));
+        yearSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedYear = yearAdapter.getItem(position).toString();
+                dayAdapter.requestEvents();
+                dayAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+
+        dayView = (RecyclerView) view.findViewById(R.id.calendar_days);
+        dayAdapter = new DayAdapter();
+        dayLayoutManager = new LinearLayoutManager(getContext());
+        dayView.setAdapter(dayAdapter);
+        dayView.setLayoutManager(dayLayoutManager);
+
+        return view;
+    }
+
+    public class DayAdapter extends RecyclerView.Adapter<DayAdapter.ViewHolder> {
+        List<Event> events;
+        int daysInMonth;
+        final String[] dayNames = new String[] {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+
+        public DayAdapter() {
+            events = new ArrayList<>();
+            daysInMonth = 0;
+            requestEvents();
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            public LinearLayout view;
+
+            public ViewHolder(LinearLayout view) {
+                super(view);
+                this.view = view;
+            }
+        }
+
+        public void requestEvents() {
+            //Find number of days in month
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.MONTH, selectedMonthNum);
+            cal.set(Calendar.YEAR, Integer.parseInt(selectedYear));
+            daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+
+            Map<String, String> params = new HashMap<>();
+            params.put("month", selectedMonthNum + "");
+            params.put("year", selectedYear);
+
+            CookieRequest eventRequest = new CookieRequest(Request.Method.POST,
+                    "/f/getEventsForUserInTeamInMonth",
+                    params,
+                    preferences,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            System.out.println(response);
+                            try {
+                                JSONArray eventArray = new JSONArray(response);
+
+                                events = new ArrayList<>();
+                                for (int i = 0; i < eventArray.length(); i++) {
+                                    JSONObject eventObject = eventArray.getJSONObject(i);
+
+                                    User creator = new User(eventObject.getString("creator"));
+
+                                    List<User> userAttendees = new ArrayList<>();
+                                    List<Subdivision> subdivisionAttendees = new ArrayList<>();
+
+                                    //Because someone refuses to actually fix the database
+                                    boolean entireTeam = false;
+                                    if (eventObject.has("entireTeam")) {
+                                        entireTeam = eventObject.getBoolean("entireTeam");
+                                    }
+
+                                    if (!entireTeam) {
+                                        JSONArray usersArray = eventObject.getJSONArray("userAttendees");
+                                        for (int j = 0; j < usersArray.length(); j++) {
+                                            userAttendees.add(new User(usersArray.getString(j)));
+                                        }
+                                        JSONArray subdivisionsArray = eventObject.getJSONArray("subdivisionAttendees");
+                                        for (int j = 0; j < subdivisionsArray.length(); j++) {
+                                            subdivisionAttendees.add(new Subdivision(subdivisionsArray.getString(j)));
+                                        }
+                                    } else {
+                                        //EntireTeam = true; Get all dem users in the team
+                                        for (String user : MainActivity.teamUsers.values()) {
+                                            //TODO: This is pretty bad -> Fix in near future please?
+                                            User attendee = new User(user);
+                                            attendee.populate(preferences, queue, false);
+                                            userAttendees.add(attendee);
+                                        }
+                                    }
+
+                                    String title = "";
+                                    if (eventObject.has("name")) {
+                                        title = eventObject.getString("name");
+                                    }
+                                    String description = "";
+                                    if (eventObject.has("description")) {
+                                        description = eventObject.getString("description");
+                                    }
+
+                                    Event event = new Event(creator,
+                                            eventObject.getString("_id"),
+                                            title,
+                                            description,
+                                            eventObject.getString("date"),
+                                            userAttendees,
+                                            subdivisionAttendees
+                                    );
+                                    events.add(event);
+                                }
+
+                                notifyDataSetChanged();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            error.printStackTrace();
+                        }
+                    }
+            );
+            queue.add(eventRequest);
+        }
+
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            LinearLayout view = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.list_date, parent, false);
+            ViewHolder viewHolder = new ViewHolder(view);
+            return viewHolder;
+        }
+
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            Calendar currentDay = Calendar.getInstance();
+            currentDay.set(Calendar.DAY_OF_MONTH, position);
+            currentDay.set(Calendar.MONTH, selectedMonthNum);
+            currentDay.set(Calendar.YEAR, Integer.parseInt(selectedYear));
+
+            String eventString = "";
+            for (int i = 0; i < events.size(); i++) {
+                if (events.get(i).getDay() == position) {
+                    //This will have to do for now
+                    eventString += events.get(i).getTitle() + "\n";
+                }
+            }
+            if(eventString.length() > 2) {
+                eventString = eventString.substring(0, eventString.length() - 1);
+            }
+
+            TextView event = (TextView) holder.view.findViewById(R.id.calendar_event);
+            event.setText(eventString);
+
+            TextView dayNum = (TextView) holder.view.findViewById(R.id.calendar_daynum);
+            dayNum.setText(Integer.toString(position + 1));
+
+            TextView dayName = (TextView) holder.view.findViewById(R.id.calendar_dayname);
+            dayName.setText(dayNames[currentDay.get(Calendar.DAY_OF_WEEK) - 1]);
+
+        }
+
+        @Override
+        public int getItemCount() {
+            return daysInMonth;
+        }
+    }
+}

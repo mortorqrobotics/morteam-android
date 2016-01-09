@@ -102,7 +102,7 @@ public class SubdivisionActivity extends AppCompatActivity {
                                 userObject.getString("lastname"),
                                 userObject.getString("_id"),
                                 profPicPath);
-                        user.requestProfPic(queue, preferences, null);
+                        user.requestProfPic(preferences, queue, null);
 
                         users.add(user);
                     }

@@ -563,7 +563,7 @@ public class ChatActivity extends AppCompatActivity {
         public void requestImage(int position) {
             final Message message = messages.get(position);
 
-            message.requestProfPic(queue, preferences, new PictureCallBack() {
+            message.requestProfPic(preferences, queue, new PictureCallBack() {
                 @Override
                 public void onComplete() {
                     notifyDataSetChanged();

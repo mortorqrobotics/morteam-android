@@ -9,6 +9,10 @@ public class Subdivision {
         this.id = id;
     }
 
+    public Subdivision(String id) {
+        this("", id);
+    }
+
     public String getName() {
         return name;
     }
