@@ -49,6 +49,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import net.team1515.morteam.R;
 
 import org.team1515.morteam.entities.Subdivision;
+import org.team1515.morteam.entities.User;
 import org.team1515.morteam.fragment.CalendarFragment;
 import org.team1515.morteam.fragment.ChatFragment;
 import org.team1515.morteam.fragment.HomeFragment;
@@ -88,9 +89,12 @@ public class MainActivity extends AppCompatActivity {
     private String currentPostGroup;
     private List<String> choices = new ArrayList<>();
 
-    public static final Map<String, String> teamUsers = new HashMap<>();
-    public static final Map<String, String> yourSubs = new HashMap<>();
-    public static final Map<String, String> publicSubs = new HashMap<>();
+//    public static final Map<String, String> teamUsers = new HashMap<>();
+    public static final List<User> teamUsers = new ArrayList<>();
+    public static final List<Subdivision> yourSubs = new ArrayList<>();
+    public static final List<Subdivision> publicSubs = new ArrayList<>();
+//    public static final Map<String, String> yourSubs = new HashMap<>();
+//    public static final Map<String, String> publicSubs = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -231,9 +235,10 @@ public class MainActivity extends AppCompatActivity {
                             JSONArray userArray = new JSONArray(response);
                             for (int i = 0; i < userArray.length(); i++) {
                                 JSONObject userObject = userArray.getJSONObject(i);
-                                MainActivity.teamUsers.put(
-                                        userObject.getString("firstname") + " " + userObject.getString("lastname"),
-                                        userObject.getString("_id")
+                                teamUsers.add(new User(userObject.getString("firstname"),
+                                                userObject.getString("lastname"),
+                                                userObject.getString("_id"),
+                                                userObject.getString("profpicpath"))
                                 );
                             }
                         } catch (JSONException e) {
@@ -259,9 +264,8 @@ public class MainActivity extends AppCompatActivity {
                             JSONArray subdivisionArray = new JSONArray(response);
                             for (int i = 0; i < subdivisionArray.length(); i++) {
                                 JSONObject subdivisionObject = subdivisionArray.getJSONObject(i);
-                                MainActivity.yourSubs.put(
-                                        subdivisionObject.getString("name"),
-                                        subdivisionObject.getString("_id")
+                                yourSubs.add(new Subdivision(subdivisionObject.getString("name"),
+                                                subdivisionObject.getString("_id"))
                                 );
                             }
                             yourSubAdapter.setSubdivisions(yourSubs);
@@ -288,9 +292,8 @@ public class MainActivity extends AppCompatActivity {
                             JSONArray subdivisionArray = new JSONArray(response);
                             for (int i = 0; i < subdivisionArray.length(); i++) {
                                 JSONObject subdivisionObject = subdivisionArray.getJSONObject(i);
-                                MainActivity.publicSubs.put(
-                                        subdivisionObject.getString("name"),
-                                        subdivisionObject.getString("_id")
+                                publicSubs.add(new Subdivision(subdivisionObject.getString("name"),
+                                        subdivisionObject.getString("_id"))
                                 );
                             }
                             publicSubAdapter.setSubdivisions(publicSubs);
@@ -319,7 +322,7 @@ public class MainActivity extends AppCompatActivity {
         alarmManager.cancel(pIntent);
         alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() + 5 * 1000,
-                60 * 1000, pIntent);
+                10 * 60 * 1000, pIntent);
     }
 
     public void showAnnouncementDialog() {
@@ -335,34 +338,60 @@ public class MainActivity extends AppCompatActivity {
                 if (item.equals("Everyone")) {
                     currentPostGroup = "everyone";
                 } else if (!item.equals("Custom")) {
-                    currentPostGroup = MainActivity.yourSubs.get(item);
+                    for(Subdivision subdivision : yourSubs) {
+                        if(subdivision.getName().equals(item)) {
+                            currentPostGroup = subdivision.getId();
+                        }
+                    }
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder.setTitle("Choose an audience");
                     final List<String> subdivisionIds = new ArrayList<>();
                     final List<String> userIds = new ArrayList<>();
                     final List<CharSequence> audiences = new ArrayList<>();
-                    for (String subdivision : MainActivity.yourSubs.keySet()) {
-                        audiences.add(subdivision);
+                    for(Subdivision subdivision : yourSubs) {
+                        audiences.add(subdivision.getName());
                     }
-                    for (String user : MainActivity.teamUsers.keySet()) {
-                        audiences.add(user);
+                    for(User user : teamUsers) {
+                        audiences.add(user.getFullName());
                     }
                     builder.setMultiChoiceItems(audiences.toArray(new CharSequence[audiences.size()]), null, new DialogInterface.OnMultiChoiceClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                            String key = audiences.get(which).toString();
+                            String name = audiences.get(which).toString();
                             if (isChecked) {
-                                if (MainActivity.yourSubs.containsKey(key)) {
-                                    subdivisionIds.add(MainActivity.yourSubs.get(key));
-                                } else {
-                                    userIds.add(MainActivity.teamUsers.get(key));
+                                boolean foundSub = false;
+                                for(Subdivision subdivision : yourSubs) {
+                                    if(subdivision.getName().equals(name)) {
+                                        subdivisionIds.add(subdivision.getId());
+                                        foundSub = true;
+                                        break;
+                                    }
+                                }
+                                if(!foundSub) {
+                                    for(User user : teamUsers) {
+                                        if(user.getFullName().equals(name)) {
+                                            userIds.add(user.getId());
+                                            break;
+                                        }
+                                    }
                                 }
                             } else {
-                                if (MainActivity.yourSubs.containsKey(key)) {
-                                    subdivisionIds.remove(MainActivity.yourSubs.get(key));
-                                } else {
-                                    userIds.remove(MainActivity.teamUsers.get(key));
+                                boolean foundSub = false;
+                                for(Subdivision subdivision : yourSubs) {
+                                    if(subdivision.getName().equals(name)) {
+                                        subdivisionIds.remove(subdivision.getId());
+                                        foundSub = true;
+                                        break;
+                                    }
+                                }
+                                if(!foundSub) {
+                                    for(User user : teamUsers) {
+                                        if(user.getFullName().equals(name)) {
+                                            userIds.remove(user.getId());
+                                            break;
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -404,8 +433,8 @@ public class MainActivity extends AppCompatActivity {
     private void populateChoiceSpinner() {
         choices = new ArrayList<>();
         choices.add("Everyone");
-        for (String subdivision : MainActivity.yourSubs.keySet()) {
-            choices.add(subdivision);
+        for(Subdivision subdivision : yourSubs) {
+            choices.add(subdivision.getId());
         }
         choices.add("Custom");
         choiceSpinner.setAdapter(
@@ -434,29 +463,51 @@ public class MainActivity extends AppCompatActivity {
         final List<String> subdivisionIds = new ArrayList<>();
         final List<String> userIds = new ArrayList<>();
         final List<String> audiences = new ArrayList<>();
-        for (String subdivision : MainActivity.yourSubs.keySet()) {
-            audiences.add(subdivision);
+        for(Subdivision subdivision : yourSubs) {
+            audiences.add(subdivision.getName());
         }
-        for (String user : MainActivity.teamUsers.keySet()) {
-            if (!user.equals(preferences.getString("firstname", "") + " " + preferences.getString("lastname", ""))) {
-                audiences.add(user);
+        for(User user : teamUsers) {
+            if(!user.getFullName().equals(preferences.getString("firstname", "") + " " + preferences.getString("lastname", ""))) {
+                audiences.add(user.getFullName());
             }
         }
         builder.setMultiChoiceItems(audiences.toArray(new CharSequence[audiences.size()]), null, new DialogInterface.OnMultiChoiceClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                String key = audiences.get(which);
+                String name = audiences.get(which);
                 if (isChecked) {
-                    if (MainActivity.yourSubs.containsKey(key)) {
-                        subdivisionIds.add(MainActivity.yourSubs.get(key));
-                    } else {
-                        userIds.add(MainActivity.teamUsers.get(key));
+                    boolean foundSub = false;
+                    for(Subdivision subdivision : yourSubs) {
+                        if(subdivision.getName().equals(name)) {
+                            subdivisionIds.add(subdivision.getId());
+                            foundSub = true;
+                            break;
+                        }
+                    }
+                    if(!foundSub) {
+                        for(User user : teamUsers) {
+                            if(user.getFullName().equals(name)) {
+                                userIds.add(user.getId());
+                                break;
+                            }
+                        }
                     }
                 } else {
-                    if (MainActivity.yourSubs.containsKey(key)) {
-                        subdivisionIds.remove(MainActivity.yourSubs.get(key));
-                    } else {
-                        userIds.remove(MainActivity.teamUsers.get(key));
+                    boolean foundSub = false;
+                    for(Subdivision subdivision : yourSubs) {
+                        if(subdivision.getName().equals(name)) {
+                            subdivisionIds.remove(subdivision.getId());
+                            foundSub = true;
+                            break;
+                        }
+                    }
+                    if(!foundSub) {
+                        for(User user : teamUsers) {
+                            if(user.getFullName().equals(name)) {
+                                userIds.remove(user.getId());
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -671,10 +722,8 @@ public class MainActivity extends AppCompatActivity {
             this.subdivisions = new ArrayList<>();
         }
 
-        public void setSubdivisions(Map<String, String> subdivisions) {
-            for (Map.Entry<String, String> subdivision : subdivisions.entrySet()) {
-                this.subdivisions.add(new Subdivision(subdivision.getKey(), subdivision.getValue()));
-            }
+        public void setSubdivisions(List<Subdivision> subdivisions) {
+            this.subdivisions = subdivisions;
             notifyDataSetChanged();
         }
 

@@ -1,16 +1,22 @@
 package org.team1515.morteam.fragment;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -27,6 +33,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.solovyev.android.views.llm.LinearLayoutManager;
 import org.team1515.morteam.activity.MainActivity;
+import org.team1515.morteam.activity.ProfileActivity;
 import org.team1515.morteam.entities.Event;
 import org.team1515.morteam.entities.Subdivision;
 import org.team1515.morteam.entities.User;
@@ -74,7 +81,7 @@ public class CalendarFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedMonth = monthAdapter.getItem(position).toString();
                 selectedMonthNum = position;
-                dayAdapter.requestEvents();
+                dayAdapter.getDays();
                 dayAdapter.notifyDataSetChanged();
             }
 
@@ -101,7 +108,7 @@ public class CalendarFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedYear = yearAdapter.getItem(position).toString();
-                dayAdapter.requestEvents();
+                dayAdapter.getDays();
                 dayAdapter.notifyDataSetChanged();
             }
 
@@ -122,32 +129,17 @@ public class CalendarFragment extends Fragment {
     }
 
     public class DayAdapter extends RecyclerView.Adapter<DayAdapter.ViewHolder> {
-        List<Event> events;
         int daysInMonth;
-        final String[] dayNames = new String[] {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+        final String[] dayNames = new String[]{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+        public List<Event> events;
 
         public DayAdapter() {
-            events = new ArrayList<>();
             daysInMonth = 0;
-            requestEvents();
+            events = new ArrayList<>();
+            getDays();
         }
 
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            public LinearLayout view;
-
-            public ViewHolder(LinearLayout view) {
-                super(view);
-                this.view = view;
-            }
-        }
-
-        public void requestEvents() {
-            //Find number of days in month
-            Calendar cal = Calendar.getInstance();
-            cal.set(Calendar.MONTH, selectedMonthNum);
-            cal.set(Calendar.YEAR, Integer.parseInt(selectedYear));
-            daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-
+        public void getEvents() {
             Map<String, String> params = new HashMap<>();
             params.put("month", selectedMonthNum + "");
             params.put("year", selectedYear);
@@ -189,11 +181,8 @@ public class CalendarFragment extends Fragment {
                                         }
                                     } else {
                                         //EntireTeam = true; Get all dem users in the team
-                                        for (String user : MainActivity.teamUsers.values()) {
-                                            //TODO: This is pretty bad -> Fix in near future please?
-                                            User attendee = new User(user);
-                                            attendee.populate(preferences, queue, false);
-                                            userAttendees.add(attendee);
+                                        for(User user : MainActivity.teamUsers) {
+                                            userAttendees.add(user);
                                         }
                                     }
 
@@ -233,6 +222,25 @@ public class CalendarFragment extends Fragment {
             queue.add(eventRequest);
         }
 
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            public LinearLayout view;
+
+            public ViewHolder(LinearLayout view) {
+                super(view);
+                this.view = view;
+            }
+        }
+
+        public void getDays() {
+            //Find number of days in month
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.MONTH, selectedMonthNum);
+            cal.set(Calendar.YEAR, Integer.parseInt(selectedYear));
+            daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+
+            getEvents();
+        }
+
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LinearLayout view = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.list_date, parent, false);
@@ -247,31 +255,125 @@ public class CalendarFragment extends Fragment {
             currentDay.set(Calendar.MONTH, selectedMonthNum);
             currentDay.set(Calendar.YEAR, Integer.parseInt(selectedYear));
 
-            String eventString = "";
-            for (int i = 0; i < events.size(); i++) {
-                if (events.get(i).getDay() == position) {
-                    //This will have to do for now
-                    eventString += events.get(i).getTitle() + "\n";
-                }
-            }
-            if(eventString.length() > 2) {
-                eventString = eventString.substring(0, eventString.length() - 1);
-            }
-
-            TextView event = (TextView) holder.view.findViewById(R.id.calendar_event);
-            event.setText(eventString);
-
             TextView dayNum = (TextView) holder.view.findViewById(R.id.calendar_daynum);
             dayNum.setText(Integer.toString(position + 1));
 
             TextView dayName = (TextView) holder.view.findViewById(R.id.calendar_dayname);
             dayName.setText(dayNames[currentDay.get(Calendar.DAY_OF_WEEK) - 1]);
 
+            ImageView newEventView = (ImageView) holder.view.findViewById(R.id.calendar_newevent);
+            if (preferences.getString("position", "").equals("admin") || preferences.getString("position", "").equals("leader")) {
+                newEventView.setVisibility(View.VISIBLE);
+            } else {
+                newEventView.setVisibility(View.GONE);
+            }
+
+
+            List<Event> dayEvents = new ArrayList<>();
+            for (Event event : events) {
+                if (event.getDay() == position) {
+                    dayEvents.add(event);
+                }
+            }
+
+            RecyclerView eventView;
+            EventAdapter eventAdapter;
+            LinearLayoutManager eventManager;
+            eventView = (RecyclerView) holder.view.findViewById(R.id.calendar_events);
+            eventAdapter = new EventAdapter(dayEvents);
+            eventManager = new LinearLayoutManager(holder.view.getContext());
+            eventView.setAdapter(eventAdapter);
+            eventView.setLayoutManager(eventManager);
         }
 
         @Override
         public int getItemCount() {
             return daysInMonth;
+        }
+    }
+
+    public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
+        public List<Event> events;
+
+
+        public EventAdapter(List<Event> events) {
+            this.events = events;
+        }
+
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            LinearLayout view = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.list_event, parent, false);
+            ViewHolder viewHolder = new ViewHolder(view);
+            return viewHolder;
+        }
+
+        @Override
+        public void onBindViewHolder(final ViewHolder holder, int position) {
+            final Event currentEvent = events.get(position);
+
+            TextView titleView = (TextView) holder.layout.findViewById(R.id.event_title);
+            titleView.setText(Html.fromHtml(currentEvent.getTitle()));
+
+            TextView descriptionView = (TextView) holder.layout.findViewById(R.id.event_description);
+            descriptionView.setMovementMethod(LinkMovementMethod.getInstance());
+            descriptionView.setText(Html.fromHtml(currentEvent.getDescription()));
+
+            ImageView deleteView = (ImageView) holder.layout.findViewById(R.id.event_delete);
+            if (preferences.getString("position", "").equals("admin") || preferences.getString("position", "").equals("leader")) {
+                deleteView.setVisibility(View.VISIBLE);
+                deleteView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(holder.layout.getContext());
+                        builder.setTitle("Are you sure you want to delete this event?");
+                        builder.setNegativeButton("Cancel", null);
+                        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //Delete event
+                                Map<String, String> params = new HashMap<String, String>();
+                                params.put("event_id", currentEvent.getId());
+                                CookieRequest deleteRequest = new CookieRequest(Request.Method.POST,
+                                        "/f/deleteEvent",
+                                        params,
+                                        preferences,
+                                        new Response.Listener<String>() {
+                                            @Override
+                                            public void onResponse(String response) {
+                                                System.out.println(response);
+                                                dayAdapter.getEvents();
+                                            }
+                                        },
+                                        new Response.ErrorListener() {
+                                            @Override
+                                            public void onErrorResponse(VolleyError error) {
+                                                error.printStackTrace();
+                                            }
+                                        }
+                                );
+                                queue.add(deleteRequest);
+                            }
+                        });
+                        builder.create().show();
+                    }
+                });
+            } else {
+                deleteView.setVisibility(View.GONE);
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return events.size();
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            LinearLayout layout;
+
+            public ViewHolder(View layout) {
+                super(layout);
+                this.layout = (LinearLayout) layout;
+            }
         }
     }
 }

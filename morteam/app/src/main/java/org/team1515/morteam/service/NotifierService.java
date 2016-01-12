@@ -152,7 +152,9 @@ public class NotifierService extends IntentService {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     } finally {
-                        wakeLock.release();
+                        if(wakeLock.isHeld()) {
+                            wakeLock.release();
+                        }
                     }
                 }
             }, new Response.ErrorListener() {
