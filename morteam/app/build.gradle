@@ -9,8 +9,8 @@ android {
         applicationId "net.mortorq.morteam"
         minSdkVersion 11
         targetSdkVersion 23
-        versionCode 13
-        versionName "0.71"
+        versionCode 14
+        versionName "0.8"
     }
     buildTypes {
         release {

@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -249,7 +250,7 @@ public class CalendarFragment extends Fragment {
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
+        public void onBindViewHolder(final ViewHolder holder, int position) {
             Calendar currentDay = Calendar.getInstance();
             currentDay.set(Calendar.DAY_OF_MONTH, position);
             currentDay.set(Calendar.MONTH, selectedMonthNum);
@@ -264,6 +265,12 @@ public class CalendarFragment extends Fragment {
             ImageView newEventView = (ImageView) holder.view.findViewById(R.id.calendar_newevent);
             if (preferences.getString("position", "").equals("admin") || preferences.getString("position", "").equals("leader")) {
                 newEventView.setVisibility(View.VISIBLE);
+                newEventView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(holder.view.getContext(), "Feature coming soon!", Toast.LENGTH_SHORT).show();
+                    }
+                });
             } else {
                 newEventView.setVisibility(View.GONE);
             }
@@ -340,7 +347,6 @@ public class CalendarFragment extends Fragment {
                                         new Response.Listener<String>() {
                                             @Override
                                             public void onResponse(String response) {
-                                                System.out.println(response);
                                                 dayAdapter.getEvents();
                                             }
                                         },
