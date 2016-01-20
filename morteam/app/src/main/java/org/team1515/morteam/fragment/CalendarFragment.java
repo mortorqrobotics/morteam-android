@@ -16,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -63,6 +64,8 @@ public class CalendarFragment extends Fragment {
     private DayAdapter dayAdapter;
     private LinearLayoutManager dayLayoutManager;
 
+    ProgressBar progress;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -70,6 +73,8 @@ public class CalendarFragment extends Fragment {
 
         preferences = getActivity().getSharedPreferences(null, 0);
         queue = Volley.newRequestQueue(getContext());
+
+        progress = (ProgressBar) view.findViewById(R.id.calendar_loading);
 
         monthSpinner = (Spinner) view.findViewById(R.id.calendar_months);
         selectedMonth = "";
@@ -211,6 +216,8 @@ public class CalendarFragment extends Fragment {
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
+
+                            progress.setVisibility(View.GONE);
                         }
                     },
                     new Response.ErrorListener() {

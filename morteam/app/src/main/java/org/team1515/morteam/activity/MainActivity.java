@@ -91,10 +91,8 @@ public class MainActivity extends AppCompatActivity {
 
 //    public static final Map<String, String> teamUsers = new HashMap<>();
     public static final List<User> teamUsers = new ArrayList<>();
-    public static final List<Subdivision> yourSubs = new ArrayList<>();
-    public static final List<Subdivision> publicSubs = new ArrayList<>();
-//    public static final Map<String, String> yourSubs = new HashMap<>();
-//    public static final Map<String, String> publicSubs = new HashMap<>();
+    public static List<Subdivision> yourSubs = new ArrayList<>();
+    public static List<Subdivision> publicSubs = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -262,6 +260,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(String response) {
                         try {
                             JSONArray subdivisionArray = new JSONArray(response);
+                            yourSubs = new ArrayList<>();
                             for (int i = 0; i < subdivisionArray.length(); i++) {
                                 JSONObject subdivisionObject = subdivisionArray.getJSONObject(i);
                                 yourSubs.add(new Subdivision(subdivisionObject.getString("name"),
@@ -290,6 +289,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(String response) {
                         try {
                             JSONArray subdivisionArray = new JSONArray(response);
+                            publicSubs = new ArrayList<>();
                             for (int i = 0; i < subdivisionArray.length(); i++) {
                                 JSONObject subdivisionObject = subdivisionArray.getJSONObject(i);
                                 publicSubs.add(new Subdivision(subdivisionObject.getString("name"),
@@ -326,6 +326,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showAnnouncementDialog() {
+
         //Create new announcement dialog
         newAnnouncementView = getLayoutInflater().inflate(R.layout.dialog_newannouncement, null);
 
@@ -434,7 +435,7 @@ public class MainActivity extends AppCompatActivity {
         choices = new ArrayList<>();
         choices.add("Everyone");
         for(Subdivision subdivision : yourSubs) {
-            choices.add(subdivision.getId());
+            choices.add(subdivision.getName());
         }
         choices.add("Custom");
         choiceSpinner.setAdapter(

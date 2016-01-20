@@ -29,4 +29,10 @@
         android:id="@+id/calendar_days"
         android:layout_marginTop="5dp"/>
 
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:id="@+id/calendar_loading" />
+
 </LinearLayout>

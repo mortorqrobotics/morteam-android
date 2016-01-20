@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -45,12 +46,16 @@ public class ChatFragment extends Fragment {
 
     private SwipeRefreshLayout refreshLayout;
 
+    ProgressBar progress;
+
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
 
         preferences = getActivity().getSharedPreferences(null, 0);
         queue = Volley.newRequestQueue(getContext());
+
+        progress = (ProgressBar) view.findViewById(R.id.chat_loading);
 
         chatList = (RecyclerView) view.findViewById(R.id.chat_chatlist);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -125,6 +130,8 @@ public class ChatFragment extends Fragment {
                             } finally {
                                 refreshLayout.setRefreshing(false);
                             }
+
+                            progress.setVisibility(View.GONE);
                         }
                     },
                     new Response.ErrorListener() {

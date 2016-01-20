@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -53,6 +54,7 @@ public class HomeFragment extends Fragment {
     private SharedPreferences preferences;
     private AnnouncementAdapter announcementAdapter;
     private SwipeRefreshLayout refreshLayout;
+    private ProgressBar progress;
 
 
     @Override
@@ -67,6 +69,8 @@ public class HomeFragment extends Fragment {
                 announcementAdapter.notifyDataSetChanged();
             }
         });
+
+        progress = (ProgressBar) view.findViewById(R.id.home_loading);
 
         final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.announcement_view);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -125,6 +129,8 @@ public class HomeFragment extends Fragment {
                             announcement.requestProfPic(preferences, queue, null);
 
                             announcements.add(announcement);
+
+                            progress.setVisibility(View.GONE);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();

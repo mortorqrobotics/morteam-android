@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -48,6 +49,8 @@ public class SubdivisionActivity extends AppCompatActivity {
     UserListAdapter userAdapter;
     List<User> users;
 
+    ProgressBar progress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +60,7 @@ public class SubdivisionActivity extends AppCompatActivity {
         preferences = getSharedPreferences(null, 0);
         queue = Volley.newRequestQueue(this);
 
+        progress = (ProgressBar) findViewById(R.id.subdivision_loading);
 
         //Set up action bar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -105,6 +109,8 @@ public class SubdivisionActivity extends AppCompatActivity {
                         user.requestProfPic(preferences, queue, null);
 
                         users.add(user);
+
+                        progress.setVisibility(View.GONE);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
