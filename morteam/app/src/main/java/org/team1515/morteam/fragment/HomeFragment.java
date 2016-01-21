@@ -71,7 +71,7 @@ public class HomeFragment extends Fragment {
             }
         });
 
-        progress = (ProgressBar) view.findViewById(R.id.home_loading);
+        progress = (ProgressBar) getActivity().findViewById(R.id.main_loading);
         progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
 
         final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.announcement_view);

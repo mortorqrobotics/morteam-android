@@ -89,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
     private String currentPostGroup;
     private List<String> choices = new ArrayList<>();
 
-//    public static final Map<String, String> teamUsers = new HashMap<>();
     public static final List<User> teamUsers = new ArrayList<>();
     public static List<Subdivision> yourSubs = new ArrayList<>();
     public static List<Subdivision> publicSubs = new ArrayList<>();

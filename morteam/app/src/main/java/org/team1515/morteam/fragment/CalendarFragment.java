@@ -75,7 +75,7 @@ public class CalendarFragment extends Fragment {
         preferences = getActivity().getSharedPreferences(null, 0);
         queue = Volley.newRequestQueue(getContext());
 
-        progress = (ProgressBar) view.findViewById(R.id.calendar_loading);
+        progress = (ProgressBar) getActivity().findViewById(R.id.main_loading);
         progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
 
         monthSpinner = (Spinner) view.findViewById(R.id.calendar_months);
