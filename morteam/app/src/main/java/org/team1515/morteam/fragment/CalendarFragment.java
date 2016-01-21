@@ -3,6 +3,7 @@ package org.team1515.morteam.fragment;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -75,6 +76,7 @@ public class CalendarFragment extends Fragment {
         queue = Volley.newRequestQueue(getContext());
 
         progress = (ProgressBar) view.findViewById(R.id.calendar_loading);
+        progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
 
         monthSpinner = (Spinner) view.findViewById(R.id.calendar_months);
         selectedMonth = "";

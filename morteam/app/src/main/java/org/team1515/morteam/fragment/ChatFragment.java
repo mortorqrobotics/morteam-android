@@ -3,6 +3,7 @@ package org.team1515.morteam.fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -56,6 +57,7 @@ public class ChatFragment extends Fragment {
         queue = Volley.newRequestQueue(getContext());
 
         progress = (ProgressBar) view.findViewById(R.id.chat_loading);
+        progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
 
         chatList = (RecyclerView) view.findViewById(R.id.chat_chatlist);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());

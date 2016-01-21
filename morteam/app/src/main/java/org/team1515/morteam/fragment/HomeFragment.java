@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -71,6 +72,7 @@ public class HomeFragment extends Fragment {
         });
 
         progress = (ProgressBar) view.findViewById(R.id.home_loading);
+        progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
 
         final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.announcement_view);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
