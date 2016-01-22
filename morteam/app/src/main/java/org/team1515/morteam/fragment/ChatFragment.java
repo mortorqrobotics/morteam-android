@@ -25,6 +25,7 @@ import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
 import org.team1515.morteam.activity.ChatActivity;
+import org.team1515.morteam.activity.MainActivity;
 import org.team1515.morteam.entities.Chat;
 import org.team1515.morteam.entities.PictureCallBack;
 import org.team1515.morteam.network.CookieRequest;
@@ -47,17 +48,11 @@ public class ChatFragment extends Fragment {
 
     private SwipeRefreshLayout refreshLayout;
 
-    ProgressBar progress;
-
-
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
 
         preferences = getActivity().getSharedPreferences(null, 0);
         queue = Volley.newRequestQueue(getContext());
-
-        progress = (ProgressBar) getActivity().findViewById(R.id.main_loading);
-        progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
 
         chatList = (RecyclerView) view.findViewById(R.id.chat_chatlist);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -129,11 +124,14 @@ public class ChatFragment extends Fragment {
                                 notifyDataSetChanged();
                             } catch (JSONException e) {
                                 e.printStackTrace();
+                                MainActivity.progress.setVisibility(View.GONE);
+                                MainActivity.errorView.setVisibility(View.VISIBLE);
+                                MainActivity.reloadView.setVisibility(View.VISIBLE);
                             } finally {
                                 refreshLayout.setRefreshing(false);
                             }
 
-                            progress.setVisibility(View.GONE);
+
                         }
                     },
                     new Response.ErrorListener() {
@@ -141,6 +139,9 @@ public class ChatFragment extends Fragment {
                         public void onErrorResponse(VolleyError error) {
                             System.out.println("ERROR: " + error);
                             refreshLayout.setRefreshing(false);
+                            MainActivity.progress.setVisibility(View.GONE);
+                            MainActivity.errorView.setVisibility(View.VISIBLE);
+                            MainActivity.reloadView.setVisibility(View.VISIBLE);
                         }
                     }
             );

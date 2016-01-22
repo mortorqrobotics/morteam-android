@@ -22,6 +22,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -31,6 +32,7 @@ import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
 
+import org.team1515.morteam.activity.MainActivity;
 import org.team1515.morteam.activity.ProfileActivity;
 import org.team1515.morteam.entities.Announcement;
 import org.team1515.morteam.entities.User;
@@ -55,7 +57,6 @@ public class HomeFragment extends Fragment {
     private SharedPreferences preferences;
     private AnnouncementAdapter announcementAdapter;
     private SwipeRefreshLayout refreshLayout;
-    private ProgressBar progress;
 
 
     @Override
@@ -70,9 +71,6 @@ public class HomeFragment extends Fragment {
                 announcementAdapter.notifyDataSetChanged();
             }
         });
-
-        progress = (ProgressBar) getActivity().findViewById(R.id.main_loading);
-        progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
 
         final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.announcement_view);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -132,10 +130,13 @@ public class HomeFragment extends Fragment {
 
                             announcements.add(announcement);
 
-                            progress.setVisibility(View.GONE);
+                            MainActivity.progress.setVisibility(View.GONE);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        MainActivity.progress.setVisibility(View.GONE);
+                        MainActivity.errorView.setVisibility(View.VISIBLE);
+                        MainActivity.reloadView.setVisibility(View.VISIBLE);
                     } finally {
                         //Tell adapter to update once request is finished
                         //Do so whether it fails or succeeds
@@ -147,6 +148,10 @@ public class HomeFragment extends Fragment {
                 public void onErrorResponse(VolleyError error) {
                     refreshLayout.setRefreshing(false);
                     System.out.println(error);
+                    MainActivity.progress.setVisibility(View.GONE);
+                    MainActivity.errorView.setVisibility(View.VISIBLE);
+                    MainActivity.reloadView.setVisibility(View.VISIBLE);
+                    Toast.makeText(getContext(), "Error connecting to the server. Try checking your internet connection and try again later.", Toast.LENGTH_SHORT).show();
                 }
             });
             queue.add(announcementsRequest);
