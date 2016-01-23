@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -189,7 +191,7 @@ public class CalendarFragment extends Fragment {
                                         }
                                     } else {
                                         //EntireTeam = true; Get all dem users in the team
-                                        for(User user : MainActivity.teamUsers) {
+                                        for (User user : MainActivity.teamUsers) {
                                             userAttendees.add(user);
                                         }
                                     }
@@ -277,7 +279,37 @@ public class CalendarFragment extends Fragment {
                 newEventView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Toast.makeText(holder.view.getContext(), "Feature coming soon!", Toast.LENGTH_SHORT).show();
+                        View dialogView = getActivity().getLayoutInflater().inflate(R.layout.dialog_createevent, null);
+
+                        final RecyclerView attendeesView = (RecyclerView) dialogView.findViewById(R.id.createevent_attendees);
+                        LinearLayoutManager attendeesManager = new LinearLayoutManager(dialogView.getContext());
+                        attendeesView.setLayoutManager(attendeesManager);
+
+
+                        CheckBox inviteEveryoneView = (CheckBox) dialogView.findViewById(R.id.createevent_inviteeveryone);
+                        inviteEveryoneView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                            @Override
+                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                if(isChecked) {
+                                    attendeesView.setVisibility(View.GONE);
+                                } else {
+                                    attendeesView.setVisibility(View.VISIBLE);
+                                }
+                            }
+                        });
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                        builder.setView(dialogView);
+                        builder.setTitle("Create Event");
+                        builder.setNegativeButton("Cancel", null);
+                        builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        });
+                        builder.create().show();
+
                     }
                 });
             } else {
