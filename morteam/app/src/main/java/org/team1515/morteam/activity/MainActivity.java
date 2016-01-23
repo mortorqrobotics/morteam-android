@@ -95,10 +95,6 @@ public class MainActivity extends AppCompatActivity {
     public static List<Subdivision> yourSubs = new ArrayList<>();
     public static List<Subdivision> publicSubs = new ArrayList<>();
 
-    public static ProgressBar progress;
-    public static TextView errorView;
-    public static View reloadView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,14 +107,6 @@ public class MainActivity extends AppCompatActivity {
         //Set up action bar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        progress = (ProgressBar) findViewById(R.id.main_loading);
-        progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
-
-        errorView = (TextView) findViewById(R.id.main_error);
-
-        reloadView = (View) findViewById(R.id.main_reload);
-        reloadView.bringToFront();
 
         //Set up action bar profile picture
         final ImageButton profilePic = (ImageButton) toolbar.findViewById(R.id.actionbar_pic);
@@ -188,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         sectionPagerAdapter = new SectionPagerAdapter(getSupportFragmentManager());
-        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+        ViewPager viewPager = (ViewPager) findViewById(R.id.main_viewpager);
         viewPager.setAdapter(sectionPagerAdapter);
         tabLayout.setupWithViewPager(viewPager);
 
@@ -306,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
                             for (int i = 0; i < subdivisionArray.length(); i++) {
                                 JSONObject subdivisionObject = subdivisionArray.getJSONObject(i);
                                 publicSubs.add(new Subdivision(subdivisionObject.getString("name"),
-                                        subdivisionObject.getString("_id"))
+                                                subdivisionObject.getString("_id"))
                                 );
                             }
                             publicSubAdapter.setSubdivisions(publicSubs);
@@ -352,8 +340,8 @@ public class MainActivity extends AppCompatActivity {
                 if (item.equals("Everyone")) {
                     currentPostGroup = "everyone";
                 } else if (!item.equals("Custom")) {
-                    for(Subdivision subdivision : yourSubs) {
-                        if(subdivision.getName().equals(item)) {
+                    for (Subdivision subdivision : yourSubs) {
+                        if (subdivision.getName().equals(item)) {
                             currentPostGroup = subdivision.getId();
                         }
                     }
@@ -363,10 +351,10 @@ public class MainActivity extends AppCompatActivity {
                     final List<String> subdivisionIds = new ArrayList<>();
                     final List<String> userIds = new ArrayList<>();
                     final List<CharSequence> audiences = new ArrayList<>();
-                    for(Subdivision subdivision : yourSubs) {
+                    for (Subdivision subdivision : yourSubs) {
                         audiences.add(subdivision.getName());
                     }
-                    for(User user : teamUsers) {
+                    for (User user : teamUsers) {
                         audiences.add(user.getFullName());
                     }
                     builder.setMultiChoiceItems(audiences.toArray(new CharSequence[audiences.size()]), null, new DialogInterface.OnMultiChoiceClickListener() {
@@ -375,16 +363,16 @@ public class MainActivity extends AppCompatActivity {
                             String name = audiences.get(which).toString();
                             if (isChecked) {
                                 boolean foundSub = false;
-                                for(Subdivision subdivision : yourSubs) {
-                                    if(subdivision.getName().equals(name)) {
+                                for (Subdivision subdivision : yourSubs) {
+                                    if (subdivision.getName().equals(name)) {
                                         subdivisionIds.add(subdivision.getId());
                                         foundSub = true;
                                         break;
                                     }
                                 }
-                                if(!foundSub) {
-                                    for(User user : teamUsers) {
-                                        if(user.getFullName().equals(name)) {
+                                if (!foundSub) {
+                                    for (User user : teamUsers) {
+                                        if (user.getFullName().equals(name)) {
                                             userIds.add(user.getId());
                                             break;
                                         }
@@ -392,16 +380,16 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             } else {
                                 boolean foundSub = false;
-                                for(Subdivision subdivision : yourSubs) {
-                                    if(subdivision.getName().equals(name)) {
+                                for (Subdivision subdivision : yourSubs) {
+                                    if (subdivision.getName().equals(name)) {
                                         subdivisionIds.remove(subdivision.getId());
                                         foundSub = true;
                                         break;
                                     }
                                 }
-                                if(!foundSub) {
-                                    for(User user : teamUsers) {
-                                        if(user.getFullName().equals(name)) {
+                                if (!foundSub) {
+                                    for (User user : teamUsers) {
+                                        if (user.getFullName().equals(name)) {
                                             userIds.remove(user.getId());
                                             break;
                                         }
@@ -447,7 +435,7 @@ public class MainActivity extends AppCompatActivity {
     private void populateChoiceSpinner() {
         choices = new ArrayList<>();
         choices.add("Everyone");
-        for(Subdivision subdivision : yourSubs) {
+        for (Subdivision subdivision : yourSubs) {
             choices.add(subdivision.getName());
         }
         choices.add("Custom");
@@ -477,11 +465,11 @@ public class MainActivity extends AppCompatActivity {
         final List<String> subdivisionIds = new ArrayList<>();
         final List<String> userIds = new ArrayList<>();
         final List<String> audiences = new ArrayList<>();
-        for(Subdivision subdivision : yourSubs) {
+        for (Subdivision subdivision : yourSubs) {
             audiences.add(subdivision.getName());
         }
-        for(User user : teamUsers) {
-            if(!user.getFullName().equals(preferences.getString("firstname", "") + " " + preferences.getString("lastname", ""))) {
+        for (User user : teamUsers) {
+            if (!user.getFullName().equals(preferences.getString("firstname", "") + " " + preferences.getString("lastname", ""))) {
                 audiences.add(user.getFullName());
             }
         }
@@ -491,16 +479,16 @@ public class MainActivity extends AppCompatActivity {
                 String name = audiences.get(which);
                 if (isChecked) {
                     boolean foundSub = false;
-                    for(Subdivision subdivision : yourSubs) {
-                        if(subdivision.getName().equals(name)) {
+                    for (Subdivision subdivision : yourSubs) {
+                        if (subdivision.getName().equals(name)) {
                             subdivisionIds.add(subdivision.getId());
                             foundSub = true;
                             break;
                         }
                     }
-                    if(!foundSub) {
-                        for(User user : teamUsers) {
-                            if(user.getFullName().equals(name)) {
+                    if (!foundSub) {
+                        for (User user : teamUsers) {
+                            if (user.getFullName().equals(name)) {
                                 userIds.add(user.getId());
                                 break;
                             }
@@ -508,16 +496,16 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else {
                     boolean foundSub = false;
-                    for(Subdivision subdivision : yourSubs) {
-                        if(subdivision.getName().equals(name)) {
+                    for (Subdivision subdivision : yourSubs) {
+                        if (subdivision.getName().equals(name)) {
                             subdivisionIds.remove(subdivision.getId());
                             foundSub = true;
                             break;
                         }
                     }
-                    if(!foundSub) {
-                        for(User user : teamUsers) {
-                            if(user.getFullName().equals(name)) {
+                    if (!foundSub) {
+                        for (User user : teamUsers) {
+                            if (user.getFullName().equals(name)) {
                                 userIds.remove(user.getId());
                                 break;
                             }
@@ -681,10 +669,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void reloadData(View view) {
-        errorView.setVisibility(View.GONE);
-        progress.setVisibility(View.VISIBLE);
-        reloadView.setVisibility(View.GONE);
-
         sectionPagerAdapter.homeFragment.requestAnnouncements();
         sectionPagerAdapter.chatFragment.getChats();
     }

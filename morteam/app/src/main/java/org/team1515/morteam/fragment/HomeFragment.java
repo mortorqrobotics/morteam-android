@@ -4,16 +4,14 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
-import android.text.format.DateFormat;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,23 +30,18 @@ import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.team1515.morteam.activity.MainActivity;
 import org.team1515.morteam.activity.ProfileActivity;
 import org.team1515.morteam.entities.Announcement;
 import org.team1515.morteam.entities.User;
 import org.team1515.morteam.network.CookieRequest;
-import org.team1515.morteam.network.ImageCookieRequest;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class HomeFragment extends Fragment {
@@ -58,6 +51,9 @@ public class HomeFragment extends Fragment {
     private AnnouncementAdapter announcementAdapter;
     private SwipeRefreshLayout refreshLayout;
 
+
+    public static ProgressBar progress;
+    public static TextView errorView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -87,6 +83,9 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        progress = (ProgressBar) view.findViewById(R.id.announcement_loading);
+        errorView = (TextView) view.findViewById(R.id.announcement_error);
+
         return view;
     }
 
@@ -106,55 +105,58 @@ public class HomeFragment extends Fragment {
         }
 
         public void requestAnnouncements() {
-            announcementsRequest = new CookieRequest(Request.Method.POST, "/f/getAnnouncementsForUser", preferences, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try {
-                        JSONArray array = new JSONArray(response);
-                        announcements = new ArrayList<>();
-                        for (int i = 0; i < array.length(); i++) {
-                            JSONObject object = array.getJSONObject(i);
-                            Announcement announcement = new Announcement(
-                                    new User(
-                                            object.getJSONObject("author").getString("firstname"),
-                                            object.getJSONObject("author").getString("lastname"),
-                                            object.getJSONObject("author").getString("_id"),
-                                            object.getJSONObject("author").getString("profpicpath") + "-60"
-                                    ),
-                                    object.getString("content"),
-                                    object.getString("timestamp"),
-                                    object.getString("_id")
-                            );
+            if(errorView == null || errorView.getVisibility() == View.GONE) {
+                errorView.setVisibility(View.GONE);
+                progress.setVisibility(View.VISIBLE);
 
-                            announcement.requestProfPic(preferences, queue, null);
+                announcementsRequest = new CookieRequest(Request.Method.POST, "/f/getAnnouncementsForUser", preferences, new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONArray array = new JSONArray(response);
+                            announcements = new ArrayList<>();
+                            for (int i = 0; i < array.length(); i++) {
+                                JSONObject object = array.getJSONObject(i);
+                                Announcement announcement = new Announcement(
+                                        new User(
+                                                object.getJSONObject("author").getString("firstname"),
+                                                object.getJSONObject("author").getString("lastname"),
+                                                object.getJSONObject("author").getString("_id"),
+                                                object.getJSONObject("author").getString("profpicpath") + "-60"
+                                        ),
+                                        object.getString("content"),
+                                        object.getString("timestamp"),
+                                        object.getString("_id")
+                                );
 
-                            announcements.add(announcement);
+                                announcement.requestProfPic(preferences, queue, null);
 
-                            MainActivity.progress.setVisibility(View.GONE);
+                                announcements.add(announcement);
+
+                                progress.setVisibility(View.GONE);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            progress.setVisibility(View.GONE);
+                            errorView.setVisibility(View.VISIBLE);
+                        } finally {
+                            //Tell adapter to update once request is finished
+                            //Do so whether it fails or succeeds
+                            refreshLayout.setRefreshing(false);
                         }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        MainActivity.progress.setVisibility(View.GONE);
-                        MainActivity.errorView.setVisibility(View.VISIBLE);
-                        MainActivity.reloadView.setVisibility(View.VISIBLE);
-                    } finally {
-                        //Tell adapter to update once request is finished
-                        //Do so whether it fails or succeeds
-                        refreshLayout.setRefreshing(false);
                     }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    refreshLayout.setRefreshing(false);
-                    System.out.println(error);
-                    MainActivity.progress.setVisibility(View.GONE);
-                    MainActivity.errorView.setVisibility(View.VISIBLE);
-                    MainActivity.reloadView.setVisibility(View.VISIBLE);
-                    Toast.makeText(getContext(), "Error connecting to the server. Try checking your internet connection and try again later.", Toast.LENGTH_SHORT).show();
-                }
-            });
-            queue.add(announcementsRequest);
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        refreshLayout.setRefreshing(false);
+                        System.out.println(error);
+                        progress.setVisibility(View.GONE);
+                        errorView.setVisibility(View.VISIBLE);
+                        Toast.makeText(getContext(), "Error connecting to the server. Try checking your internet connection and try again later.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                queue.add(announcementsRequest);
+            }
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {

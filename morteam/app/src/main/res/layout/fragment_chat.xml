@@ -17,6 +17,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:id="@+id/chat_loading" />
+
+        <TextView
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:visibility="gone"
+            android:text="There was an error loading this page. Click to try again."
+            android:id="@+id/chat_error"/>
+
+
     </android.support.v4.widget.SwipeRefreshLayout>
 
     <android.support.design.widget.CoordinatorLayout

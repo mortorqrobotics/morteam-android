@@ -215,8 +215,6 @@ public class CalendarFragment extends Fragment {
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-
-                            MainActivity.progress.setVisibility(View.GONE);
                         }
                     },
                     new Response.ErrorListener() {

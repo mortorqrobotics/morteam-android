@@ -2,8 +2,6 @@ package org.team1515.morteam.fragment;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -24,16 +22,14 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
-import org.team1515.morteam.activity.ChatActivity;
-import org.team1515.morteam.activity.MainActivity;
-import org.team1515.morteam.entities.Chat;
-import org.team1515.morteam.entities.PictureCallBack;
-import org.team1515.morteam.network.CookieRequest;
-import org.team1515.morteam.network.ImageCookieRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.team1515.morteam.activity.ChatActivity;
+import org.team1515.morteam.entities.Chat;
+import org.team1515.morteam.entities.PictureCallBack;
+import org.team1515.morteam.network.CookieRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +43,9 @@ public class ChatFragment extends Fragment {
     private ChatAdapter chatAdapter;
 
     private SwipeRefreshLayout refreshLayout;
+
+    private ProgressBar progress;
+    private TextView errorView  ;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
@@ -68,6 +67,9 @@ public class ChatFragment extends Fragment {
                 chatAdapter.getChats();
             }
         });
+
+        progress = (ProgressBar) view.findViewById(R.id.chat_loading);
+        errorView = (TextView) view.findViewById(R.id.chat_error);
 
         return view;
     }
@@ -95,22 +97,22 @@ public class ChatFragment extends Fragment {
                             try {
                                 chats = new ArrayList<>();
                                 JSONArray chatArray = new JSONArray(response);
-                                for(int i = 0; i < chatArray.length(); i++) {
+                                for (int i = 0; i < chatArray.length(); i++) {
                                     JSONObject chatObject = chatArray.getJSONObject(i);
                                     String id = chatObject.getString("_id");
                                     String name = "";
                                     String picPath = "";
                                     boolean isGroup = chatObject.getBoolean("group");
-                                    if(isGroup) {
+                                    if (isGroup) {
                                         name = chatObject.getString("name");
                                         picPath = "/images/group.png";
                                     } else {
                                         //For non-group chats, find name of other user
                                         JSONArray chatUserArray = chatObject.getJSONArray("userMembers");
                                         String currentUserId = preferences.getString("_id", "");
-                                        for(int user = 0; user < chatUserArray.length(); user++) {
+                                        for (int user = 0; user < chatUserArray.length(); user++) {
                                             JSONObject userObject = chatUserArray.getJSONObject(user);
-                                            if(!userObject.getString("_id").equals(currentUserId)) {
+                                            if (!userObject.getString("_id").equals(currentUserId)) {
                                                 name = userObject.getString("firstname") + " " + userObject.getString("lastname");
                                                 picPath = userObject.getString("profpicpath") + "-60";
                                             }
@@ -124,9 +126,8 @@ public class ChatFragment extends Fragment {
                                 notifyDataSetChanged();
                             } catch (JSONException e) {
                                 e.printStackTrace();
-                                MainActivity.progress.setVisibility(View.GONE);
-                                MainActivity.errorView.setVisibility(View.VISIBLE);
-                                MainActivity.reloadView.setVisibility(View.VISIBLE);
+                                progress.setVisibility(View.GONE);
+                                errorView.setVisibility(View.VISIBLE);
                             } finally {
                                 refreshLayout.setRefreshing(false);
                             }
@@ -137,11 +138,9 @@ public class ChatFragment extends Fragment {
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            System.out.println("ERROR: " + error);
-                            refreshLayout.setRefreshing(false);
-                            MainActivity.progress.setVisibility(View.GONE);
-                            MainActivity.errorView.setVisibility(View.VISIBLE);
-                            MainActivity.reloadView.setVisibility(View.VISIBLE);
+                            error.printStackTrace();
+                            progress.setVisibility(View.GONE);
+                            errorView.setVisibility(View.VISIBLE);
                         }
                     }
             );
@@ -193,6 +192,7 @@ public class ChatFragment extends Fragment {
             public ViewHolder(LinearLayout linearLayout) {
                 super(linearLayout);
                 this.linearLayout = linearLayout;
+                refreshLayout.setRefreshing(false);
             }
         }
     }
