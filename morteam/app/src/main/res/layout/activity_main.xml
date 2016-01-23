@@ -12,6 +12,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:onClick="reloadData"
+            android:visibility="gone"
+            android:id="@+id/main_reload"/>
+
         <LinearLayout
             android:layout_width="match_parent"
 
@@ -40,6 +47,15 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:id="@+id/main_loading" />
+
+        <TextView
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:visibility="gone"
+            android:text="There was an error loading this page. Please try again later."
+            android:id="@+id/main_error"/>
 
     </RelativeLayout>
 

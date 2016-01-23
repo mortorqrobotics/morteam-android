@@ -67,8 +67,6 @@ public class CalendarFragment extends Fragment {
     private DayAdapter dayAdapter;
     private LinearLayoutManager dayLayoutManager;
 
-    ProgressBar progress;
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -76,9 +74,6 @@ public class CalendarFragment extends Fragment {
 
         preferences = getActivity().getSharedPreferences(null, 0);
         queue = Volley.newRequestQueue(getContext());
-
-        progress = (ProgressBar) getActivity().findViewById(R.id.main_loading);
-        progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
 
         monthSpinner = (Spinner) view.findViewById(R.id.calendar_months);
         selectedMonth = "";
@@ -221,7 +216,7 @@ public class CalendarFragment extends Fragment {
                                 e.printStackTrace();
                             }
 
-                            progress.setVisibility(View.GONE);
+                            MainActivity.progress.setVisibility(View.GONE);
                         }
                     },
                     new Response.ErrorListener() {

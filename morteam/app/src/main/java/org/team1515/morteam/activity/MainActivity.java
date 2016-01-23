@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.design.widget.TabLayout;
@@ -35,6 +36,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -93,6 +95,10 @@ public class MainActivity extends AppCompatActivity {
     public static List<Subdivision> yourSubs = new ArrayList<>();
     public static List<Subdivision> publicSubs = new ArrayList<>();
 
+    public static ProgressBar progress;
+    public static TextView errorView;
+    public static View reloadView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,6 +111,14 @@ public class MainActivity extends AppCompatActivity {
         //Set up action bar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        progress = (ProgressBar) findViewById(R.id.main_loading);
+        progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
+
+        errorView = (TextView) findViewById(R.id.main_error);
+
+        reloadView = (View) findViewById(R.id.main_reload);
+        reloadView.bringToFront();
 
         //Set up action bar profile picture
         final ImageButton profilePic = (ImageButton) toolbar.findViewById(R.id.actionbar_pic);
@@ -664,6 +678,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void reloadData(View view) {
+        errorView.setVisibility(View.GONE);
+        progress.setVisibility(View.VISIBLE);
+        reloadView.setVisibility(View.GONE);
+
+        sectionPagerAdapter.homeFragment.requestAnnouncements();
+        sectionPagerAdapter.chatFragment.getChats();
     }
 
     private class SectionPagerAdapter extends FragmentPagerAdapter {
