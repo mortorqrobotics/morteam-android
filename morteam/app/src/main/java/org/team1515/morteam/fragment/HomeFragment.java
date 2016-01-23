@@ -89,6 +89,11 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        requestAnnouncements();
+    }
 
     public void requestAnnouncements() {
         announcementAdapter.requestAnnouncements();
@@ -101,11 +106,10 @@ public class HomeFragment extends Fragment {
 
         public AnnouncementAdapter() {
             announcements = new ArrayList<>();
-            requestAnnouncements();
         }
 
         public void requestAnnouncements() {
-            if(errorView == null || errorView.getVisibility() == View.GONE) {
+            if(errorView.getVisibility() == View.GONE) {
                 errorView.setVisibility(View.GONE);
                 progress.setVisibility(View.VISIBLE);
 
