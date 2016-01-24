@@ -3,6 +3,7 @@ package org.team1515.morteam.activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -61,6 +62,7 @@ public class SubdivisionActivity extends AppCompatActivity {
         queue = Volley.newRequestQueue(this);
 
         progress = (ProgressBar) findViewById(R.id.subdivision_loading);
+        progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
 
         //Set up action bar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -73,6 +75,7 @@ public class SubdivisionActivity extends AppCompatActivity {
         userList.setLayoutManager(userLayoutManager);
         userAdapter = new UserListAdapter();
         userList.setAdapter(userAdapter);
+        users = new ArrayList<>();
 
         Intent intent = getIntent();
         name = intent.getStringExtra("name");

@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.design.widget.TabLayout;
@@ -36,7 +35,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -45,8 +43,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import net.team1515.morteam.R;
 
@@ -222,6 +218,23 @@ public class MainActivity extends AppCompatActivity {
         });
         announcementBuilder.setNegativeButton("Cancel", null);
 
+        getSubdivisions();
+    }
+
+    public void onResume() {
+        super.onResume();
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        Intent intent = new Intent(this, NotifierService.class);
+        PendingIntent pIntent = PendingIntent.getService(this, 0, intent, 0);
+        alarmManager.cancel(pIntent);
+        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + 5 * 1000,
+                10 * 60 * 1000, pIntent);
+
+        getSubdivisions();
+    }
+
+    public void getSubdivisions() {
         //Get users and subdivisions
         CookieRequest usersRequest = new CookieRequest(
                 Request.Method.POST,
@@ -315,15 +328,10 @@ public class MainActivity extends AppCompatActivity {
         queue.add(usersRequest);
     }
 
-    public void onResume() {
-        super.onResume();
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        Intent intent = new Intent(this, NotifierService.class);
-        PendingIntent pIntent = PendingIntent.getService(this, 0, intent, 0);
-        alarmManager.cancel(pIntent);
-        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + 5 * 1000,
-                10 * 60 * 1000, pIntent);
+    public void reloadData(View view) {
+        sectionPagerAdapter.homeFragment.requestAnnouncements();
+        sectionPagerAdapter.chatFragment.getChats();
+        getSubdivisions();
     }
 
     public void showAnnouncementDialog() {
@@ -666,11 +674,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    public void reloadData(View view) {
-        sectionPagerAdapter.homeFragment.requestAnnouncements();
-        sectionPagerAdapter.chatFragment.getChats();
     }
 
     private class SectionPagerAdapter extends FragmentPagerAdapter {

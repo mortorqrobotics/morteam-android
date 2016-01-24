@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -67,6 +68,8 @@ public class CalendarFragment extends Fragment {
     private DayAdapter dayAdapter;
     private LinearLayoutManager dayLayoutManager;
 
+    private SwipeRefreshLayout refreshLayout;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -74,6 +77,16 @@ public class CalendarFragment extends Fragment {
 
         preferences = getActivity().getSharedPreferences(null, 0);
         queue = Volley.newRequestQueue(getContext());
+
+        refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.calendar_refresh);
+        refreshLayout.setColorSchemeResources(R.color.orange_theme);
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                dayAdapter.getDays();
+                dayAdapter.getEvents();
+            }
+        });
 
         monthSpinner = (Spinner) view.findViewById(R.id.calendar_months);
         selectedMonth = "";
@@ -156,7 +169,6 @@ public class CalendarFragment extends Fragment {
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            System.out.println(response);
                             try {
                                 JSONArray eventArray = new JSONArray(response);
 
@@ -214,13 +226,17 @@ public class CalendarFragment extends Fragment {
                                 notifyDataSetChanged();
                             } catch (JSONException e) {
                                 e.printStackTrace();
+                            } finally {
+                                refreshLayout.setRefreshing(false);
                             }
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            error.printStackTrace();
+                            refreshLayout.setRefreshing(false);
+
+                            Toast.makeText(getContext(), "Error connecting to the server. Try checking your internet connection and try again later.", Toast.LENGTH_SHORT).show();
                         }
                     }
             );

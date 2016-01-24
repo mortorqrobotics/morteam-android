@@ -2,6 +2,7 @@ package org.team1515.morteam.fragment;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -14,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -45,7 +47,7 @@ public class ChatFragment extends Fragment {
     private SwipeRefreshLayout refreshLayout;
 
     private ProgressBar progress;
-    private TextView errorView  ;
+    private TextView errorView;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
@@ -69,9 +71,16 @@ public class ChatFragment extends Fragment {
         });
 
         progress = (ProgressBar) view.findViewById(R.id.chat_loading);
+        progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
         errorView = (TextView) view.findViewById(R.id.chat_error);
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        getChats();
     }
 
     public void getChats() {
@@ -83,10 +92,12 @@ public class ChatFragment extends Fragment {
 
         public ChatAdapter() {
             chats = new ArrayList<>();
-            getChats();
         }
 
         public void getChats() {
+            errorView.setVisibility(View.GONE);
+            progress.setVisibility(View.VISIBLE);
+
             CookieRequest chatRequest = new CookieRequest(
                     Request.Method.POST,
                     "/f/getChatsForUser",
@@ -122,12 +133,16 @@ public class ChatFragment extends Fragment {
                                     Chat chat = new Chat(name, id, picPath, isGroup);
 
                                     chats.add(chat);
+
+                                    progress.setVisibility(View.GONE);
                                 }
                                 notifyDataSetChanged();
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 progress.setVisibility(View.GONE);
-                                errorView.setVisibility(View.VISIBLE);
+                                if (chats.isEmpty()) {
+                                    errorView.setVisibility(View.VISIBLE);
+                                }
                             } finally {
                                 refreshLayout.setRefreshing(false);
                             }
@@ -138,9 +153,14 @@ public class ChatFragment extends Fragment {
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            error.printStackTrace();
+                            refreshLayout.setRefreshing(false);
                             progress.setVisibility(View.GONE);
-                            errorView.setVisibility(View.VISIBLE);
+
+                            if(chats.isEmpty()) {
+                                errorView.setVisibility(View.VISIBLE);
+                            }
+
+                            Toast.makeText(getContext(), "Error connecting to the server. Try checking your internet connection and try again later.", Toast.LENGTH_SHORT).show();
                         }
                     }
             );
@@ -192,7 +212,6 @@ public class ChatFragment extends Fragment {
             public ViewHolder(LinearLayout linearLayout) {
                 super(linearLayout);
                 this.linearLayout = linearLayout;
-                refreshLayout.setRefreshing(false);
             }
         }
     }

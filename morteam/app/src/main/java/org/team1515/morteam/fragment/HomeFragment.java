@@ -4,9 +4,9 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -33,7 +33,6 @@ import net.team1515.morteam.R;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.team1515.morteam.activity.MainActivity;
 import org.team1515.morteam.activity.ProfileActivity;
 import org.team1515.morteam.entities.Announcement;
 import org.team1515.morteam.entities.User;
@@ -84,6 +83,7 @@ public class HomeFragment extends Fragment {
         });
 
         progress = (ProgressBar) view.findViewById(R.id.announcement_loading);
+        progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
         errorView = (TextView) view.findViewById(R.id.announcement_error);
 
         return view;
@@ -109,58 +109,61 @@ public class HomeFragment extends Fragment {
         }
 
         public void requestAnnouncements() {
-            if(errorView.getVisibility() == View.GONE) {
-                errorView.setVisibility(View.GONE);
-                progress.setVisibility(View.VISIBLE);
+            errorView.setVisibility(View.GONE);
+            progress.setVisibility(View.VISIBLE);
 
-                announcementsRequest = new CookieRequest(Request.Method.POST, "/f/getAnnouncementsForUser", preferences, new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONArray array = new JSONArray(response);
-                            announcements = new ArrayList<>();
-                            for (int i = 0; i < array.length(); i++) {
-                                JSONObject object = array.getJSONObject(i);
-                                Announcement announcement = new Announcement(
-                                        new User(
-                                                object.getJSONObject("author").getString("firstname"),
-                                                object.getJSONObject("author").getString("lastname"),
-                                                object.getJSONObject("author").getString("_id"),
-                                                object.getJSONObject("author").getString("profpicpath") + "-60"
-                                        ),
-                                        object.getString("content"),
-                                        object.getString("timestamp"),
-                                        object.getString("_id")
-                                );
+            announcementsRequest = new CookieRequest(Request.Method.POST, "/f/getAnnouncementsForUser", preferences, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    try {
+                        JSONArray array = new JSONArray(response);
+                        announcements = new ArrayList<>();
+                        for (int i = 0; i < array.length(); i++) {
+                            JSONObject object = array.getJSONObject(i);
+                            Announcement announcement = new Announcement(
+                                    new User(
+                                            object.getJSONObject("author").getString("firstname"),
+                                            object.getJSONObject("author").getString("lastname"),
+                                            object.getJSONObject("author").getString("_id"),
+                                            object.getJSONObject("author").getString("profpicpath") + "-60"
+                                    ),
+                                    object.getString("content"),
+                                    object.getString("timestamp"),
+                                    object.getString("_id")
+                            );
 
-                                announcement.requestProfPic(preferences, queue, null);
+                            announcement.requestProfPic(preferences, queue, null);
 
-                                announcements.add(announcement);
+                            announcements.add(announcement);
 
-                                progress.setVisibility(View.GONE);
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
                             progress.setVisibility(View.GONE);
-                            errorView.setVisibility(View.VISIBLE);
-                        } finally {
-                            //Tell adapter to update once request is finished
-                            //Do so whether it fails or succeeds
-                            refreshLayout.setRefreshing(false);
                         }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        refreshLayout.setRefreshing(false);
-                        System.out.println(error);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                         progress.setVisibility(View.GONE);
-                        errorView.setVisibility(View.VISIBLE);
-                        Toast.makeText(getContext(), "Error connecting to the server. Try checking your internet connection and try again later.", Toast.LENGTH_SHORT).show();
+                        if (announcements.isEmpty()) {
+                            errorView.setVisibility(View.VISIBLE);
+                        }
+                    } finally {
+                        //Tell adapter to update once request is finished
+                        //Do so whether it fails or succeeds
+                        refreshLayout.setRefreshing(false);
                     }
-                });
-                queue.add(announcementsRequest);
-            }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    refreshLayout.setRefreshing(false);
+                    progress.setVisibility(View.GONE);
+
+                    if(announcements.isEmpty()) {
+                        errorView.setVisibility(View.VISIBLE);
+                    }
+
+                    Toast.makeText(getContext(), "Error connecting to the server. Try checking your internet connection and try again later.", Toast.LENGTH_SHORT).show();
+                }
+            });
+            queue.add(announcementsRequest);
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
@@ -188,7 +191,7 @@ public class HomeFragment extends Fragment {
                 public void onClick(View v) {
                     Intent intent = new Intent(HomeFragment.this.getContext(), ProfileActivity.class);
                     intent.putExtra("_id", currentAnnouncement.getUserId());
-                    if(currentAnnouncement.getUserId().equals(preferences.getString("_id", ""))) {
+                    if (currentAnnouncement.getUserId().equals(preferences.getString("_id", ""))) {
                         intent.putExtra("isCurrentUser", true);
                     } else {
                         intent.putExtra("isCurrentUser", false);
