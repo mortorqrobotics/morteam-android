@@ -29,6 +29,13 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="Parent Email"
+            android:inputType="textEmailAddress"
+            android:id="@+id/editprofile_parentemail"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:hint="Phone Number"
             android:inputType="phone"
             android:id="@+id/editprofile_phone"/>

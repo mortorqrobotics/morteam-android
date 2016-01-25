@@ -235,6 +235,8 @@ public class ProfileActivity extends AppCompatActivity {
                 final String lastName = lastNameView.getText().toString();
                 EditText emailView = (EditText) ((AlertDialog) dialog).findViewById(R.id.editprofile_email);
                 final String email = emailView.getText().toString();
+                EditText parentEmailView = (EditText) ((AlertDialog) dialog).findViewById(R.id.editprofile_parentemail);
+                final String parentEmail = parentEmailView.getText().toString();
                 EditText phoneView = (EditText) ((AlertDialog) dialog).findViewById(R.id.editprofile_phone);
                 final String phone = phoneView.getText().toString();
 
@@ -254,6 +256,9 @@ public class ProfileActivity extends AppCompatActivity {
                     params.put("email", user.getEmail());
                 } else {
                     params.put("email", email);
+                }
+                if (!parentEmail.isEmpty()) {
+                    params.put("parentEmail", parentEmail);
                 }
                 if (phone.isEmpty()) { //BUT WHO WAS PHONE????!!//?1/1
                     params.put("phone", user.getPhone());
