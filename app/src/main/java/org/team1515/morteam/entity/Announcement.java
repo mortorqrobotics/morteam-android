@@ -1,4 +1,4 @@
-package org.team1515.morteam.entities;
+package org.team1515.morteam.entity;
 
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -11,14 +11,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class Message {
+public class Announcement {
     private User user;
     private String content;
     private Date date;
     private String id;
-    public boolean isMyMessage;
 
-    public Message(User user, String content, String date, String id, boolean isMyMessage) {
+    public Announcement(User user, String content, String date, String id) {
         this.user = user;
         this.content = content;
         try {
@@ -28,15 +27,22 @@ public class Message {
             date = null;
         }
         this.id = id;
-        this.isMyMessage = isMyMessage;
     }
 
-    public String getFirstName() {
-        return user.getFirstName();
+    public String getUserName() {
+        return user.getFullName();
+    }
+
+    public void requestProfPic(SharedPreferences preferences, RequestQueue queue, PictureCallBack callBack) {
+        user.requestProfPic(preferences, queue, callBack);
+    }
+
+    public Bitmap getProfPic() {
+        return user.getProfPic();
     }
 
     public String getContent() {
-        return content;
+        return  content;
     }
 
     public Date getRawDate() {
@@ -44,18 +50,14 @@ public class Message {
     }
 
     public String getDate() {
-        return DateFormat.format("MMM d, h:mm a", date).toString();
+        return DateFormat.format("h:mm a - MMMM d, yyyy", date).toString();
     }
 
     public String getId() {
         return id;
     }
 
-    public Bitmap getProfPic() {
-        return user.getProfPic();
-    }
-
-    public void requestProfPic(SharedPreferences preferences, RequestQueue queue, final PictureCallBack callBack) {
-        user.requestProfPic(preferences, queue, callBack);
+    public String getUserId() {
+        return user.getId();
     }
 }

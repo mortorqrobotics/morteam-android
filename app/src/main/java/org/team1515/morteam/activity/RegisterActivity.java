@@ -4,8 +4,11 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,16 +41,16 @@ public class RegisterActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
     }
 
-    public void registerPressed(View view){
+    public void register(View view){
         final Button registerButton = (Button)findViewById(R.id.login_registerbutton);
 
         //Add all user info to post parameters
         Map<String, String> params = new HashMap<>();
 
-        EditText firstnameBox = (EditText)findViewById(R.id.register_firstname);
+        EditText firstnameBox = (EditText)findViewById(R.id.register_firstName);
         params.put("firstname", firstnameBox.getText().toString());
 
-        EditText lastnameBox = (EditText)findViewById(R.id.register_lastname);
+        EditText lastnameBox = (EditText)findViewById(R.id.register_lastName);
         params.put("lastname", lastnameBox.getText().toString());
 
         EditText usernameBox = (EditText)findViewById(R.id.register_username);
@@ -56,7 +59,7 @@ public class RegisterActivity extends AppCompatActivity {
         EditText passwordBox = (EditText)findViewById(R.id.register_password);
         params.put("password", passwordBox.getText().toString());
 
-        EditText confirmPasswordBox = (EditText)findViewById(R.id.register_confirmpassword);
+        EditText confirmPasswordBox = (EditText)findViewById(R.id.register_passwordConfirm);
         params.put("password_confirm", confirmPasswordBox.getText().toString());
 
         EditText emailBox = (EditText)findViewById(R.id.register_email);
@@ -65,7 +68,7 @@ public class RegisterActivity extends AppCompatActivity {
         EditText phonenumberBox = (EditText)findViewById(R.id.register_phone);
         params.put("phone", phonenumberBox.getText().toString());
 
-        CookieRequest registerRequest = new CookieRequest(Request.Method.POST, "/f/createUser",
+        CookieRequest registerRequest = new CookieRequest(Request.Method.POST, "/users",
                 params,
                 preferences,
                 new Response.Listener<String>() {

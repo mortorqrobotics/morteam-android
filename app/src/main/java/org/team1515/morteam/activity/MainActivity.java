@@ -1,15 +1,12 @@
 package org.team1515.morteam.activity;
 
-import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -46,18 +43,16 @@ import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
 
-import org.team1515.morteam.entities.Subdivision;
-import org.team1515.morteam.entities.User;
-import org.team1515.morteam.fragment.CalendarFragment;
-import org.team1515.morteam.fragment.ChatFragment;
-import org.team1515.morteam.fragment.HomeFragment;
-import org.team1515.morteam.network.CookieRequest;
-import org.team1515.morteam.network.ImageCookieRequest;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.team1515.morteam.service.NotifierService;
+import org.team1515.morteam.entity.Subdivision;
+import org.team1515.morteam.entity.User;
+import org.team1515.morteam.fragment.CalendarFragment;
+import org.team1515.morteam.fragment.ChatFragment;
+import org.team1515.morteam.fragment.AnnouncementFragment;
+import org.team1515.morteam.network.CookieRequest;
+import org.team1515.morteam.network.ImageCookieRequest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -223,22 +218,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void onResume() {
         super.onResume();
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        Intent intent = new Intent(this, NotifierService.class);
-        PendingIntent pIntent = PendingIntent.getService(this, 0, intent, 0);
-        alarmManager.cancel(pIntent);
-        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + 5 * 1000,
-                10 * 60 * 1000, pIntent);
-
         getSubdivisions();
     }
 
     public void getSubdivisions() {
         //Get users and subdivisions
         CookieRequest usersRequest = new CookieRequest(
-                Request.Method.POST,
-                "/f/getUsersInTeam",
+                Request.Method.GET,
+                "/teams/current/users",
                 preferences,
                 new Response.Listener<String>() {
                     @Override
@@ -319,7 +306,7 @@ public class MainActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        System.out.println(error);
+                        error.printStackTrace();
                     }
                 }
         );
@@ -329,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void reloadData(View view) {
-        sectionPagerAdapter.homeFragment.requestAnnouncements();
+        sectionPagerAdapter.announcementFragment.getAnnouncements();
         sectionPagerAdapter.chatFragment.getChats();
         getSubdivisions();
     }
@@ -621,10 +608,10 @@ public class MainActivity extends AppCompatActivity {
             Map<String, String> params = new HashMap<>();
             params.put("content", message);
             params.put("audience", getCurrentPostGroup());
-            CookieRequest request = new CookieRequest(Request.Method.POST, "/f/postAnnouncement", params, preferences, new Response.Listener<String>() {
+            CookieRequest request = new CookieRequest(Request.Method.POST, "/announcement", params, preferences, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
-                    sectionPagerAdapter.homeFragment.requestAnnouncements();
+                    sectionPagerAdapter.announcementFragment.getAnnouncements();
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -678,14 +665,14 @@ public class MainActivity extends AppCompatActivity {
 
     private class SectionPagerAdapter extends FragmentPagerAdapter {
 
-        public HomeFragment homeFragment;
+        public AnnouncementFragment announcementFragment;
         public ChatFragment chatFragment;
         public CalendarFragment calendarFragment;
 
         public SectionPagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
 
-            homeFragment = new HomeFragment();
+            announcementFragment = new AnnouncementFragment();
             chatFragment = new ChatFragment();
             calendarFragment = new CalendarFragment();
         }
@@ -694,7 +681,7 @@ public class MainActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return homeFragment;
+                    return announcementFragment;
                 case 1:
                     return chatFragment;
                 case 2:

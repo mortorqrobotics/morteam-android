@@ -2,7 +2,6 @@ package org.team1515.morteam.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -25,9 +24,8 @@ import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
 
-import org.team1515.morteam.entities.User;
+import org.team1515.morteam.entity.User;
 import org.team1515.morteam.network.CookieRequest;
-import org.team1515.morteam.network.ImageCookieRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;

@@ -1,4 +1,4 @@
-package org.team1515.morteam.entities;
+package org.team1515.morteam.entity;
 
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;

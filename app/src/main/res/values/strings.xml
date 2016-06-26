@@ -5,10 +5,21 @@
     <string name="action_settings">Settings</string>
 
     <!-- Login Activity -->
-    <string name="login_welcome">Welcome to MorTeam!</string>
-    <string name="login_username">Username/E-Mail</string>
+    <string name="login_username">Username</string>
     <string name="login_password">Password</string>
-    <string name="login_button">Login</string>
+    <string name="login_loginButton">Log In</string>
+    <string name="login_separator">  - OR - </string>
+    <string name="login_registerButton">Register</string>
+
+    <!-- Register -->
+    <string name="register_firstName">First Name</string>
+    <string name="register_lastName">Last Name</string>
+    <string name="register_username">Username</string>
+    <string name="register_password">Password</string>
+    <string name="register_passwordConfirm">Confirm Password</string>
+    <string name="register_email">Email</string>
+    <string name="register_phone">Phone</string>
+    <string name="register_registerButton">Register</string>
 
     <!-- Main Tab Activity -->
     <string name="title_frag1">Home</string>

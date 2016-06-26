@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/orange_theme">
 
     <include layout="@layout/actionbar" />
 
@@ -13,68 +14,89 @@
         android:layout_centerVertical="true" >
 
         <EditText
-            android:layout_width="200dp"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
-            android:hint="First name"
-            android:id="@+id/register_firstname"
+            android:hint="@string/register_firstName"
+            android:layout_marginBottom="8dp"
+            android:padding="8dp"
+            android:id="@+id/register_firstName"
             android:inputType="textCapWords"
+            android:background="@drawable/edittext_border"
             android:singleLine="true" />
 
         <EditText
-            android:layout_width="200dp"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
-            android:hint="Last name"
-            android:id="@+id/register_lastname"
+            android:hint="@string/register_lastName"
+            android:layout_marginBottom="8dp"
+            android:padding="8dp"
+            android:id="@+id/register_lastName"
             android:inputType="textCapWords"
+            android:background="@drawable/edittext_border"
             android:singleLine="true" />
 
         <EditText
-            android:layout_width="200dp"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
-            android:hint="Username"
+            android:hint="@string/login_username"
+            android:layout_marginBottom="8dp"
+            android:padding="8dp"
             android:id="@+id/register_username"
             android:inputType="textNoSuggestions"
+            android:background="@drawable/edittext_border"
             android:singleLine="true" />
 
         <EditText
-            android:layout_width="200dp"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
-            android:hint="Password"
+            android:hint="@string/login_password"
+            android:layout_marginBottom="8dp"
+            android:padding="8dp"
             android:id="@+id/register_password"
+            android:background="@drawable/edittext_border"
             android:singleLine="true" />
 
         <EditText
-            android:layout_width="200dp"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
-            android:hint="Confirm password"
-            android:id="@+id/register_confirmpassword"
+            android:hint="@string/register_passwordConfirm"
+            android:layout_marginBottom="8dp"
+            android:padding="8dp"
+            android:id="@+id/register_passwordConfirm"
+            android:background="@drawable/edittext_border"
             android:singleLine="true" />
 
         <EditText
-            android:layout_width="200dp"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
-            android:hint="Email"
+            android:hint="@string/register_email"
+            android:layout_marginBottom="8dp"
             android:inputType="textEmailAddress"
             android:id="@+id/register_email"
+            android:padding="8dp"
+            android:background="@drawable/edittext_border"
             android:singleLine="true" />
 
         <EditText
-            android:layout_width="200dp"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
-            android:hint="Phone number"
+            android:hint="@string/register_phone"
+            android:layout_marginBottom="8dp"
             android:inputType="phone"
             android:id="@+id/register_phone"
+            android:padding="8dp"
+            android:background="@drawable/edittext_border"
             android:singleLine="true" />
 
-
         <Button
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:text="Register"
+            android:layout_width="250dp"
+            android:layout_height="45dp"
+            android:text="@string/register_registerButton"
             android:id="@+id/login_loginbutton"
-            android:onClick="registerPressed"/>
+            android:onClick="register"
+            style="@style/Widget.AppCompat.Button.Colored" />
 
     </LinearLayout>
 

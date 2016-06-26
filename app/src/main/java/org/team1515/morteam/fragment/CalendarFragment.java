@@ -3,7 +3,6 @@ package org.team1515.morteam.fragment;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -20,8 +19,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,10 +36,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.solovyev.android.views.llm.LinearLayoutManager;
 import org.team1515.morteam.activity.MainActivity;
-import org.team1515.morteam.activity.ProfileActivity;
-import org.team1515.morteam.entities.Event;
-import org.team1515.morteam.entities.Subdivision;
-import org.team1515.morteam.entities.User;
+import org.team1515.morteam.entity.Event;
+import org.team1515.morteam.entity.Subdivision;
+import org.team1515.morteam.entity.User;
 import org.team1515.morteam.network.CookieRequest;
 
 import java.util.ArrayList;
@@ -162,8 +158,8 @@ public class CalendarFragment extends Fragment {
             params.put("month", selectedMonthNum + "");
             params.put("year", selectedYear);
 
-            CookieRequest eventRequest = new CookieRequest(Request.Method.POST,
-                    "/f/getEventsForUserInTeamInMonth",
+            CookieRequest eventRequest = new CookieRequest(Request.Method.GET,
+                    "/events",
                     params,
                     preferences,
                     new Response.Listener<String>() {

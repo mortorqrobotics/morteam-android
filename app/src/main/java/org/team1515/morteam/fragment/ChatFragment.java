@@ -29,8 +29,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.team1515.morteam.activity.ChatActivity;
-import org.team1515.morteam.entities.Chat;
-import org.team1515.morteam.entities.PictureCallBack;
+import org.team1515.morteam.entity.Chat;
+import org.team1515.morteam.entity.PictureCallBack;
 import org.team1515.morteam.network.CookieRequest;
 
 import java.util.ArrayList;
@@ -99,8 +99,8 @@ public class ChatFragment extends Fragment {
             progress.setVisibility(View.VISIBLE);
 
             CookieRequest chatRequest = new CookieRequest(
-                    Request.Method.POST,
-                    "/f/getChatsForUser",
+                    Request.Method.GET,
+                    "/chats",
                     preferences,
                     new Response.Listener<String>() {
                         @Override

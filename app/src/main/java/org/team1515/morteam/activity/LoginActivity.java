@@ -1,14 +1,12 @@
 package org.team1515.morteam.activity;
 
-import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,12 +19,10 @@ import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
 
-import org.team1515.morteam.network.CookieRequest;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.team1515.morteam.service.NotifierService;
+import org.team1515.morteam.network.CookieRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,135 +31,137 @@ import java.util.Map;
 public class LoginActivity extends AppCompatActivity {
 
     SharedPreferences preferences;
+    RequestQueue queue;
+
+    public static final String[] userData = {
+            "_id",
+            "username",
+            "fistname",
+            "lastname",
+            "email",
+            "phone",
+            "profpicpath",
+            "position",
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         preferences = getSharedPreferences(null, 0);
+        queue = Volley.newRequestQueue(this);
 
-        String sessionId = preferences.getString(CookieRequest.SESSION_COOKIE, "");
-        boolean isOnTeam = preferences.getBoolean("isOnTeam", false);
-        if (!sessionId.isEmpty()) {
-            //Essentially logout user if a value is missing
-            if (preferences.contains("username")
-                    && preferences.contains("firstname")
-                    && preferences.contains("lastname")
-                    && preferences.contains("email")
-                    && preferences.contains("phone")
-                    && preferences.contains("profpicpath")
-                    && preferences.contains("isOnTeam")
-                    && preferences.contains("position")) {
-                if (isOnTeam) {
-                    Intent intent = new Intent(this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
-
-                } else {
-                    Intent intent = new Intent(LoginActivity.this, JoinTeamActivity.class);
-                    startActivity(intent);
-                    finish();
-                }
+        for (String data : userData) {
+            if (!preferences.contains(data) || !preferences.getBoolean("isOnTeam", false)) {
+                // If not logged in, bring to login page and clear data
+                System.out.println(data);
+                System.out.println(preferences.getString("_id", "nope"));
+                System.out.println(preferences.getBoolean("isOnTeam", false));
+//                preferences.edit().clear().apply();
+                setContentView(R.layout.activity_login);
                 return;
-            } else {
-                preferences.edit().clear().apply();
             }
         }
 
-        setContentView(R.layout.activity_login);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        // If all values are present, proceed to main activity
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
-    public void loginPressed(View view) {
+    public void login(View view) {
         //Make sure the user cannot press the button twice
-        final Button loginButton = (Button) findViewById(R.id.login_loginbutton);
+        final Button loginButton = (Button) findViewById(R.id.login_loginButton);
         loginButton.setClickable(false);
 
-        EditText userBox = (EditText) findViewById(R.id.login_username);
-        EditText passBox = (EditText) findViewById(R.id.login_password);
-        final String user = userBox.getText().toString();
-        final String pass = passBox.getText().toString();
+        EditText usernameView = (EditText) findViewById(R.id.login_username);
+        EditText passwordView = (EditText) findViewById(R.id.login_password);
+        String username = usernameView.getText().toString();
+        String password = passwordView.getText().toString();
 
-        if (user.isEmpty() || pass.isEmpty()) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Please enter a valid username/password");
-            builder.setPositiveButton("Okay", null);
-            builder.create().show();
+        // Make sure text boxes are not blank
+        boolean isEmpty = false;
+        if (username.trim().isEmpty()) {
+            usernameView.setText("");
+            usernameView.setHintTextColor(Color.RED);
+        }
 
-            loginButton.setClickable(true);
-        } else {
-            RequestQueue queue = Volley.newRequestQueue(this);
+        if (password.trim().isEmpty()) {
+            passwordView.setText("");
+            passwordView.setHintTextColor(Color.RED);
+            isEmpty = true;
+        }
 
-            Map<String, String> params = new HashMap<>();
-            params.put("username", user);
-            params.put("password", pass);
-            CookieRequest stringRequest = new CookieRequest(Request.Method.POST, "/f/login", params, preferences, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    try {
-                        System.out.println(response);
-                        JSONObject json = new JSONObject(response);
-                        JSONArray teams = json.getJSONArray("teams");
-                        preferences.edit()
-                                .putString("_id", json.getString("_id"))
-                                .putString("username", json.getString("username"))
-                                .putString("firstname", json.getString("firstname"))
-                                .putString("lastname", json.getString("lastname"))
-                                .putString("email", json.getString("email"))
-                                .putString("phone", json.getString("phone"))
-                                .putString("profpicpath", json.getString("profpicpath"))
-                                .apply();
-                        if (teams.length() <= 0) {
-                            preferences.edit().putBoolean("isOnTeam", false).apply();
-                            Intent intent = new Intent(LoginActivity.this, JoinTeamActivity.class);
+        if (isEmpty) {
+            loginButton.setEnabled(true);
+            return;
+        }
+
+        Map<String, String> params = new HashMap<>();
+        params.put("username", username);
+        params.put("password", password);
+        CookieRequest loginRequest = new CookieRequest(
+                Request.Method.POST,
+                "/login",
+                params,
+                preferences,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONObject userObject = new JSONObject(response);
+                            JSONArray teamArray = userObject.getJSONArray("teams");
+
+                            SharedPreferences.Editor editor = preferences.edit();
+                            editor.putString("_id", userObject.getString("_id"))
+                                    .putString("username", userObject.getString("username"))
+                                    .putString("firstname", userObject.getString("firstname"))
+                                    .putString("lastname", userObject.getString("lastname"))
+                                    .putString("email", userObject.getString("email"))
+                                    .putString("phone", userObject.getString("phone"))
+                                    .putString("profpicpath", userObject.getString("profpicpath"));
+
+                            Intent intent = new Intent();
+
+                            if (teamArray.length() <= 0) {
+                                editor.putBoolean("isOnTeam", false).apply();
+                                intent.setClass(LoginActivity.this, JoinTeamActivity.class);
+                            } else {
+                                editor.putBoolean("isOnTeam", true)
+                                        .putString("position", userObject.getJSONObject("current_team").getString("position"))
+                                        .apply();
+                                intent.setClass(LoginActivity.this, MainActivity.class);
+                            }
+
+                            loginButton.setClickable(true);
                             startActivity(intent);
                             finish();
-                        } else {
-                            preferences.edit().
-                                    putBoolean("isOnTeam", true)
-                                    .putString("position", json.getJSONObject("current_team").getString("position"))
-                                    .apply();
+                        } catch (JSONException e) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                            builder.setTitle("Incorrect username or password");
+                            builder.setPositiveButton("Okay", null);
+                            builder.create().show();
 
-                            PendingIntent pendingIntent;
-                            Intent alarmIntent = new Intent(LoginActivity.this, NotifierService.class);
-                            pendingIntent = PendingIntent.getBroadcast(LoginActivity.this, 0, alarmIntent, 0);
-
-                            AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-                            alarm.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                                    5 * 1000, 60 * 1000, pendingIntent);
-
-                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                            startActivity(intent);
-                            finish();
+                            loginButton.setClickable(true);
                         }
-                    } catch (JSONException e) {
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-                        builder.setTitle("Incorrect username or password");
+                        builder.setTitle("Cannot connect to server");
+                        builder.setMessage("Please make sure you have a working internet connection.");
                         builder.setPositiveButton("Okay", null);
                         builder.create().show();
 
                         loginButton.setClickable(true);
                     }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-                    builder.setTitle("Cannot connect to server");
-                    builder.setMessage("Please make sure you have a working internet connection.");
-                    builder.setPositiveButton("Okay", null);
-                    builder.create().show();
-
-                    loginButton.setClickable(true);
-
-                }
-            });
-            queue.add(stringRequest);
-        }
+                });
+        queue.add(loginRequest);
     }
 
-    public void registerPressed(View view) {
+    public void register(View view) {
         Intent intent = new Intent(this, RegisterActivity.class);
         startActivity(intent);
     }

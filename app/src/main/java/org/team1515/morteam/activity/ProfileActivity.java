@@ -33,9 +33,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.solovyev.android.views.llm.LinearLayoutManager;
-import org.team1515.morteam.entities.PictureCallBack;
-import org.team1515.morteam.entities.Task;
-import org.team1515.morteam.entities.User;
+import org.team1515.morteam.entity.PictureCallBack;
+import org.team1515.morteam.entity.Task;
+import org.team1515.morteam.entity.User;
 import org.team1515.morteam.network.CookieRequest;
 
 import java.text.ParseException;
