@@ -109,8 +109,8 @@ public class User {
     public void populate(final SharedPreferences preferences, final RequestQueue queue, final boolean getProfPic) {
         Map<String, String> params = new HashMap<>();
         params.put("_id", getId());
-        CookieRequest userRequest = new CookieRequest(Request.Method.POST,
-                "/f/getuser",
+        CookieRequest userRequest = new CookieRequest(Request.Method.GET,
+                "/users",
                 params,
                 preferences,
                 new Response.Listener<String>() {

@@ -82,48 +82,51 @@ public class SubdivisionActivity extends AppCompatActivity {
         //Get users in subdivision/team
         Map<String, String> params = new HashMap<>();
         String path;
-        if(intent.getBooleanExtra("isTeam", false)) {
-            path = "/f/getUsersInTeam";
+        if (intent.getBooleanExtra("isTeam", false)) {
+            path = "/teams/current/users";
         } else {
-            path = "/f/getUsersInSubdivision";
             id = intent.getStringExtra("id");
-            params.put("subdivision_id", id);
+            path = "/subdivisions/id/" + id + "/users";
+
         }
-        CookieRequest userRequest = new CookieRequest(Request.Method.POST,
+        System.out.println(path);
+        CookieRequest userRequest = new CookieRequest(
+                Request.Method.GET,
                 path,
                 params,
                 preferences,
                 new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                users = new ArrayList<>();
-                try {
-                    JSONArray userArray = new JSONArray(response);
-                    for(int i = 0; i < userArray.length(); i++) {
-                        JSONObject userObject = userArray.getJSONObject(i);
-                        String profPicPath = userObject.getString("profpicpath") + "-60";
-                        profPicPath = profPicPath.replace(" ", "+");
-                        final User user = new User(userObject.getString("firstname"),
-                                userObject.getString("lastname"),
-                                userObject.getString("_id"),
-                                profPicPath);
-                        user.requestProfPic(preferences, queue, null);
+                    @Override
+                    public void onResponse(String response) {
+                        users = new ArrayList<>();
+                        try {
+                            JSONArray userArray = new JSONArray(response);
+                            for (int i = 0; i < userArray.length(); i++) {
+                                JSONObject userObject = userArray.getJSONObject(i);
+                                String profPicPath = userObject.getString("profpicpath") + "-60";
+                                profPicPath = profPicPath.replace(" ", "+");
+                                final User user = new User(userObject.getString("firstname"),
+                                        userObject.getString("lastname"),
+                                        userObject.getString("_id"),
+                                        profPicPath);
+                                user.requestProfPic(preferences, queue, null);
 
-                        users.add(user);
+                                users.add(user);
 
-                        progress.setVisibility(View.GONE);
+                                progress.setVisibility(View.GONE);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        },
+                },
                 new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.println(error);
-            }
-        });
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        System.out.println(error);
+                    }
+                }
+        );
         queue.addRequestFinishedListener(new RequestQueue.RequestFinishedListener<Object>() {
             @Override
             public void onRequestFinished(Request<Object> request) {
@@ -184,7 +187,7 @@ public class SubdivisionActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     Intent intent = new Intent(SubdivisionActivity.this, ProfileActivity.class);
                     intent.putExtra("_id", currentUser.getId());
-                    if(currentUser.getId().equals(preferences.getString("_id", ""))) {
+                    if (currentUser.getId().equals(preferences.getString("_id", ""))) {
                         intent.putExtra("isCurrentUser", true);
                     } else {
                         intent.putExtra("isCurrentUser", false);

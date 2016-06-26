@@ -36,12 +36,14 @@ public class LoginActivity extends AppCompatActivity {
     public static final String[] userData = {
             "_id",
             "username",
-            "fistname",
+            "firstname",
             "lastname",
             "email",
             "phone",
             "profpicpath",
             "position",
+            "team_id",
+            "teamNumber",
     };
 
     @Override
@@ -51,13 +53,15 @@ public class LoginActivity extends AppCompatActivity {
         preferences = getSharedPreferences(null, 0);
         queue = Volley.newRequestQueue(this);
 
+        for (Object data : preferences.getAll().keySet()) {
+            System.out.println(data + "\t" + preferences.getAll().get(data));
+        }
+
         for (String data : userData) {
-            if (!preferences.contains(data) || !preferences.getBoolean("isOnTeam", false)) {
-                // If not logged in, bring to login page and clear data
+            if (!preferences.contains(data)) {
                 System.out.println(data);
-                System.out.println(preferences.getString("_id", "nope"));
-                System.out.println(preferences.getBoolean("isOnTeam", false));
-//                preferences.edit().clear().apply();
+                // If not logged in, bring to login page and clear data
+                preferences.edit().clear().apply();
                 setContentView(R.layout.activity_login);
                 return;
             }
@@ -109,8 +113,8 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         try {
+                            System.out.println(response);
                             JSONObject userObject = new JSONObject(response);
-                            JSONArray teamArray = userObject.getJSONArray("teams");
 
                             SharedPreferences.Editor editor = preferences.edit();
                             editor.putString("_id", userObject.getString("_id"))
@@ -123,20 +127,24 @@ public class LoginActivity extends AppCompatActivity {
 
                             Intent intent = new Intent();
 
-                            if (teamArray.length() <= 0) {
-                                editor.putBoolean("isOnTeam", false).apply();
-                                intent.setClass(LoginActivity.this, JoinTeamActivity.class);
-                            } else {
-                                editor.putBoolean("isOnTeam", true)
-                                        .putString("position", userObject.getJSONObject("current_team").getString("position"))
-                                        .apply();
+                            if (userObject.has("team")) {
+                                JSONObject teamObject = userObject.getJSONObject("team");
+                                editor.putString("team_id", teamObject.getString("_id"))
+                                        .putString("teamNumber", teamObject.getString("number"))
+                                        .putString("position", userObject.getString("position"));
+
                                 intent.setClass(LoginActivity.this, MainActivity.class);
+                            } else {
+                                intent.setClass(LoginActivity.this, JoinTeamActivity.class);
                             }
+
+                            editor.apply();
 
                             loginButton.setClickable(true);
                             startActivity(intent);
                             finish();
                         } catch (JSONException e) {
+                            e.printStackTrace();
                             AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                             builder.setTitle("Incorrect username or password");
                             builder.setPositiveButton("Okay", null);

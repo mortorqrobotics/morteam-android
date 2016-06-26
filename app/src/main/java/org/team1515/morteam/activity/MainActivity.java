@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 CookieRequest logoutRequest = new CookieRequest(Request.Method.POST,
-                                        "/f/logout",
+                                        "/logout",
                                         preferences,
                                         new Response.Listener<String>() {
                                             @Override
@@ -253,8 +253,8 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        CookieRequest yourSubsRequest = new CookieRequest(Request.Method.POST,
-                "/f/getAllSubdivisionsForUserInTeam",
+        CookieRequest yourSubsRequest = new CookieRequest(Request.Method.GET,
+                "/subdivisions/joined",
                 preferences,
                 new Response.Listener<String>() {
                     @Override
@@ -282,8 +282,8 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        CookieRequest publicSubsRequest = new CookieRequest(Request.Method.POST,
-                "/f/getPublicSubdivisions",
+        CookieRequest publicSubsRequest = new CookieRequest(Request.Method.GET,
+                "/subdivisions/public",
                 preferences,
                 new Response.Listener<String>() {
                     @Override
