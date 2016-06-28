@@ -608,7 +608,7 @@ public class MainActivity extends AppCompatActivity {
             Map<String, String> params = new HashMap<>();
             params.put("content", message);
             params.put("audience", getCurrentPostGroup());
-            CookieRequest request = new CookieRequest(Request.Method.POST, "/announcement", params, preferences, new Response.Listener<String>() {
+            CookieRequest request = new CookieRequest(Request.Method.POST, "/announcements", params, preferences, new Response.Listener<String>() {
                 @Override
                 public void onResponse(String response) {
                     sectionPagerAdapter.announcementFragment.getAnnouncements();

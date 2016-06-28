@@ -29,21 +29,24 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="ChatActivity.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/activity/ChatActivity.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="441" column="56" selection-start-line="441" selection-start-column="56" selection-end-line="441" selection-end-column="56" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="AnnouncementFragment.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/fragment/AnnouncementFragment.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="119" column="64" selection-start-line="119" selection-start-column="64" selection-end-line="119" selection-end-column="64" />
+              <caret line="154" column="65" selection-start-line="154" selection-start-column="62" selection-end-line="154" selection-end-column="65" />
+              <folding>
+                <element signature="e#5595#6208#0" expanded="true" />
+                <element signature="e#6207#6208#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MainActivity.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/activity/MainActivity.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.29342723">
+              <caret line="610" column="90" selection-start-line="610" selection-start-column="90" selection-end-line="610" selection-end-column="90" />
               <folding />
             </state>
           </provider>
@@ -82,11 +85,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MorTeam.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="MorTeam.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/MorTeam.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6681319">
-              <caret line="31" column="39" selection-start-line="31" selection-start-column="39" selection-end-line="31" selection-end-column="39" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="28" column="45" selection-start-line="28" selection-start-column="45" selection-end-line="28" selection-end-column="45" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -1861,7 +1864,6 @@
       <list>
         <option value="$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/activity/JoinTeamActivity.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/activity/LoginActivity.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/activity/MainActivity.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/list_announcement.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/network/ImageLoader.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/network/ImageLoaderSingleton.java" />
@@ -1881,6 +1883,7 @@
         <option value="$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/activity/SubdivisionActivity.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/entity/User.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/MorTeam.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/activity/MainActivity.java" />
       </list>
     </option>
   </component>
@@ -2456,14 +2459,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/activity/MainActivity.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-4.6896553">
-          <caret line="97" column="0" selection-start-line="97" selection-start-column="0" selection-end-line="97" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_home.xml">
       <provider selected="true" editor-type-id="android-designer">
         <state />
@@ -2572,14 +2567,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/fragment/AnnouncementFragment.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="119" column="64" selection-start-line="119" selection-start-column="64" selection-end-line="119" selection-end-column="64" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_profile.xml">
       <provider editor-type-id="android-designer">
         <state />
@@ -2653,11 +2640,30 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/MorTeam.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6681319">
-          <caret line="31" column="39" selection-start-line="31" selection-start-column="39" selection-end-line="31" selection-end-column="39" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="28" column="45" selection-start-line="28" selection-start-column="45" selection-end-line="28" selection-end-column="45" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/fragment/AnnouncementFragment.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="154" column="65" selection-start-line="154" selection-start-column="62" selection-end-line="154" selection-end-column="65" />
+          <folding>
+            <element signature="e#5595#6208#0" expanded="true" />
+            <element signature="e#6207#6208#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/org/team1515/morteam/activity/MainActivity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.29342723">
+          <caret line="610" column="90" selection-start-line="610" selection-start-column="90" selection-end-line="610" selection-end-column="90" />
+          <folding />
         </state>
       </provider>
     </entry>
