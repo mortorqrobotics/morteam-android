@@ -39,6 +39,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.Volley;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.engineio.client.Transport;
@@ -51,6 +52,7 @@ import net.team1515.morteam.R;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.entity.Message;
 import org.team1515.morteam.entity.PictureCallBack;
 import org.team1515.morteam.entity.User;
@@ -297,7 +299,6 @@ public class ChatActivity extends AppCompatActivity {
                         false
                 );
 
-                messageAdapter.requestImage(messageAdapter.getItemCount() - 1);
                 messageAdapter.scrollToBottom();
             }
         }, new IntentFilter("message"));
@@ -438,12 +439,8 @@ public class ChatActivity extends AppCompatActivity {
 
                                         final Message message = new Message(new User(firstName, lastName, null, profPicPath), content, date, chatId, isMyChat);
 
-                                        if (skip > 0) {
+                                        if (skip <= 0) {
                                             messages.add(message);
-                                            requestImage(messages.size() - 1);
-                                        } else {
-                                            messages.add(message);
-                                            requestImage(i);
                                         }
                                     }
                                     notifyDataSetChanged();
@@ -482,7 +479,7 @@ public class ChatActivity extends AppCompatActivity {
             date.setText(currentMessage.getDate());
 
             CardView cardView = (CardView) holder.relativeLayout.findViewById(R.id.messagelist_cardview);
-            final ImageView messagePic = (ImageView) holder.relativeLayout.findViewById(R.id.messagelist_pic);
+            final NetworkImageView messagePic = (NetworkImageView) holder.relativeLayout.findViewById(R.id.messagelist_pic);
 
             View.OnClickListener dateClickListener = new View.OnClickListener() {
                 @Override
@@ -515,7 +512,7 @@ public class ChatActivity extends AppCompatActivity {
                 nameString.setSpan(new StyleSpan(Typeface.BOLD), 0, nameString.length(), 0);
                 messageString.append(nameString);
 
-                messagePic.setImageBitmap(currentMessage.getProfPic());
+                MorTeam.setNetworkImage(currentMessage.getProfPicPath(), messagePic);
                 messagePic.setVisibility(View.VISIBLE);
                 messagePic.getLayoutParams().width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, getResources().getDisplayMetrics());
 
@@ -547,23 +544,11 @@ public class ChatActivity extends AppCompatActivity {
 
         public void addMessage(String firstName, String lastName, String content, String date, String chatId, String profPicPath, boolean isMyChat) {
             messages.add(0, new Message(new User(firstName, lastName, null, profPicPath), content, date, chatId, isMyChat));
-            requestImage(messages.size() - 1);
             notifyDataSetChanged();
         }
 
         public void scrollToBottom() {
             messageList.smoothScrollToPosition(0);
-        }
-
-        public void requestImage(int position) {
-            final Message message = messages.get(position);
-
-            message.requestProfPic(preferences, queue, new PictureCallBack() {
-                @Override
-                public void onComplete() {
-                    notifyDataSetChanged();
-                }
-            });
         }
     }
 }

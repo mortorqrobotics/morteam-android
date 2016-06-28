@@ -12,11 +12,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ImageCookieRequest extends ImageRequest {
+public class CookieImageRequest extends ImageRequest {
 
     SharedPreferences preferences;
 
-    public ImageCookieRequest(String url, SharedPreferences preferences, Response.Listener<Bitmap> listener, int maxWidth, int maxHeight, ImageView.ScaleType scaleType, Bitmap.Config decodeConfig, Response.ErrorListener errorListener) {
+    public CookieImageRequest(String url, SharedPreferences preferences, Response.Listener<Bitmap> listener, int maxWidth, int maxHeight, ImageView.ScaleType scaleType, Bitmap.Config decodeConfig, Response.ErrorListener errorListener) {
         super(url, listener, maxWidth, maxHeight, scaleType, decodeConfig, errorListener);
         this.preferences = preferences;
     }

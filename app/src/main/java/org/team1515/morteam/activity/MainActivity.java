@@ -52,7 +52,7 @@ import org.team1515.morteam.fragment.CalendarFragment;
 import org.team1515.morteam.fragment.ChatFragment;
 import org.team1515.morteam.fragment.AnnouncementFragment;
 import org.team1515.morteam.network.CookieRequest;
-import org.team1515.morteam.network.ImageCookieRequest;
+import org.team1515.morteam.network.CookieImageRequest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,8 +95,6 @@ public class MainActivity extends AppCompatActivity {
         preferences = getSharedPreferences(null, 0);
         queue = Volley.newRequestQueue(this);
 
-        System.out.println(preferences.getString("position", "nope"));
-
         //Set up action bar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -105,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         final ImageButton profilePic = (ImageButton) toolbar.findViewById(R.id.actionbar_pic);
         profilePic.setClickable(true);
         profilePic.setVisibility(View.VISIBLE);
-        ImageCookieRequest profilePicRequest = new ImageCookieRequest("http://www.morteam.com" + preferences.getString("profpicpath", "") + "-60",
+        CookieImageRequest profilePicRequest = new CookieImageRequest("http://www.morteam.com" + preferences.getString("profpicpath", "") + "-60",
                 preferences, new Response.Listener<Bitmap>() {
             @Override
             public void onResponse(Bitmap response) {

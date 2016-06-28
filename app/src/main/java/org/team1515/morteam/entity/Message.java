@@ -51,11 +51,7 @@ public class Message {
         return id;
     }
 
-    public Bitmap getProfPic() {
-        return user.getProfPic();
-    }
-
-    public void requestProfPic(SharedPreferences preferences, RequestQueue queue, final PictureCallBack callBack) {
-        user.requestProfPic(preferences, queue, callBack);
+    public String getProfPicPath() {
+        return user.getProfPicPath();
     }
 }

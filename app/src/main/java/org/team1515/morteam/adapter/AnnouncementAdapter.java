@@ -12,8 +12,11 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.toolbox.NetworkImageView;
+
 import net.team1515.morteam.R;
 
+import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.activity.ProfileActivity;
 import org.team1515.morteam.entity.Announcement;
 import org.team1515.morteam.fragment.AnnouncementFragment;
@@ -69,8 +72,8 @@ public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapte
             }
         };
 
-        ImageView profPic = (ImageView) holder.cardView.findViewById(R.id.announcement_pic);
-        profPic.setImageBitmap(currentAnnouncement.getProfPic());
+        NetworkImageView profPic = (NetworkImageView) holder.cardView.findViewById(R.id.announcement_pic);
+        MorTeam.setNetworkImage(currentAnnouncement.getProfPicPath(), profPic);
         profPic.setOnClickListener(profileListener);
 
         TextView author = (TextView) holder.cardView.findViewById(R.id.author);

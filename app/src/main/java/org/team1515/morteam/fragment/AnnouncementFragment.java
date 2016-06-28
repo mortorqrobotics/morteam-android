@@ -117,7 +117,6 @@ public class AnnouncementFragment extends Fragment {
                                         object.getString("_id")
                                 );
 
-                                announcement.requestProfPic(preferences, queue, null);
                                 announcements.add(announcement);
                             }
 

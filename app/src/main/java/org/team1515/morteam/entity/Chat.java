@@ -7,7 +7,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
-import org.team1515.morteam.network.ImageCookieRequest;
+import org.team1515.morteam.network.CookieImageRequest;
 
 public class Chat {
     private String name;
@@ -37,7 +37,7 @@ public class Chat {
     }
 
     public void requestProfPic(RequestQueue queue, SharedPreferences preferences, final PictureCallBack callBack) {
-        ImageCookieRequest messagePicRequest = new ImageCookieRequest(
+        CookieImageRequest messagePicRequest = new CookieImageRequest(
                 "http://www.morteam.com" + picPath,
                 preferences,
                 new Response.Listener<Bitmap>() {

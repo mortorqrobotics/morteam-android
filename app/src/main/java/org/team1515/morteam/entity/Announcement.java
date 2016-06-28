@@ -33,12 +33,8 @@ public class Announcement {
         return user.getFullName();
     }
 
-    public void requestProfPic(SharedPreferences preferences, RequestQueue queue, PictureCallBack callBack) {
-        user.requestProfPic(preferences, queue, callBack);
-    }
-
-    public Bitmap getProfPic() {
-        return user.getProfPic();
+    public String getProfPicPath() {
+        return user.getProfPicPath();
     }
 
     public String getContent() {

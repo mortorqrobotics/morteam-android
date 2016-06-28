@@ -16,14 +16,17 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.volley.Network;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
 
+import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.entity.User;
 import org.team1515.morteam.network.CookieRequest;
 
@@ -109,7 +112,6 @@ public class SubdivisionActivity extends AppCompatActivity {
                                         userObject.getString("lastname"),
                                         userObject.getString("_id"),
                                         profPicPath);
-                                user.requestProfPic(preferences, queue, null);
 
                                 users.add(user);
 
@@ -176,8 +178,8 @@ public class SubdivisionActivity extends AppCompatActivity {
         public void onBindViewHolder(ViewHolder holder, final int position) {
             final User currentUser = users.get(position);
 
-            final ImageView icon = (ImageView) holder.layout.findViewById(R.id.userlist_icon);
-            icon.setImageBitmap(currentUser.getProfPic());
+            NetworkImageView icon = (NetworkImageView) holder.layout.findViewById(R.id.userlist_icon);
+            MorTeam.setNetworkImage(currentUser.getProfPicPath(), icon);
 
             TextView name = (TextView) holder.layout.findViewById(R.id.userlist_name);
             name.setText(currentUser.getFullName());

@@ -21,10 +21,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Network;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
@@ -33,6 +35,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.solovyev.android.views.llm.LinearLayoutManager;
+import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.entity.PictureCallBack;
 import org.team1515.morteam.entity.Task;
 import org.team1515.morteam.entity.User;
@@ -118,13 +121,8 @@ public class ProfileActivity extends AppCompatActivity {
                             );
 
                             //Set up profile picture, name, and email
-                            user.requestProfPic(preferences, queue, new PictureCallBack() {
-                                @Override
-                                public void onComplete() {
-                                    ImageView profilePic = (ImageView) findViewById(R.id.profile_picture);
-                                    profilePic.setImageBitmap(user.getProfPic());
-                                }
-                            });
+                            NetworkImageView profilePic = (NetworkImageView) findViewById(R.id.profile_picture);
+                            MorTeam.setNetworkImage(user.getProfPicPath(), profilePic);
 
                             TextView nameView = (TextView) findViewById(R.id.profile_name);
                             nameView.setText(user.getFullName());

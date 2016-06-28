@@ -11,7 +11,7 @@ import com.android.volley.VolleyError;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.team1515.morteam.network.CookieRequest;
-import org.team1515.morteam.network.ImageCookieRequest;
+import org.team1515.morteam.network.CookieImageRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +21,6 @@ public class User {
     private String lastName;
     private String id;
     private String profPicPath;
-    private Bitmap profPic;
     private String email;
     private String phone;
 
@@ -30,7 +29,6 @@ public class User {
         this.lastName = lastName;
         this.id = id;
         this.profPicPath = profPicPath;
-        profPic = null;
         this.email = email;
         this.phone = phone;
     }
@@ -63,31 +61,8 @@ public class User {
         return id;
     }
 
-    public Bitmap getProfPic() {
-        return profPic;
-    }
-
-    public void requestProfPic(SharedPreferences preferences, RequestQueue queue, final PictureCallBack callBack) {
-        ImageCookieRequest messagePicRequest = new ImageCookieRequest(
-                "http://www.morteam.com" + profPicPath,
-                preferences,
-                new Response.Listener<Bitmap>() {
-                    @Override
-                    public void onResponse(Bitmap response) {
-                        profPic = response;
-                        try {
-                            callBack.onComplete();
-                        } catch (NullPointerException e) {
-
-                        }
-                    }
-                }, 0, 0, null, Bitmap.Config.RGB_565, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.println(error);
-            }
-        });
-        queue.add(messagePicRequest);
+    public String getProfPicPath() {
+        return "http://morteam.com" + profPicPath;
     }
 
     public String getEmail() {
@@ -123,10 +98,6 @@ public class User {
                             profPicPath = userObject.getString("profpicpath");
                             email = userObject.getString("email");
                             phone = userObject.getString("phone");
-                            if(getProfPic) {
-                                requestProfPic(preferences, queue, null);
-                            }
-
                         } catch(JSONException e) {
                             e.printStackTrace();
                         }
