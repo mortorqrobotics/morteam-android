@@ -113,7 +113,6 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         try {
-                            System.out.println(response);
                             JSONObject userObject = new JSONObject(response);
 
                             SharedPreferences.Editor editor = preferences.edit();

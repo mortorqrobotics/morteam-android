@@ -160,10 +160,7 @@ public class AnnouncementFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
-                Map<String, String> params = new HashMap<>();
-                params.put("_id", id);
-
-                CookieRequest request = new CookieRequest(Request.Method.POST, "/f/deleteAnnouncement", params, preferences, new Response.Listener<String>() {
+                CookieRequest request = new CookieRequest(Request.Method.DELETE, "/announcements/id/" + id, preferences, new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         announcements.remove(position);

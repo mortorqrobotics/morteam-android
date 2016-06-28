@@ -87,7 +87,8 @@ public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapte
         ImageButton deleteButton = (ImageButton) holder.cardView.findViewById(R.id.delete_button);
 
         //Don't show delete announcement buttons if not admin
-        if (!fragment.preferences.getString("position", "").equals("admin")) {
+        String teamPosition = fragment.preferences.getString("position", "");
+        if (!teamPosition.equals("leader")) {
             deleteButton.setClickable(false);
             deleteButton.setVisibility(View.INVISIBLE);
         } else {
