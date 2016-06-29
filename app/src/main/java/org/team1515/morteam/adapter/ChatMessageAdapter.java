@@ -9,6 +9,7 @@ import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.text.style.StyleSpan;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,8 +81,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RelativeViewHolder>
         SpannableString contentString = new SpannableString(Html.fromHtml(currentMessage.getContent()));
 
         if (currentMessage.isMyMessage) {
-            messagePic.setVisibility(View.INVISIBLE);
-            messagePic.getLayoutParams().width = 0;
+            messagePic.setVisibility(View.GONE);
 
             //Change background color and align to right
             cardView.setCardBackgroundColor(Color.argb(255, 255, 197, 71));
@@ -96,8 +96,6 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<RelativeViewHolder>
 
             MorTeam.setNetworkImage(currentMessage.getProfPicPath(), messagePic);
             messagePic.setVisibility(View.VISIBLE);
-//            messagePic.getLayoutParams().width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, getResources().getDisplayMetrics());
-
 
             cardView.setCardBackgroundColor(Color.WHITE);
 

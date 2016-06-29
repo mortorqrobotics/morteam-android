@@ -13,14 +13,12 @@ public class Chat {
     private String name;
     private String id;
     private String picPath;
-    private Bitmap pic;
     public boolean isGroup;
 
     public Chat(String name, String id, String picPath, boolean isGroup) {
         this.name = name;
         this.id = id;
         this.picPath = picPath;
-        pic = null;
         this.isGroup = isGroup;
     }
 
@@ -32,26 +30,7 @@ public class Chat {
         return id;
     }
 
-    public Bitmap getPic() {
-        return pic;
-    }
-
-    public void requestProfPic(RequestQueue queue, SharedPreferences preferences, final PictureCallBack callBack) {
-        CookieImageRequest messagePicRequest = new CookieImageRequest(
-                "http://www.morteam.com" + picPath,
-                preferences,
-                new Response.Listener<Bitmap>() {
-                    @Override
-                    public void onResponse(Bitmap response) {
-                        pic = response;
-                        callBack.onComplete();
-                    }
-                }, 0, 0, null, Bitmap.Config.RGB_565, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.println(error);
-            }
-        });
-        queue.add(messagePicRequest);
+    public String getPicPath() {
+        return "http://morteam.com/" + picPath;
     }
 }

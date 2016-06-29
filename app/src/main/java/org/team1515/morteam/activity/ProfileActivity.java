@@ -1,42 +1,35 @@
 package org.team1515.morteam.activity;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
 import android.text.format.DateFormat;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Network;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.NetworkImageView;
-import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.solovyev.android.views.llm.LinearLayoutManager;
 import org.team1515.morteam.MorTeam;
-import org.team1515.morteam.entity.PictureCallBack;
+import org.team1515.morteam.adapter.TaskAdapter;
 import org.team1515.morteam.entity.Task;
 import org.team1515.morteam.entity.User;
 import org.team1515.morteam.network.CookieRequest;
@@ -50,35 +43,35 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-
 public class ProfileActivity extends AppCompatActivity {
 
-    SharedPreferences preferences;
-    RequestQueue queue;
-
     User user;
-    boolean isCurrentUser;
+    public boolean isCurrentUser;
+
+    List<Task> tasks;
 
     RecyclerView pendingView;
     LinearLayoutManager pendingLayoutManager;
     TaskAdapter pendingAdapter;
+    TextView pendingNoneView;
 
     RecyclerView completedView;
     LinearLayoutManager completedLayoutManager;
     TaskAdapter completedAdapter;
+    TextView completedNoneView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        preferences = getSharedPreferences(null, 0);
-        queue = Volley.newRequestQueue(this);
-
         setContentView(R.layout.activity_profile);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+        }
 
         //Get data from intent
         Intent intent = getIntent();
@@ -93,19 +86,15 @@ public class ProfileActivity extends AppCompatActivity {
             changePasswordButton.setVisibility(View.GONE);
 
             Button assignTaskButton = (Button) findViewById(R.id.profile_assigntask);
-            String position = preferences.getString("position", "");
+            String position = MorTeam.preferences.getString("position", "");
             if(position.equals("leader") || position.equals("admin")) {
                 assignTaskButton.setVisibility(View.VISIBLE);
             }
         }
 
-        Map<String, String> params = new HashMap<>();
-        params.put("_id", id);
-
-        CookieRequest userRequest = new CookieRequest(Request.Method.POST,
-                "/f/getUser",
-                params,
-                preferences,
+        CookieRequest userRequest = new CookieRequest(Request.Method.GET,
+                "/users/id/" + id,
+                MorTeam.preferences,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -142,9 +131,9 @@ public class ProfileActivity extends AppCompatActivity {
                             params.put("user_id", user.getId());
 
                             CookieRequest attendanceRequest = new CookieRequest(Request.Method.POST,
-                                    "/f/getUserAbsences",
+                                    "/users/id/" + id + "/absences",
                                     params,
-                                    preferences,
+                                    MorTeam.preferences,
                                     new Response.Listener<String>() {
                                         @Override
                                         public void onResponse(String response) {
@@ -176,6 +165,8 @@ public class ProfileActivity extends AppCompatActivity {
                                             } catch (JSONException e) {
                                                 e.printStackTrace();
                                             }
+
+                                            setupTasks();
                                         }
                                     },
                                     new Response.ErrorListener() {
@@ -185,21 +176,7 @@ public class ProfileActivity extends AppCompatActivity {
                                         }
                                     }
                             );
-                            queue.add(attendanceRequest);
-
-
-                            //Get tasks
-                            pendingView = (RecyclerView) findViewById(R.id.profile_pendingtasks);
-                            pendingLayoutManager = new LinearLayoutManager(ProfileActivity.this);
-                            pendingAdapter = new TaskAdapter(true);
-                            pendingView.setLayoutManager(pendingLayoutManager);
-                            pendingView.setAdapter(pendingAdapter);
-
-                            completedView = (RecyclerView) findViewById(R.id.profile_completedtasks);
-                            completedLayoutManager = new LinearLayoutManager(ProfileActivity.this);
-                            completedAdapter = new TaskAdapter(false);
-                            completedView.setLayoutManager(completedLayoutManager);
-                            completedView.setAdapter(completedAdapter);
+                            MorTeam.queue.add(attendanceRequest);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -212,7 +189,29 @@ public class ProfileActivity extends AppCompatActivity {
                     }
                 }
         );
-        queue.add(userRequest);
+        MorTeam.queue.add(userRequest);
+    }
+
+    private void setupTasks() {
+        //Get tasks
+        pendingView = (RecyclerView) findViewById(R.id.profile_pendingtasks);
+        pendingLayoutManager = new LinearLayoutManager(ProfileActivity.this);
+        pendingAdapter = new TaskAdapter(this, true);
+        pendingView.setLayoutManager(pendingLayoutManager);
+        pendingView.setAdapter(pendingAdapter);
+        pendingNoneView = (TextView) findViewById(R.id.profile_pendingnone);
+
+        completedView = (RecyclerView) findViewById(R.id.profile_completedtasks);
+        completedLayoutManager = new LinearLayoutManager(ProfileActivity.this);
+        completedAdapter = new TaskAdapter(this, false);
+        completedView.setLayoutManager(completedLayoutManager);
+        completedView.setAdapter(completedAdapter);
+        completedNoneView = (TextView) findViewById(R.id.profile_completednone);
+
+        tasks = new ArrayList<>();
+
+        getTasks(true);
+        getTasks(false);
     }
 
 
@@ -267,13 +266,13 @@ public class ProfileActivity extends AppCompatActivity {
                 CookieRequest changeProfileRequest = new CookieRequest(Request.Method.POST,
                         "/f/editProfile",
                         params,
-                        preferences,
+                        MorTeam.preferences,
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
                                 if (response.equals("success")) {
                                     Toast.makeText(ProfileActivity.this, "Profile changed successfully.", Toast.LENGTH_SHORT).show();
-                                    SharedPreferences.Editor editor = preferences.edit();
+                                    SharedPreferences.Editor editor = MorTeam.preferences.edit();
                                     String newName = "";
                                     if (!firstName.isEmpty()) {
                                         editor.putString("firstname", firstName);
@@ -313,7 +312,7 @@ public class ProfileActivity extends AppCompatActivity {
                             }
                         }
                 );
-                queue.add(changeProfileRequest);
+                MorTeam.queue.add(changeProfileRequest);
             }
         });
         builder.setNegativeButton("Cancel", null);
@@ -346,7 +345,7 @@ public class ProfileActivity extends AppCompatActivity {
                     CookieRequest changePasswordRequest = new CookieRequest(Request.Method.POST,
                             "/f/changePassword",
                             params,
-                            preferences,
+                            MorTeam.preferences,
                             new Response.Listener<String>() {
                                 @Override
                                 public void onResponse(String response) {
@@ -368,7 +367,7 @@ public class ProfileActivity extends AppCompatActivity {
                                 }
                             }
                     );
-                    queue.add(changePasswordRequest);
+                    MorTeam.queue.add(changePasswordRequest);
                 }
             }
         });
@@ -420,11 +419,11 @@ public class ProfileActivity extends AppCompatActivity {
                 CookieRequest assignRequest = new CookieRequest(Request.Method.POST,
                         "/f/assignTask",
                         params,
-                        preferences,
+                        MorTeam.preferences,
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
-                                pendingAdapter.getTasks();
+                                getTasks(true);
                             }
                         },
                         new Response.ErrorListener() {
@@ -434,170 +433,106 @@ public class ProfileActivity extends AppCompatActivity {
                             }
                         }
                 );
-                queue.add(assignRequest);
+                MorTeam.queue.add(assignRequest);
                 dialog.dismiss();
             }
         });
     }
 
-    class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
-        List<Task> tasks;
-        boolean isPending;
-        String path;
-        TextView noneView;
+    public void getTasks(final boolean isPending) {
+        String path = "/users/id/" + user.getId() + "/tasks/" + (isPending ? "pending" : "completed");
 
-        public TaskAdapter(boolean isPending) {
-            tasks = new ArrayList<>();
-            this.isPending = isPending;
-
-            if (isPending) {
-                path = "/f/getPendingUserTasks";
-                noneView = (TextView) ProfileActivity.this.findViewById(R.id.profile_pendingnone);
-            } else {
-                path = "/f/getCompletedUserTasks";
-                noneView = (TextView) ProfileActivity.this.findViewById(R.id.profile_completednone);
-            }
-
-            getTasks();
-        }
-
-        public void getTasks() {
-            Map<String, String> params = new HashMap<>();
-            params.put("user_id", user.getId());
-
-            CookieRequest taskRequest = new CookieRequest(Request.Method.POST,
-                    path,
-                    params,
-                    preferences,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            tasks = new ArrayList<>();
-                            try {
-                                JSONArray taskArray = new JSONArray(response);
-                                if(taskArray.length() == 0) {
-                                    noneView.setVisibility(View.VISIBLE);
+        CookieRequest taskRequest = new CookieRequest(Request.Method.POST,
+                path,
+                MorTeam.preferences,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        tasks = new ArrayList<>();
+                        try {
+                            JSONArray taskArray = new JSONArray(response);
+                            if(taskArray.length() == 0) {
+                                if (isPending) {
+                                    pendingNoneView.setVisibility(View.VISIBLE);
                                 } else {
-                                    noneView.setVisibility(View.GONE);
-                                    for (int i = 0; i < taskArray.length(); i++) {
-                                        JSONObject taskObject = taskArray.getJSONObject(i);
-                                        JSONObject creatorObject = taskObject.getJSONObject("creator");
-
-                                        String description = "";
-                                        if(taskObject.has("description")) {
-                                            description = taskObject.getString("description");
-                                        }
-
-                                        tasks.add(
-                                                new Task(
-                                                        new User(
-                                                                creatorObject.getString("firstname"),
-                                                                creatorObject.getString("lastname"),
-                                                                creatorObject.getString("_id"),
-                                                                ""
-                                                        ),
-                                                        taskObject.getString("_id"),
-                                                        taskObject.getString("due_date"),
-                                                        taskObject.getString("name"),
-                                                        description
-                                                )
-                                        );
-                                    }
+                                    completedNoneView.setVisibility(View.VISIBLE);
                                 }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
+                            } else {
+                                if (isPending) {
+                                    pendingNoneView.setVisibility(View.GONE);
+                                } else {
+                                    completedNoneView.setVisibility(View.GONE);
+                                }
+
+                                for (int i = 0; i < taskArray.length(); i++) {
+                                    JSONObject taskObject = taskArray.getJSONObject(i);
+                                    JSONObject creatorObject = taskObject.getJSONObject("creator");
+
+                                    String description = "";
+                                    if(taskObject.has("description")) {
+                                        description = taskObject.getString("description");
+                                    }
+
+                                    tasks.add(
+                                            new Task(
+                                                    new User(
+                                                            creatorObject.getString("firstname"),
+                                                            creatorObject.getString("lastname"),
+                                                            creatorObject.getString("_id"),
+                                                            ""
+                                                    ),
+                                                    taskObject.getString("_id"),
+                                                    taskObject.getString("due_date"),
+                                                    taskObject.getString("name"),
+                                                    description
+                                            )
+                                    );
+                                }
                             }
-                            notifyDataSetChanged();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            error.printStackTrace();
+                        if (isPending) {
+                            pendingAdapter.notifyDataSetChanged();
+                        } else {
+                            completedAdapter.notifyDataSetChanged();
                         }
                     }
-            );
-            queue.add(taskRequest);
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            LinearLayout layout = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.list_task, parent, false);
-            ViewHolder viewHolder = new ViewHolder(layout);
-            return viewHolder;
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            final Task currentTask = tasks.get(position);
-
-            TextView taskView = (TextView) holder.layout.findViewById(R.id.task_text);
-            String taskString = "&#8226; " + currentTask.getTitle() + " <small>(By " +
-                    currentTask.getDueDate() + ")</small>";
-            if(!currentTask.getDescription().isEmpty()) {
-                taskString += "<br/>\t\t<small>" + currentTask.getDescription() + "</small>";
-            }
-            taskView.setText(Html.fromHtml(taskString));
-
-            Button completeButton = (Button) holder.layout.findViewById(R.id.task_button);
-            if(isPending && (currentTask.getAssignerId().equals(preferences.getString("_id", ""))
-                    || isCurrentUser
-                    || preferences.getString("position", "").equals("leader")
-                    || preferences.getString("position", "").equals("admin"))) {
-                completeButton.setVisibility(View.VISIBLE);
-            }
-            completeButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
-                    builder.setTitle("Are you sure you want to complete this task?");
-                    builder.setMessage("This action is irreversible.");
-                    builder.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Map<String, String> params = new HashMap<>();
-                            params.put("target_user", user.getId());
-                            params.put("task_id", currentTask.getId());
-
-                            CookieRequest completeRequest = new CookieRequest(Request.Method.POST,
-                                    "/f/markTaskAsCompleted",
-                                    params,
-                                    preferences,
-                                    new Response.Listener<String>() {
-                                        @Override
-                                        public void onResponse(String response) {
-                                            getTasks();
-                                            completedAdapter.getTasks();
-                                        }
-                                    },
-                                    new Response.ErrorListener() {
-                                        @Override
-                                        public void onErrorResponse(VolleyError error) {
-
-                                        }
-                                    }
-                            );
-                            queue.add(completeRequest);
-                        }
-                    });
-                    builder.setNegativeButton("Cancel", null);
-                    builder.create().show();
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                    }
                 }
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return tasks.size();
-        }
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            public LinearLayout layout;
-
-            public ViewHolder(View itemView) {
-                super(itemView);
-                this.layout = (LinearLayout) itemView;
-            }
-        }
+        );
+        MorTeam.queue.add(taskRequest);
     }
+
+    public void completeTask(String taskId) {
+        Map<String, String> params = new HashMap<>();
+        params.put("target_user", user.getId());
+        params.put("task_id", taskId);
+
+        CookieRequest completeRequest = new CookieRequest(Request.Method.POST,
+                "/f/markTaskAsCompleted",
+                params,
+                MorTeam.preferences,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        getTasks(true);
+                        getTasks(false);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                }
+        );
+        MorTeam.queue.add(completeRequest);
+    }
+
 }

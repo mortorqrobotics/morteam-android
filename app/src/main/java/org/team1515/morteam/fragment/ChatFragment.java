@@ -21,6 +21,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
@@ -28,6 +29,7 @@ import net.team1515.morteam.R;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.activity.ChatActivity;
 import org.team1515.morteam.entity.Chat;
 import org.team1515.morteam.entity.PictureCallBack;
@@ -189,13 +191,8 @@ public class ChatFragment extends Fragment {
                 }
             });
 
-            final ImageView chatPic = (ImageView) holder.linearLayout.findViewById(R.id.chatlist_pic);
-            currentChat.requestProfPic(queue, preferences, new PictureCallBack() {
-                @Override
-                public void onComplete() {
-                    chatPic.setImageBitmap(currentChat.getPic());
-                }
-            });
+            NetworkImageView chatPic = (NetworkImageView) holder.linearLayout.findViewById(R.id.chatlist_pic);
+            MorTeam.setNetworkImage(currentChat.getPicPath(), chatPic);
 
             TextView name = (TextView) holder.linearLayout.findViewById(R.id.chatlist_name);
             name.setText(currentChat.getName());
