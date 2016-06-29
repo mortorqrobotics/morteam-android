@@ -1,45 +1,27 @@
 package org.team1515.morteam.activity;
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.NotificationCompat;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.text.Html;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
 import android.text.TextWatcher;
-import android.text.method.LinkMovementMethod;
-import android.text.style.StyleSpan;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.Volley;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.engineio.client.Transport;
@@ -53,8 +35,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.team1515.morteam.MorTeam;
+import org.team1515.morteam.adapter.ChatMessageAdapter;
 import org.team1515.morteam.entity.Message;
-import org.team1515.morteam.entity.PictureCallBack;
 import org.team1515.morteam.entity.User;
 import org.team1515.morteam.network.CookieRequest;
 
@@ -70,17 +52,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class ChatActivity extends AppCompatActivity {
-
-    SharedPreferences preferences;
-    RequestQueue queue;
-
     private String chatName;
     private String chatId;
     private boolean isGroup;
 
     private RecyclerView messageList;
-    private MessageAdapter messageAdapter;
-    private LinearLayoutManager layoutManager;
+    private ChatMessageAdapter messageAdapter;
+    private LinearLayoutManager messageLayoutManager;
     private boolean loading = false;
     private boolean canLoadMore = true;
     private int firstItem, visibleItemCount, totalItemCount;
@@ -89,18 +67,20 @@ public class ChatActivity extends AppCompatActivity {
 
     private boolean isClearingText;
 
+    private List<Message> messages;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        preferences = getSharedPreferences(null, 0);
-        queue = Volley.newRequestQueue(this);
-
         setContentView(R.layout.activity_chat);
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+        }
 
         //Get messages
         Intent intent = getIntent();
@@ -109,12 +89,13 @@ public class ChatActivity extends AppCompatActivity {
         isGroup = intent.getBooleanExtra("isGroup", false);
 
         messageList = (RecyclerView) findViewById(R.id.chat_messagelist);
-        messageAdapter = new MessageAdapter();
-        layoutManager = new LinearLayoutManager(this);
-        layoutManager.setReverseLayout(true);
-        messageList.setLayoutManager(layoutManager);
+        messageAdapter = new ChatMessageAdapter();
+        messageLayoutManager = new LinearLayoutManager(this);
+        messageLayoutManager.setReverseLayout(true);
+        messageList.setLayoutManager(messageLayoutManager);
         messageList.setAdapter(messageAdapter);
 
+        messages = new ArrayList<>();
 
         messageList.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -122,13 +103,13 @@ public class ChatActivity extends AppCompatActivity {
                 if (dy < 0) //check for scroll up
                 {
                     if (!loading && canLoadMore) {
-                        visibleItemCount = layoutManager.getChildCount();
-                        totalItemCount = layoutManager.getItemCount();
-                        firstItem = layoutManager.findFirstVisibleItemPosition();
+                        visibleItemCount = messageLayoutManager.getChildCount();
+                        totalItemCount = messageLayoutManager.getItemCount();
+                        firstItem = messageLayoutManager.findFirstVisibleItemPosition();
 
                         if (visibleItemCount + firstItem >= totalItemCount - 2) {
                             loading = true;
-                            messageAdapter.getChats();
+                            getChats();
                         }
                     }
                 }
@@ -190,7 +171,7 @@ public class ChatActivity extends AppCompatActivity {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-        final String sessionId = preferences.getString(CookieRequest.SESSION_COOKIE, "");
+        final String sessionId = MorTeam.preferences.getString(CookieRequest.SESSION_COOKIE, "");
 
         socket.io().on(Manager.EVENT_TRANSPORT, new Emitter.Listener() {
             @Override
@@ -250,28 +231,6 @@ public class ChatActivity extends AppCompatActivity {
                     String profPicPath = messageObject.getString("author_profpicpath") + "-60";
                     profPicPath = profPicPath.replace(" ", "+");
 
-                    NotificationCompat.Builder builder = new NotificationCompat.Builder(ChatActivity.this);
-                    builder.setSmallIcon(R.mipmap.ic_launcher);
-                    builder.setContentTitle("New Message");
-                    builder.setContentText(content);
-
-                    Intent notificationIntent = new Intent(ChatActivity.this, ChatActivity.class);
-                    notificationIntent.putExtra("firstname", firstName);
-                    notificationIntent.putExtra("lastname", lastName);
-                    notificationIntent.putExtra("_id", chatId);
-                    notificationIntent.putExtra("isGroup", false);
-
-                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(ChatActivity.this);
-                    stackBuilder.addParentStack(ChatActivity.class);
-                    stackBuilder.addNextIntent(notificationIntent);
-
-                    PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-                    builder.setContentIntent(pendingIntent);
-
-                    NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//                    notificationManager.notify(1, builder.build());
-
-
                     Intent intent = new Intent("message");
                     intent.putExtra("firstname", firstName);
                     intent.putExtra("lastname", lastName);
@@ -299,9 +258,11 @@ public class ChatActivity extends AppCompatActivity {
                         false
                 );
 
-                messageAdapter.scrollToBottom();
+                messageList.smoothScrollToPosition(0);
             }
         }, new IntentFilter("message"));
+
+        getChats();
     }
 
     @Override
@@ -328,12 +289,11 @@ public class ChatActivity extends AppCompatActivity {
         if (!messageContent.isEmpty()) {
 
             Map<String, String> params = new HashMap<>();
-            params.put("chat_id", chatId);
             params.put("content", messageContent);
 
-            CookieRequest sendRequest = new CookieRequest(Request.Method.POST, "/f/sendMessage",
+            CookieRequest sendRequest = new CookieRequest(Request.Method.POST, "/chats/id/" + chatId + "/messages",
                     params,
-                    preferences,
+                    MorTeam.preferences,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
@@ -367,15 +327,15 @@ public class ChatActivity extends AppCompatActivity {
                             DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
                             System.out.println(df.format(new Date()));
                             messageAdapter.addMessage(
-                                    preferences.getString("firstname", ""),
-                                    preferences.getString("lastname", ""),
+                                    MorTeam.preferences.getString("firstname", ""),
+                                    MorTeam.preferences.getString("lastname", ""),
                                     messageContent,
                                     df.format(new Date()),
                                     chatId,
-                                    preferences.getString("profpicpath", "") + "-60",
+                                    MorTeam.preferences.getString("profpicpath", "") + "-60",
                                     true
                             );
-                            messageAdapter.scrollToBottom();
+                            messageList.smoothScrollToPosition(0);
                             sendButton.setClickable(true);
                         }
                     }, new Response.ErrorListener() {
@@ -385,170 +345,70 @@ public class ChatActivity extends AppCompatActivity {
                     sendButton.setClickable(true);
                 }
             });
-            queue.add(sendRequest);
+            MorTeam.queue.add(sendRequest);
         }
     }
 
-    public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
-        private List<Message> messages;
 
-        public MessageAdapter() {
-            messages = new ArrayList<>();
-            getChats();
+    public void getChats() {
+        final int skip;
+        if (!messages.isEmpty()) {
+            skip = messages.size();
+        } else {
+            skip = 0;
         }
+        CookieRequest messageRequest = new CookieRequest(
+                Request.Method.GET,
+                "/chats/id/" + chatId + "/messages?skip=" + skip,
+                MorTeam.preferences,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            JSONArray messageArray = new JSONArray(response);
+                            if (skip - messages.size() >= messageArray.length()) {
+                                //No more messages are left in the chat - cease fire(ing request!)
+                                canLoadMore = false;
+                            } else {
+                                for (int i = (skip == 0 ? 0 : skip - messages.size()); i < messageArray.length(); i++) {
+                                    JSONObject messageObject = messageArray.getJSONObject(i);
+                                    String id = messageObject.getString("_id");
+                                    String content = messageObject.getString("content");
+                                    String date = messageObject.getString("timestamp");
 
-        public void getChats() {
-            Map<String, String> params = new HashMap<>();
-            params.put("chat_id", chatId);
-            final int skip;
-            if (!messages.isEmpty()) {
-                skip = ((messages.size() - 1) / 20 + 1) * 20;
-                params.put("skip", skip + "");
-            } else {
-                skip = 0;
-            }
-            CookieRequest messageRequest = new CookieRequest(
-                    Request.Method.POST,
-                    "/f/loadMessagesForChat",
-                    params,
-                    preferences,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            try {
-                                JSONArray messageArray = new JSONArray(response);
-                                if (skip - messages.size() >= messageArray.length()) {
-                                    //No more messages are left in the chat - cease fire(ing request!)
-                                    canLoadMore = false;
-                                } else {
-                                    for (int i = (skip == 0 ? 0 : skip - messages.size()); i < messageArray.length(); i++) {
-                                        JSONObject messageObject = messageArray.getJSONObject(i);
-                                        String id = messageObject.getString("_id");
-                                        String content = messageObject.getString("content");
-                                        String date = messageObject.getString("timestamp");
-
-                                        JSONObject authorObject = messageObject.getJSONObject("author");
-                                        String firstName = authorObject.getString("firstname");
-                                        String lastName = authorObject.getString("lastname");
-                                        String profPicPath = authorObject.getString("profpicpath") + "-60";
-                                        profPicPath = profPicPath.replace(" ", "+");
-                                        boolean isMyChat = false;
-                                        if (authorObject.getString("_id").equals(preferences.getString("_id", ""))) {
-                                            isMyChat = true;
-                                        }
-
-                                        final Message message = new Message(new User(firstName, lastName, null, profPicPath), content, date, chatId, isMyChat);
-
-                                        if (skip <= 0) {
-                                            messages.add(message);
-                                        }
+                                    JSONObject authorObject = messageObject.getJSONObject("author");
+                                    String firstName = authorObject.getString("firstname");
+                                    String lastName = authorObject.getString("lastname");
+                                    String profPicPath = authorObject.getString("profpicpath") + "-60";
+                                    profPicPath = profPicPath.replace(" ", "+");
+                                    boolean isMyChat = false;
+                                    if (authorObject.getString("_id").equals(MorTeam.preferences.getString("_id", ""))) {
+                                        isMyChat = true;
                                     }
-                                    notifyDataSetChanged();
+
+                                    final Message message = new Message(new User(firstName, lastName, null, profPicPath), content, date, chatId, isMyChat);
+
+//                                    if (skip <= 0) {
+                                        messages.add(message);
+//                                    }
                                 }
-                                loading = false;
-                            } catch (JSONException e) {
-                                e.printStackTrace();
+
+                                messageAdapter.setMessages(messages);
                             }
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            System.out.println("ERROR: " + error);
+                            loading = false;
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
                     }
-            );
-            queue.add(messageRequest);
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            RelativeLayout relativeLayout = (RelativeLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.list_message, parent, false);
-            ViewHolder viewHolder = new ViewHolder(relativeLayout);
-            return viewHolder;
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            final Message currentMessage = messages.get(position);
-
-            TextView message = (TextView) holder.relativeLayout.findViewById(R.id.messagelist_message);
-            message.setMovementMethod(LinkMovementMethod.getInstance());
-
-            final TextView date = (TextView) holder.relativeLayout.findViewById(R.id.messagelist_date);
-            date.setText(currentMessage.getDate());
-
-            CardView cardView = (CardView) holder.relativeLayout.findViewById(R.id.messagelist_cardview);
-            final NetworkImageView messagePic = (NetworkImageView) holder.relativeLayout.findViewById(R.id.messagelist_pic);
-
-            View.OnClickListener dateClickListener = new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (date.getVisibility() == View.GONE) {
-                        date.setVisibility(View.VISIBLE);
-                    } else {
-                        date.setVisibility(View.GONE);
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        System.out.println("ERROR: " + error);
                     }
                 }
-            };
-            cardView.setOnClickListener(dateClickListener);
-            message.setOnClickListener(dateClickListener);
-
-            SpannableStringBuilder messageString = new SpannableStringBuilder();
-            SpannableString contentString = new SpannableString(Html.fromHtml(currentMessage.getContent()));
-
-            if (currentMessage.isMyMessage) {
-                messagePic.setVisibility(View.INVISIBLE);
-                messagePic.getLayoutParams().width = 0;
-
-                //Change background color and align to right
-                cardView.setCardBackgroundColor(Color.argb(255, 255, 197, 71));
-
-                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) cardView.getLayoutParams();
-                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
-                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-            } else {
-                SpannableString nameString = new SpannableString(currentMessage.getFirstName() + ": ");
-                nameString.setSpan(new StyleSpan(Typeface.BOLD), 0, nameString.length(), 0);
-                messageString.append(nameString);
-
-                MorTeam.setNetworkImage(currentMessage.getProfPicPath(), messagePic);
-                messagePic.setVisibility(View.VISIBLE);
-                messagePic.getLayoutParams().width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 30, getResources().getDisplayMetrics());
-
-
-                cardView.setCardBackgroundColor(Color.WHITE);
-
-                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) cardView.getLayoutParams();
-                params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
-                params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-            }
-
-            messageString.append(contentString);
-            message.setText(messageString, TextView.BufferType.SPANNABLE);
-        }
-
-        @Override
-        public int getItemCount() {
-            return messages.size();
-        }
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            public RelativeLayout relativeLayout;
-
-            public ViewHolder(RelativeLayout relativeLayout) {
-                super(relativeLayout);
-                this.relativeLayout = relativeLayout;
-            }
-        }
-
-        public void addMessage(String firstName, String lastName, String content, String date, String chatId, String profPicPath, boolean isMyChat) {
-            messages.add(0, new Message(new User(firstName, lastName, null, profPicPath), content, date, chatId, isMyChat));
-            notifyDataSetChanged();
-        }
-
-        public void scrollToBottom() {
-            messageList.smoothScrollToPosition(0);
-        }
+        );
+        MorTeam.queue.add(messageRequest);
     }
+
 }
