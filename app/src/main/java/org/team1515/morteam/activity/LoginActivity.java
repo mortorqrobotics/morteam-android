@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -88,6 +89,7 @@ public class LoginActivity extends AppCompatActivity {
         if (username.trim().isEmpty()) {
             usernameView.setText("");
             usernameView.setHintTextColor(Color.RED);
+            isEmpty = true;
         }
 
         if (password.trim().isEmpty()) {
@@ -97,7 +99,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         if (isEmpty) {
-            loginButton.setEnabled(true);
+            loginButton.setClickable(true);
             return;
         }
 
@@ -156,10 +158,23 @@ public class LoginActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+
+                        // Handle login errors
                         AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-                        builder.setTitle("Cannot connect to server");
-                        builder.setMessage("Please make sure you have a working internet connection.");
                         builder.setPositiveButton("Okay", null);
+
+                        NetworkResponse response = error.networkResponse;
+                        if (response.statusCode == 400) {
+                            String message = new String(response.data);
+                            if (message.equals("Invalid login credentials")) {
+                                builder.setTitle("Invalid login");
+                                builder.setMessage("Make sure you used your correct username and password.");
+                            }
+                        } else {
+                            builder.setTitle("Cannot connect to server");
+                            builder.setMessage("Please make sure you have a working internet connection.");
+                        }
                         builder.create().show();
 
                         loginButton.setClickable(true);

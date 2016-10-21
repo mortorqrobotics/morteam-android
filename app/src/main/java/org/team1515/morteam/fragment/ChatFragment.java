@@ -115,13 +115,13 @@ public class ChatFragment extends Fragment {
                                     String id = chatObject.getString("_id");
                                     String name = "";
                                     String picPath = "";
-                                    boolean isGroup = chatObject.getBoolean("group");
-                                    if (isGroup) {
+                                    boolean isTwoPeople = chatObject.getBoolean("isTwoPeople");
+                                    if (!isTwoPeople) {
                                         name = chatObject.getString("name");
                                         picPath = "/images/group.png";
                                     } else {
                                         //For non-group chats, find name of other user
-                                        JSONArray chatUserArray = chatObject.getJSONArray("userMembers");
+                                        JSONArray chatUserArray = chatObject.getJSONObject("audience").getJSONArray("users");
                                         String currentUserId = preferences.getString("_id", "");
                                         for (int user = 0; user < chatUserArray.length(); user++) {
                                             JSONObject userObject = chatUserArray.getJSONObject(user);
@@ -132,7 +132,7 @@ public class ChatFragment extends Fragment {
                                         }
                                     }
 
-                                    Chat chat = new Chat(name, id, picPath, isGroup);
+                                    Chat chat = new Chat(name, id, picPath, isTwoPeople);
 
                                     chats.add(chat);
 

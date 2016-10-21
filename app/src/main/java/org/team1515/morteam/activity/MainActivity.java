@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         CookieRequest yourSubsRequest = new CookieRequest(Request.Method.GET,
-                "/subdivisions/joined",
+                "/groups",
                 preferences,
                 new Response.Listener<String>() {
                     @Override
@@ -264,9 +264,11 @@ public class MainActivity extends AppCompatActivity {
                             yourSubs = new ArrayList<>();
                             for (int i = 0; i < subdivisionArray.length(); i++) {
                                 JSONObject subdivisionObject = subdivisionArray.getJSONObject(i);
-                                yourSubs.add(new Subdivision(subdivisionObject.getString("name"),
-                                                subdivisionObject.getString("_id"))
-                                );
+                                if (subdivisionObject.getString("__t").equals("NormalGroup")) {
+                                    yourSubs.add(new Subdivision(subdivisionObject.getString("name"),
+                                                    subdivisionObject.getString("_id"))
+                                    );
+                                }
                             }
                             yourSubAdapter.setSubdivisions(yourSubs);
                         } catch (JSONException e) {
@@ -283,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         CookieRequest publicSubsRequest = new CookieRequest(Request.Method.GET,
-                "/subdivisions/public",
+                "/groups/other",
                 preferences,
                 new Response.Listener<String>() {
                     @Override
@@ -293,9 +295,11 @@ public class MainActivity extends AppCompatActivity {
                             publicSubs = new ArrayList<>();
                             for (int i = 0; i < subdivisionArray.length(); i++) {
                                 JSONObject subdivisionObject = subdivisionArray.getJSONObject(i);
-                                publicSubs.add(new Subdivision(subdivisionObject.getString("name"),
-                                                subdivisionObject.getString("_id"))
-                                );
+                                if (subdivisionObject.getString("__t").equals("NormalGroup")) {
+                                    publicSubs.add(new Subdivision(subdivisionObject.getString("name"),
+                                                    subdivisionObject.getString("_id"))
+                                    );
+                                }
                             }
                             publicSubAdapter.setSubdivisions(publicSubs);
                         } catch (JSONException e) {
@@ -693,7 +697,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return 3;
+            return 2;
         }
 
         @Override

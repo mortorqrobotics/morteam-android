@@ -46,30 +46,30 @@ public class JoinTeamActivity extends AppCompatActivity {
                 params,
                 preferences,
                 new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                if(response.equals("success")) {
-                    preferences.edit().
-                            putBoolean("isOnTeam", true)
-                            .apply();
-                    Intent intent = new Intent(JoinTeamActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
-                } else if(response.equals("no such team")) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(JoinTeamActivity.this);
-                    builder.setTitle("The team does not exists");
-                    builder.setMessage("Make sure you inputted the correct team id.");
-                    builder.setPositiveButton("Okay", null);
-                    builder.create().show();
-                } else if(response.equals("banned")) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(JoinTeamActivity.this);
-                    builder.setTitle("You have been banned from this team");
-                    builder.setMessage("Contact the team owner if this is an error.");
-                    builder.setPositiveButton("Okay", null);
-                    builder.create().show();
-                }
-            }
-        }, new Response.ErrorListener() {
+                    @Override
+                    public void onResponse(String response) {
+                        if(response.equals("success")) {
+                            preferences.edit().
+                                    putBoolean("isOnTeam", true)
+                                    .apply();
+                            Intent intent = new Intent(JoinTeamActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
+                        } else if(response.equals("no such team")) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(JoinTeamActivity.this);
+                            builder.setTitle("The team does not exists");
+                            builder.setMessage("Make sure you inputted the correct team id.");
+                            builder.setPositiveButton("Okay", null);
+                            builder.create().show();
+                        } else if(response.equals("banned")) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(JoinTeamActivity.this);
+                            builder.setTitle("You have been banned from this team");
+                            builder.setMessage("Contact the team owner if this is an error.");
+                            builder.setPositiveButton("Okay", null);
+                            builder.create().show();
+                        }
+                    }
+                }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(JoinTeamActivity.this);

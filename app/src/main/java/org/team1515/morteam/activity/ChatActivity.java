@@ -389,7 +389,7 @@ public class ChatActivity extends AppCompatActivity {
                                     final Message message = new Message(new User(firstName, lastName, null, profPicPath), content, date, chatId, isMyChat);
 
 //                                    if (skip <= 0) {
-                                        messages.add(message);
+                                    messages.add(message);
 //                                    }
                                 }
 

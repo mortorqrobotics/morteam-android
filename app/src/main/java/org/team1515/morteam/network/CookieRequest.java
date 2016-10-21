@@ -20,7 +20,7 @@ public class CookieRequest extends StringRequest {
     public static final String COOKIE_KEY = "Cookie";
     public static final String SESSION_COOKIE = "connect.sid";
 
-    private static final String host = "http://www.morteam.com";
+    private static final String host = "http://www.morteam.com:8080/api";
 
     private final Map<String, String> params;
     private SharedPreferences preferences;

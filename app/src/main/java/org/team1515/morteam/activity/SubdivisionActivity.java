@@ -92,7 +92,7 @@ public class SubdivisionActivity extends AppCompatActivity {
             path = "/subdivisions/id/" + id + "/users";
 
         }
-        System.out.println(path);
+
         CookieRequest userRequest = new CookieRequest(
                 Request.Method.GET,
                 path,

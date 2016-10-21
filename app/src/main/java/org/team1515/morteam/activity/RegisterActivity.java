@@ -72,24 +72,24 @@ public class RegisterActivity extends AppCompatActivity {
                 params,
                 preferences,
                 new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                if(response.equals("success")) {
-                    Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                    startActivity(intent);
-                    try {
-                        finalize();
-                    } catch (Throwable throwable) {
-                        throwable.printStackTrace();
+                    @Override
+                    public void onResponse(String response) {
+                        if(response.equals("success")) {
+                            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                            startActivity(intent);
+                            try {
+                                finalize();
+                            } catch (Throwable throwable) {
+                                throwable.printStackTrace();
+                            }
+                        } else {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
+                            builder.setTitle("One or more of the inputted information is incorrect");
+                            builder.setPositiveButton("Okay", null);
+                            builder.create().show();
+                        }
                     }
-                } else {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
-                    builder.setTitle("One or more of the inputted information is incorrect");
-                    builder.setPositiveButton("Okay", null);
-                    builder.create().show();
-                }
-            }
-        }, new Response.ErrorListener() {
+                }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 System.out.println(error);
