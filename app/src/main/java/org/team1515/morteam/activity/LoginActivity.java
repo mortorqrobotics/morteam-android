@@ -165,16 +165,22 @@ public class LoginActivity extends AppCompatActivity {
                         builder.setPositiveButton("Okay", null);
 
                         NetworkResponse response = error.networkResponse;
-                        if (response.statusCode == 400) {
-                            String message = new String(response.data);
-                            if (message.equals("Invalid login credentials")) {
-                                builder.setTitle("Invalid login");
-                                builder.setMessage("Make sure you used your correct username and password.");
+                        if (response != null) {
+                            if (response.statusCode == 400) {
+                                String message = new String(response.data);
+                                if (message.equals("Invalid login credentials")) {
+                                    builder.setTitle("Invalid login");
+                                    builder.setMessage("Make sure you used your correct username and password.");
+                                }
+                            } else {
+                                builder.setTitle("Cannot connect to server");
+                                builder.setMessage("Please make sure you have a stable internet connection.");
                             }
                         } else {
                             builder.setTitle("Cannot connect to server");
-                            builder.setMessage("Please make sure you have a working internet connection.");
+                            builder.setMessage("Please make sure you have a stable internet connection.");
                         }
+
                         builder.create().show();
 
                         loginButton.setClickable(true);

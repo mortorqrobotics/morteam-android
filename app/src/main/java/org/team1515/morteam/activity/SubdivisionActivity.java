@@ -89,7 +89,7 @@ public class SubdivisionActivity extends AppCompatActivity {
             path = "/teams/current/users";
         } else {
             id = intent.getStringExtra("id");
-            path = "/subdivisions/id/" + id + "/users";
+            path = "/groups/normal/id/" + id + "/users";
 
         }
 

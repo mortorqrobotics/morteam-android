@@ -167,7 +167,7 @@ public class ChatActivity extends AppCompatActivity {
 
 
         try {
-            socket = IO.socket("http://www.morteam.com");
+            socket = IO.socket("http://www.morteam.com:8080");
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -291,62 +291,45 @@ public class ChatActivity extends AppCompatActivity {
             Map<String, String> params = new HashMap<>();
             params.put("content", messageContent);
 
-            CookieRequest sendRequest = new CookieRequest(Request.Method.POST, "/chats/id/" + chatId + "/messages",
-                    params,
-                    MorTeam.preferences,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            try {
-                                JSONObject typingObject = new JSONObject();
-                                typingObject.put("chat_id", chatId);
-                                socket.emit("stop typing", typingObject);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
+            try {
+                JSONObject typingObject = new JSONObject();
+                typingObject.put("chat_id", chatId);
+                socket.emit("stop typing", typingObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
-                            JSONObject messageObject = new JSONObject();
-                            try {
-                                messageObject.put("chat_id", chatId);
-                                messageObject.put("content", messageContent);
-                                if (isGroup) {
-                                    messageObject.put("type", "group");
-                                    messageObject.put("chat_name", chatName);
-                                } else {
-                                    messageObject.put("type", "private");
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                            socket.emit("message", messageObject);
+            JSONObject messageObject = new JSONObject();
+            try {
+                messageObject.put("chatId", chatId);
+                messageObject.put("content", messageContent);
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return;
+            }
 
-                            isClearingText = true;
-                            messageText.setText("");
-                            isClearingText = false;
+            System.out.println(socket.connected());
+            socket.emit("sendMessage", messageObject);
 
-                            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-                            System.out.println(df.format(new Date()));
-                            messageAdapter.addMessage(
-                                    MorTeam.preferences.getString("firstname", ""),
-                                    MorTeam.preferences.getString("lastname", ""),
-                                    messageContent,
-                                    df.format(new Date()),
-                                    chatId,
-                                    MorTeam.preferences.getString("profpicpath", "") + "-60",
-                                    true
-                            );
-                            messageList.smoothScrollToPosition(0);
-                            sendButton.setClickable(true);
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    error.printStackTrace();
-                    sendButton.setClickable(true);
-                }
-            });
-            MorTeam.queue.add(sendRequest);
+            isClearingText = true;
+            messageText.setText("");
+            isClearingText = false;
+
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+            System.out.println(df.format(new Date()));
+            messageAdapter.addMessage(
+                    MorTeam.preferences.getString("firstname", ""),
+                    MorTeam.preferences.getString("lastname", ""),
+                    messageContent,
+                    df.format(new Date()),
+                    chatId,
+                    MorTeam.preferences.getString("profpicpath", "") + "-60",
+                    true
+            );
+            messageList.smoothScrollToPosition(0);
+            sendButton.setClickable(true);
         }
+
     }
 
 
