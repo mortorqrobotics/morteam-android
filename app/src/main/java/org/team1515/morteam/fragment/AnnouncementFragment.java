@@ -16,6 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -27,9 +28,11 @@ import net.team1515.morteam.R;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.team1515.morteam.activity.LoginActivity;
 import org.team1515.morteam.adapter.AnnouncementAdapter;
 import org.team1515.morteam.entity.Announcement;
 import org.team1515.morteam.entity.User;
+import org.team1515.morteam.network.CookieJsonRequest;
 import org.team1515.morteam.network.CookieRequest;
 
 import java.util.ArrayList;
@@ -50,7 +53,7 @@ public class AnnouncementFragment extends Fragment {
     private ProgressBar progress;
     private TextView errorView;
 
-    private List<Announcement> announcements;
+    private List<Announcement> announcements = new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -93,7 +96,7 @@ public class AnnouncementFragment extends Fragment {
 
         CookieRequest announcementRequest = new CookieRequest(
                 Request.Method.GET,
-                "/announcements",
+                "/announcements?skip=0",
                 preferences,
                 new Response.Listener<String>() {
                     @Override
@@ -144,6 +147,15 @@ public class AnnouncementFragment extends Fragment {
 
                         if (announcements.isEmpty()) {
                             errorView.setVisibility(View.VISIBLE);
+                        }
+
+                        NetworkResponse response = error.networkResponse;
+                        if (response != null) {
+                            if (response.statusCode == 400) {
+                                String message = new String(response.data);
+                                System.out.println(message);
+
+                            }
                         }
 
                         Toast.makeText(getContext(), "Error connecting to the server. Try checking your internet connection and try again later.", Toast.LENGTH_SHORT).show();

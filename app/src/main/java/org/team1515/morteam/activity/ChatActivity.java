@@ -19,10 +19,8 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.engineio.client.Transport;
 import com.github.nkzawa.socketio.client.IO;
@@ -208,6 +206,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
         socket = socket.connect();
+        System.out.println(socket.connected());
 
         socket.emit("get clients");
         socket.on("get clients", new Emitter.Listener() {

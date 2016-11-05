@@ -1,14 +1,5 @@
 package org.team1515.morteam.entity;
 
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-
-import org.team1515.morteam.network.CookieImageRequest;
-
 public class Chat {
     private String name;
     private String id;
@@ -20,6 +11,11 @@ public class Chat {
         this.id = id;
         this.picPath = picPath;
         this.isGroup = isGroup;
+        if (picPath.substring(0, 3).equals("/pp")) {
+            this.picPath = "http://profilepics.morteam.com.s3.amazonaws.com" + picPath.substring(3);
+        } else {
+            this.picPath = "http://www.morteam.com:8080" + picPath;
+        }
     }
 
     public String getName() {
@@ -31,6 +27,6 @@ public class Chat {
     }
 
     public String getPicPath() {
-        return "http://morteam.com/" + picPath;
+        return picPath;
     }
 }

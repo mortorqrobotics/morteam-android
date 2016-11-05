@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         final ImageButton profilePic = (ImageButton) toolbar.findViewById(R.id.actionbar_pic);
         profilePic.setClickable(true);
         profilePic.setVisibility(View.VISIBLE);
-        CookieImageRequest profilePicRequest = new CookieImageRequest("http://www.morteam.com" + preferences.getString("profpicpath", "") + "-60",
+        CookieImageRequest profilePicRequest = new CookieImageRequest("http://www.morteam.com:8080" + preferences.getString("profpicpath", ""),
                 preferences, new Response.Listener<Bitmap>() {
             @Override
             public void onResponse(Bitmap response) {
@@ -621,7 +621,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setTitle("Erorr posting announcement");
+                    builder.setTitle("Error posting announcement");
                     builder.setMessage("Please try again later");
                     builder.setPositiveButton("Okay", null);
                     builder.create().show();

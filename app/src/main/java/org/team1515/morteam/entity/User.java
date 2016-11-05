@@ -28,7 +28,11 @@ public class User {
         this.firstName = firstName;
         this.lastName = lastName;
         this.id = id;
-        this.profPicPath = profPicPath;
+        if (profPicPath.substring(0, 3).equals("/pp")) {
+            this.profPicPath = "http://profilepics.morteam.com.s3.amazonaws.com" + profPicPath.substring(3);
+        } else {
+            this.profPicPath = "http://www.morteam.com:8080" + profPicPath;
+        }
         this.email = email;
         this.phone = phone;
     }
@@ -62,7 +66,7 @@ public class User {
     }
 
     public String getProfPicPath() {
-        return "http://morteam.com" + profPicPath;
+        return profPicPath;
     }
 
     public String getEmail() {

@@ -16,6 +16,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
@@ -23,16 +24,21 @@ import net.team1515.morteam.R;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.team1515.morteam.network.CookieJsonRequest;
 import org.team1515.morteam.network.CookieRequest;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static android.webkit.WebViewDatabase.getInstance;
 
 
 public class LoginActivity extends AppCompatActivity {
 
     SharedPreferences preferences;
     RequestQueue queue;
+
+    boolean rememberMe;
 
     public static final String[] userData = {
             "_id",
@@ -54,9 +60,7 @@ public class LoginActivity extends AppCompatActivity {
         preferences = getSharedPreferences(null, 0);
         queue = Volley.newRequestQueue(this);
 
-        for (Object data : preferences.getAll().keySet()) {
-            System.out.println(data + "\t" + preferences.getAll().get(data));
-        }
+        rememberMe = false;
 
         for (String data : userData) {
             if (!preferences.contains(data)) {
@@ -103,20 +107,25 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        Map<String, String> params = new HashMap<>();
-        params.put("username", username);
-        params.put("password", password);
-        CookieRequest loginRequest = new CookieRequest(
+        JSONObject params = new JSONObject();
+        try {
+            params.put("username", username);
+            params.put("password", password);
+            params.put("rememberMe", rememberMe);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        CookieJsonRequest loginRequest = new CookieJsonRequest(
                 Request.Method.POST,
                 "/login",
                 params,
                 preferences,
-                new Response.Listener<String>() {
+                new Response.Listener<JSONObject>() {
                     @Override
-                    public void onResponse(String response) {
+                    public void onResponse(JSONObject userObject) {
                         try {
-                            JSONObject userObject = new JSONObject(response);
-
                             SharedPreferences.Editor editor = preferences.edit();
                             editor.putString("_id", userObject.getString("_id"))
                                     .putString("username", userObject.getString("username"))
@@ -168,9 +177,10 @@ public class LoginActivity extends AppCompatActivity {
                         if (response != null) {
                             if (response.statusCode == 400) {
                                 String message = new String(response.data);
+                                System.out.println(message);
                                 if (message.equals("Invalid login credentials")) {
                                     builder.setTitle("Invalid login");
-                                    builder.setMessage("Make sure you used your correct username and password.");
+                                    builder.setMessage("Please make sure you entered the correct username and password.");
                                 }
                             } else {
                                 builder.setTitle("Cannot connect to server");
@@ -185,8 +195,92 @@ public class LoginActivity extends AppCompatActivity {
 
                         loginButton.setClickable(true);
                     }
-                });
+                }
+        );
         queue.add(loginRequest);
+
+//        CookieRequest loginRequest = new CookieRequest(
+//                Request.Method.POST,
+//                "/login",
+//                params,
+//                preferences,
+//                new Response.Listener<String>() {
+//                    @Override
+//                    public void onResponse(String response) {
+//                        try {
+//                            JSONObject userObject = new JSONObject(response);
+//
+//                            SharedPreferences.Editor editor = preferences.edit();
+//                            editor.putString("_id", userObject.getString("_id"))
+//                                    .putString("username", userObject.getString("username"))
+//                                    .putString("firstname", userObject.getString("firstname"))
+//                                    .putString("lastname", userObject.getString("lastname"))
+//                                    .putString("email", userObject.getString("email"))
+//                                    .putString("phone", userObject.getString("phone"))
+//                                    .putString("profpicpath", userObject.getString("profpicpath"));
+//
+//                            Intent intent = new Intent();
+//
+//                            if (userObject.has("team")) {
+//                                JSONObject teamObject = userObject.getJSONObject("team");
+//                                editor.putString("team_id", teamObject.getString("_id"))
+//                                        .putString("teamNumber", teamObject.getString("number"))
+//                                        .putString("position", userObject.getString("position"));
+//
+//                                intent.setClass(LoginActivity.this, MainActivity.class);
+//                            } else {
+//                                intent.setClass(LoginActivity.this, JoinTeamActivity.class);
+//                            }
+//
+//                            editor.apply();
+//
+//                            loginButton.setClickable(true);
+//                            startActivity(intent);
+//                            finish();
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                            AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+//                            builder.setTitle("Incorrect username or password");
+//                            builder.setPositiveButton("Okay", null);
+//                            builder.create().show();
+//
+//                            loginButton.setClickable(true);
+//                        }
+//                    }
+//                },
+//                new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        error.printStackTrace();
+//
+//                        // Handle login errors
+//                        AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+//                        builder.setPositiveButton("Okay", null);
+//
+//                        NetworkResponse response = error.networkResponse;
+//                        if (response != null) {
+//                            if (response.statusCode == 400) {
+//                                String message = new String(response.data);
+//                                System.out.println(message);
+//                                if (message.equals("Invalid login credentials")) {
+//                                    builder.setTitle("Invalid login");
+//                                    builder.setMessage("Please make sure you entered the correct username and password.");
+//                                }
+//                            } else {
+//                                builder.setTitle("Cannot connect to server");
+//                                builder.setMessage("Please make sure you have a stable internet connection.");
+//                            }
+//                        } else {
+//                            builder.setTitle("Cannot connect to server");
+//                            builder.setMessage("Please make sure you have a stable internet connection.");
+//                        }
+//
+//                        builder.create().show();
+//
+//                        loginButton.setClickable(true);
+//                    }
+//                });
+//        queue.add(loginRequest);
     }
 
     public void register(View view) {

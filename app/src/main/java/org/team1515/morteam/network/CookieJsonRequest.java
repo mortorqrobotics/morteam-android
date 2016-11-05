@@ -1,45 +1,39 @@
 package org.team1515.morteam.network;
 
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Response;
-import com.android.volley.Response.ErrorListener;
-import com.android.volley.Response.Listener;
-import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import org.json.JSONObject;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-
-public class CookieRequest extends StringRequest {
+public class CookieJsonRequest extends JsonObjectRequest {
     public static final String SET_COOKIE_KEY = "set-cookie";
     public static final String COOKIE_KEY = "Cookie";
     public static final String SESSION_COOKIE = "connect.sid";
 
-    private static final String host = "http://www.morteam.com:8080/api";
+        private static final String host = "http://www.morteam.com:8080/api";
 //    public static final String host = "http://192.168.1.100:8042";
 
-    private final Map<String, String> params;
     private SharedPreferences preferences;
 
-    public CookieRequest(int method, String path, SharedPreferences preferences, Listener<String> listener, ErrorListener errorListener) {
-        super(method, host + path, listener, errorListener);
-        this.params = null;
-        this.preferences = preferences;
+    public CookieJsonRequest(int method, String path, SharedPreferences preferences, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        this(method, path, new JSONObject(), preferences, listener, errorListener);
     }
 
-    public CookieRequest(int method, String path, Map<String, String> params, SharedPreferences preferences, Listener<String> listener, ErrorListener errorListener) {
-        super(method, host + path, listener, errorListener);
-        this.params = params;
+    public CookieJsonRequest(int method, String path, JSONObject jsonRequest, SharedPreferences preferences, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        super(method, host + path, jsonRequest, listener, errorListener);
         this.preferences = preferences;
     }
 
     @Override
-    protected Response<String> parseNetworkResponse(NetworkResponse response) {
+    protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
         //Store seession-id cookie in storage
         if(response.headers.containsKey(SET_COOKIE_KEY) && response.headers.get(SET_COOKIE_KEY).startsWith(SESSION_COOKIE)) {
             String cookie = response.headers.get(SET_COOKIE_KEY);
@@ -47,17 +41,12 @@ public class CookieRequest extends StringRequest {
                 String[] splitCookie = cookie.split(";");
                 String[] splitSessionId = splitCookie[0].split("=");
                 cookie = splitSessionId[1];
-                Editor editor = preferences.edit();
+                SharedPreferences.Editor editor = preferences.edit();
                 editor.putString(SESSION_COOKIE, cookie);
                 editor.apply();
             }
         }
         return super.parseNetworkResponse(response);
-    }
-
-    @Override
-    protected Map<String, String> getParams() {
-        return params;
     }
 
     @Override
