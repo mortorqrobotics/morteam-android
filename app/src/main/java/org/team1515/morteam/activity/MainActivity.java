@@ -51,6 +51,7 @@ import org.team1515.morteam.entity.User;
 import org.team1515.morteam.fragment.CalendarFragment;
 import org.team1515.morteam.fragment.ChatFragment;
 import org.team1515.morteam.fragment.AnnouncementFragment;
+import org.team1515.morteam.network.CookieJsonRequest;
 import org.team1515.morteam.network.CookieRequest;
 import org.team1515.morteam.network.CookieImageRequest;
 
@@ -79,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
     public AlertDialog.Builder announcementBuilder;
     public View newAnnouncementView;
     private Spinner choiceSpinner;
-    private String currentPostGroup;
+    private JSONObject currentPostGroup = new JSONObject();
     private List<String> choices = new ArrayList<>();
 
     public static final List<User> teamUsers = new ArrayList<>();
@@ -335,20 +336,21 @@ public class MainActivity extends AppCompatActivity {
         choiceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                final List<String> users = new ArrayList<String>();
+                final List<String> groups = new ArrayList<String>();
+
                 String item = parent.getItemAtPosition(position).toString();
                 if (item.equals("Everyone")) {
-                    currentPostGroup = "everyone";
+                    groups.add(preferences.getString("team_id", ""));
                 } else if (!item.equals("Custom")) {
                     for (Subdivision subdivision : yourSubs) {
                         if (subdivision.getName().equals(item)) {
-                            currentPostGroup = subdivision.getId();
+                            groups.add(subdivision.getId());
                         }
                     }
                 } else {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder.setTitle("Choose an audience");
-                    final List<String> subdivisionIds = new ArrayList<>();
-                    final List<String> userIds = new ArrayList<>();
                     final List<CharSequence> audiences = new ArrayList<>();
                     for (Subdivision subdivision : yourSubs) {
                         audiences.add(subdivision.getName());
@@ -364,7 +366,7 @@ public class MainActivity extends AppCompatActivity {
                                 boolean foundSub = false;
                                 for (Subdivision subdivision : yourSubs) {
                                     if (subdivision.getName().equals(name)) {
-                                        subdivisionIds.add(subdivision.getId());
+                                        groups.add(subdivision.getId());
                                         foundSub = true;
                                         break;
                                     }
@@ -372,7 +374,7 @@ public class MainActivity extends AppCompatActivity {
                                 if (!foundSub) {
                                     for (User user : teamUsers) {
                                         if (user.getFullName().equals(name)) {
-                                            userIds.add(user.getId());
+                                            users.add(user.getId());
                                             break;
                                         }
                                     }
@@ -381,7 +383,7 @@ public class MainActivity extends AppCompatActivity {
                                 boolean foundSub = false;
                                 for (Subdivision subdivision : yourSubs) {
                                     if (subdivision.getName().equals(name)) {
-                                        subdivisionIds.remove(subdivision.getId());
+                                        groups.remove(subdivision.getId());
                                         foundSub = true;
                                         break;
                                     }
@@ -389,7 +391,7 @@ public class MainActivity extends AppCompatActivity {
                                 if (!foundSub) {
                                     for (User user : teamUsers) {
                                         if (user.getFullName().equals(name)) {
-                                            userIds.remove(user.getId());
+                                            users.remove(user.getId());
                                             break;
                                         }
                                     }
@@ -400,19 +402,24 @@ public class MainActivity extends AppCompatActivity {
                     builder.setPositiveButton("Choose", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            currentPostGroup = "{\"subdivisionMembers\":[";
-                            for (String id : subdivisionIds) {
-                                currentPostGroup += "\"" + id + "\",";
+                            currentPostGroup = new JSONObject();
+
+                            JSONArray userArray = new JSONArray();
+                            for (String user : users) {
+                                userArray.put(user);
                             }
-                            if (!subdivisionIds.isEmpty()) {
-                                currentPostGroup = currentPostGroup.substring(0, currentPostGroup.length() - 1);
+
+                            JSONArray groupArray = new JSONArray();
+                            for (String group : groups) {
+                                userArray.put(group);
                             }
-                            currentPostGroup += "],\"userMembers\":[\"" + preferences.getString("_id", "") + "\",";
-                            for (String id : userIds) {
-                                currentPostGroup += "\"" + id + "\",";
+
+                            try {
+                                currentPostGroup.put("users", userArray);
+                                currentPostGroup.put("groups", groupArray);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
-                            currentPostGroup = currentPostGroup.substring(0, currentPostGroup.length() - 1);
-                            currentPostGroup += "]}";
                         }
                     });
                     builder.setNegativeButton("Cancel", null);
@@ -446,7 +453,7 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
-    public String getCurrentPostGroup() {
+    public JSONObject getCurrentPostGroup() {
         return currentPostGroup;
     }
 
@@ -600,8 +607,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void postAnnouncement() {
         //Hide keyboard
-        InputMethodManager imm = (InputMethodManager) getSystemService(
-                INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
 
         //Get content from edittext
@@ -609,12 +615,18 @@ public class MainActivity extends AppCompatActivity {
         String message = messageBox.getText().toString();
 
         if (!message.isEmpty()) {
-            Map<String, String> params = new HashMap<>();
-            params.put("content", message);
-            params.put("audience", getCurrentPostGroup());
-            CookieRequest request = new CookieRequest(Request.Method.POST, "/announcements", params, preferences, new Response.Listener<String>() {
+            JSONObject params = new JSONObject();
+            try {
+                params.put("content", message);
+                params.put("audience", getCurrentPostGroup());
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return;
+            }
+
+            CookieJsonRequest request = new CookieJsonRequest(Request.Method.POST, "/announcements", params, preferences, new Response.Listener<JSONObject>() {
                 @Override
-                public void onResponse(String response) {
+                public void onResponse(JSONObject response) {
                     sectionPagerAdapter.announcementFragment.getAnnouncements();
                 }
             }, new Response.ErrorListener() {
