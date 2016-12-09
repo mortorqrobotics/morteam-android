@@ -35,6 +35,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -336,8 +337,8 @@ public class MainActivity extends AppCompatActivity {
         choiceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                final List<String> users = new ArrayList<String>();
-                final List<String> groups = new ArrayList<String>();
+                final List<String> users = new ArrayList<>();
+                final List<String> groups = new ArrayList<>();
 
                 String item = parent.getItemAtPosition(position).toString();
                 if (item.equals("Everyone")) {
@@ -402,7 +403,8 @@ public class MainActivity extends AppCompatActivity {
                     builder.setPositiveButton("Choose", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            currentPostGroup = new JSONObject();
+
+
 
                             JSONArray userArray = new JSONArray();
                             for (String user : users) {
@@ -411,9 +413,10 @@ public class MainActivity extends AppCompatActivity {
 
                             JSONArray groupArray = new JSONArray();
                             for (String group : groups) {
-                                userArray.put(group);
+                                groupArray.put(group);
                             }
 
+                            currentPostGroup = new JSONObject();
                             try {
                                 currentPostGroup.put("users", userArray);
                                 currentPostGroup.put("groups", groupArray);
@@ -424,6 +427,24 @@ public class MainActivity extends AppCompatActivity {
                     });
                     builder.setNegativeButton("Cancel", null);
                     builder.create().show();
+                }
+
+                JSONArray userArray = new JSONArray();
+                for (String user : users) {
+                    userArray.put(user);
+                }
+
+                JSONArray groupArray = new JSONArray();
+                for (String group : groups) {
+                    groupArray.put(group);
+                }
+
+                currentPostGroup = new JSONObject();
+                try {
+                    currentPostGroup.put("users", userArray);
+                    currentPostGroup.put("groups", groupArray);
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             }
 
@@ -624,6 +645,8 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
+            System.out.println(params.toString());
+
             CookieJsonRequest request = new CookieJsonRequest(Request.Method.POST, "/announcements", params, preferences, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
@@ -632,6 +655,14 @@ public class MainActivity extends AppCompatActivity {
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
+                    NetworkResponse response = error.networkResponse;
+                    if (response != null) {
+                        if (response.statusCode == 400) {
+                            String message = new String(response.data);
+                            System.out.println(message);
+                        }
+                    }
+
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder.setTitle("Error posting announcement");
                     builder.setMessage("Please try again later");

@@ -44,7 +44,6 @@ public class MorTeam extends Application {
     }
 
     public static void setNetworkImage(String url, NetworkImageView view) {
-        System.out.println(url);
         imageLoader.get(url, imageLoader.getImageListener(view,
                 R.drawable.ic_user, R.drawable.ic_user));
         view.setImageUrl(url, imageLoader);
