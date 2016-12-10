@@ -22,9 +22,10 @@ public class User {
     private String id;
     private String profPicPath;
     private String email;
+    private String parentEmail;
     private String phone;
 
-    public User(String firstName, String lastName, String id, String profPicPath, String email, String phone) {
+    public User(String firstName, String lastName, String id, String profPicPath, String email, String parentEmail, String phone) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.id = id;
@@ -34,11 +35,12 @@ public class User {
             this.profPicPath = "http://www.morteam.com:8080" + profPicPath;
         }
         this.email = email;
+        this.parentEmail = parentEmail;
         this.phone = phone;
     }
 
     public User(String firstName, String lastName, String id, String profPicPath) {
-        this(firstName, lastName, id, profPicPath, "", "");
+        this(firstName, lastName, id, profPicPath, "", "", "");
     }
 
     public User(String firstName, String lastName, String profPicPath) {
@@ -71,6 +73,10 @@ public class User {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getParentEmail() {
+        return parentEmail;
     }
 
     public String getPhone() {

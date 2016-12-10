@@ -548,27 +548,37 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                final Map<String, String> params = new HashMap<>();
+                final JSONObject params = new JSONObject();
                 if (subdivisionIds.isEmpty() && userIds.size() == 1) { //If is not a group chat
-                    params.put("user2", userIds.get(0));
-                    params.put("type", "private");
+                    try {
+                        params.put("isTwoPeople", true);
+                        params.put("otherUser", userIds.get(0));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
 
                     createNewChat(params);
                 } else {
-                    params.put("type", "group");
+                    try {
+                        params.put("isTwoPeople", false);
 
-                    JSONArray subdivisionsArray = new JSONArray();
-                    for (String id : subdivisionIds) {
-                        subdivisionsArray.put(id);
-                    }
-                    params.put("subdivisionMembers", subdivisionsArray.toString());
+                        JSONObject audience = new JSONObject();
 
-                    JSONArray userArray = new JSONArray();
-                    for (String id : userIds) {
-                        userArray.put(id);
+                        JSONArray usersArray = new JSONArray();
+                        for (String user : userIds) {
+                            usersArray.put(user);
+                        }
+                        audience.put("users", usersArray);
+
+                        JSONArray groupsArray = new JSONArray();
+                        for (String subdivision : subdivisionIds) {
+                            groupsArray.put(subdivision);
+                        }
+                        audience.put("groups", groupsArray);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                    userArray.put(preferences.getString("_id", ""));
-                    params.put("userMembers", userArray.toString());
 
                     AlertDialog.Builder nameBuilder = new AlertDialog.Builder(MainActivity.this);
                     nameBuilder.setView(getLayoutInflater().inflate(R.layout.dialog_chatname, null));
@@ -584,7 +594,11 @@ public class MainActivity extends AppCompatActivity {
                             EditText nameView = (EditText) ((AlertDialog) nameDialog).findViewById(R.id.chatname_name);
                             String name = nameView.getText().toString();
                             if (!name.isEmpty()) {
-                                params.put("name", name);
+                                try {
+                                    params.put("name", name);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
                                 nameDialog.dismiss();
                                 createNewChat(params);
                             } else {
@@ -601,19 +615,15 @@ public class MainActivity extends AppCompatActivity {
         builder.create().show();
     }
 
-    public void createNewChat(Map<String, String> params) {
-        System.out.println(params.get("userMembers"));
-        CookieRequest newChatRequest = new CookieRequest(Request.Method.POST,
-                "/f/createChat",
+    public void createNewChat(JSONObject params) {
+        CookieJsonRequest newChatRequest = new CookieJsonRequest(Request.Method.POST,
+                "/chats",
                 params,
                 preferences,
-                new Response.Listener<String>() {
+                new Response.Listener<JSONObject>() {
                     @Override
-                    public void onResponse(String response) {
-                        System.out.println(response);
-                        if (!response.equals("fail")) {
-                            sectionPagerAdapter.chatFragment.getChats();
-                        }
+                    public void onResponse(JSONObject response) {
+                        System.out.println(response.toString());
                     }
                 },
                 new Response.ErrorListener() {
