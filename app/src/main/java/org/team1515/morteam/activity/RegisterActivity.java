@@ -42,8 +42,6 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     public void register(View view){
-        final Button registerButton = (Button)findViewById(R.id.login_registerbutton);
-
         //Add all user info to post parameters
         Map<String, String> params = new HashMap<>();
 

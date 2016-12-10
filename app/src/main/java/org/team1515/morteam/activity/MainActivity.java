@@ -79,7 +79,6 @@ public class MainActivity extends AppCompatActivity {
     public View newAnnouncementView;
     private Spinner choiceSpinner;
     private JSONObject currentPostGroup = new JSONObject();
-    private List<String> choices = new ArrayList<>();
 
     public static final List<User> teamUsers = new ArrayList<>();
     public static List<Subdivision> yourSubs = new ArrayList<>();
@@ -98,6 +97,12 @@ public class MainActivity extends AppCompatActivity {
         final NetworkImageView profilePic = (NetworkImageView) toolbar.findViewById(R.id.actionbar_pic);
         profilePic.setClickable(true);
         profilePic.setVisibility(View.VISIBLE);
+        profilePic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                popupMenu.show();
+            }
+        });
         MorTeam.setNetworkImage("http://www.morteam.com:8080" + preferences.getString("profpicpath", ""), profilePic);
 
         //Menu
@@ -438,7 +443,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void populateChoiceSpinner() {
-        choices = new ArrayList<>();
+        List<String> choices = new ArrayList<>();
         choices.add("Everyone");
         for (Subdivision subdivision : yourSubs) {
             choices.add(subdivision.getName());
@@ -454,10 +459,6 @@ public class MainActivity extends AppCompatActivity {
 
     public JSONObject getCurrentPostGroup() {
         return currentPostGroup;
-    }
-
-    public void profilePictureClick(View view) {
-        popupMenu.show();
     }
 
     public void newAnnouncement(View view) {
