@@ -37,6 +37,7 @@ import org.team1515.morteam.adapter.ChatMessageAdapter;
 import org.team1515.morteam.entity.Message;
 import org.team1515.morteam.entity.User;
 import org.team1515.morteam.network.CookieRequest;
+import org.team1515.morteam.network.NetworkUtils;
 
 import java.net.URISyntaxException;
 import java.text.DateFormat;
@@ -169,7 +170,7 @@ public class ChatActivity extends AppCompatActivity {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-        final String sessionId = MorTeam.preferences.getString(CookieRequest.SESSION_COOKIE, "");
+        final String sessionId = MorTeam.preferences.getString(NetworkUtils.SESSION_COOKIE, "");
 
         socket.io().on(Manager.EVENT_TRANSPORT, new Emitter.Listener() {
             @Override
@@ -185,14 +186,14 @@ public class ChatActivity extends AppCompatActivity {
                         //Insert session-id cookie into header
                         if (sessionId.length() > 0) {
                             StringBuilder builder = new StringBuilder();
-                            builder.append(CookieRequest.SESSION_COOKIE);
+                            builder.append(NetworkUtils.SESSION_COOKIE);
                             builder.append("=");
                             builder.append(sessionId);
-                            if (headers.containsKey(CookieRequest.COOKIE_KEY)) {
+                            if (headers.containsKey(NetworkUtils.COOKIE_KEY)) {
                                 builder.append("; ");
-                                builder.append(headers.get(CookieRequest.COOKIE_KEY));
+                                builder.append(headers.get(NetworkUtils.COOKIE_KEY));
                             }
-                            headers.put(CookieRequest.COOKIE_KEY, builder.toString());
+                            headers.put(NetworkUtils.COOKIE_KEY, builder.toString());
                         }
                     }
                 }).on(Transport.EVENT_RESPONSE_HEADERS, new Emitter.Listener() {
@@ -342,7 +343,6 @@ public class ChatActivity extends AppCompatActivity {
         CookieRequest messageRequest = new CookieRequest(
                 Request.Method.GET,
                 "/chats/id/" + chatId + "/messages?skip=" + skip,
-                MorTeam.preferences,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {

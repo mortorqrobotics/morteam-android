@@ -44,7 +44,6 @@ public class JoinTeamActivity extends AppCompatActivity {
         CookieRequest joinTeamRequest = new CookieRequest(Request.Method.POST,
                 "/f/joinTeam",
                 params,
-                preferences,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {

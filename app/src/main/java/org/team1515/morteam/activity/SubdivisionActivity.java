@@ -97,7 +97,6 @@ public class SubdivisionActivity extends AppCompatActivity {
                 Request.Method.GET,
                 path,
                 params,
-                preferences,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {

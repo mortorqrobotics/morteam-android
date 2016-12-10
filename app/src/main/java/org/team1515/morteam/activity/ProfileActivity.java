@@ -95,7 +95,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         CookieRequest userRequest = new CookieRequest(Request.Method.GET,
                 "/users/id/" + id,
-                MorTeam.preferences,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -130,7 +129,6 @@ public class ProfileActivity extends AppCompatActivity {
 
                             CookieRequest attendanceRequest = new CookieRequest(Request.Method.GET,
                                     "/users/id/" + id + "/absences",
-                                    MorTeam.preferences,
                                     new Response.Listener<String>() {
                                         @Override
                                         public void onResponse(String response) {
@@ -270,7 +268,6 @@ public class ProfileActivity extends AppCompatActivity {
                 CookieRequest changeProfileRequest = new CookieRequest(Request.Method.PUT,
                         "/profile",
                         params,
-                        MorTeam.preferences,
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
@@ -358,7 +355,6 @@ public class ProfileActivity extends AppCompatActivity {
                     CookieRequest changePasswordRequest = new CookieRequest(Request.Method.PUT,
                             "/password",
                             params,
-                            MorTeam.preferences,
                             new Response.Listener<String>() {
                                 @Override
                                 public void onResponse(String response) {
@@ -431,7 +427,6 @@ public class ProfileActivity extends AppCompatActivity {
                 CookieRequest assignRequest = new CookieRequest(Request.Method.POST,
                         "/users/id/" + user.getId() + "/tasks",
                         params,
-                        MorTeam.preferences,
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
@@ -456,7 +451,6 @@ public class ProfileActivity extends AppCompatActivity {
 
         CookieRequest taskRequest = new CookieRequest(Request.Method.GET,
                 path,
-                MorTeam.preferences,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -527,7 +521,6 @@ public class ProfileActivity extends AppCompatActivity {
     public void completeTask(String taskId) {
         CookieRequest completeRequest = new CookieRequest(Request.Method.POST,
                 "/tasks/id/" + taskId + "/markCompleted",
-                MorTeam.preferences,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {

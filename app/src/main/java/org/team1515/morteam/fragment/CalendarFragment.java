@@ -161,7 +161,6 @@ public class CalendarFragment extends Fragment {
             CookieRequest eventRequest = new CookieRequest(Request.Method.GET,
                     "/events",
                     params,
-                    preferences,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
@@ -389,7 +388,6 @@ public class CalendarFragment extends Fragment {
                                 CookieRequest deleteRequest = new CookieRequest(Request.Method.POST,
                                         "/f/deleteEvent",
                                         params,
-                                        preferences,
                                         new Response.Listener<String>() {
                                             @Override
                                             public void onResponse(String response) {

@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -29,7 +28,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -40,6 +38,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.Volley;
 
 import net.team1515.morteam.R;
@@ -47,25 +46,23 @@ import net.team1515.morteam.R;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.entity.Subdivision;
 import org.team1515.morteam.entity.User;
+import org.team1515.morteam.fragment.AnnouncementFragment;
 import org.team1515.morteam.fragment.CalendarFragment;
 import org.team1515.morteam.fragment.ChatFragment;
-import org.team1515.morteam.fragment.AnnouncementFragment;
 import org.team1515.morteam.network.CookieJsonRequest;
 import org.team1515.morteam.network.CookieRequest;
-import org.team1515.morteam.network.CookieImageRequest;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import static org.team1515.morteam.MorTeam.preferences;
+import static org.team1515.morteam.MorTeam.queue;
 
 public class MainActivity extends AppCompatActivity {
     SectionPagerAdapter sectionPagerAdapter;
-
-    SharedPreferences preferences;
-    RequestQueue queue;
 
     PopupMenu popupMenu;
 
@@ -93,31 +90,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        preferences = getSharedPreferences(null, 0);
-        queue = Volley.newRequestQueue(this);
-
         //Set up action bar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         //Set up action bar profile picture
-        final ImageButton profilePic = (ImageButton) toolbar.findViewById(R.id.actionbar_pic);
+        final NetworkImageView profilePic = (NetworkImageView) toolbar.findViewById(R.id.actionbar_pic);
         profilePic.setClickable(true);
         profilePic.setVisibility(View.VISIBLE);
-        CookieImageRequest profilePicRequest = new CookieImageRequest("http://www.morteam.com:8080" + preferences.getString("profpicpath", ""),
-                preferences, new Response.Listener<Bitmap>() {
-            @Override
-            public void onResponse(Bitmap response) {
-                profilePic.setImageBitmap(response);
-            }
-        }, 0, 0, null, Bitmap.Config.RGB_565, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.println(error);
-            }
-        });
-        queue.add(profilePicRequest);
+        MorTeam.setNetworkImage("http://www.morteam.com:8080" + preferences.getString("profpicpath", ""), profilePic);
 
         //Menu
         popupMenu = new PopupMenu(this, profilePic);
@@ -134,7 +115,6 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 CookieRequest logoutRequest = new CookieRequest(Request.Method.POST,
                                         "/logout",
-                                        preferences,
                                         new Response.Listener<String>() {
                                             @Override
                                             public void onResponse(String response) {
@@ -175,8 +155,10 @@ public class MainActivity extends AppCompatActivity {
 
         drawerLayout = (DrawerLayout) findViewById(R.id.main_drawerlayout);
         final ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeButtonEnabled(true);
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+        }
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
@@ -228,7 +210,6 @@ public class MainActivity extends AppCompatActivity {
         CookieRequest usersRequest = new CookieRequest(
                 Request.Method.GET,
                 "/teams/current/users",
-                preferences,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -237,9 +218,9 @@ public class MainActivity extends AppCompatActivity {
                             for (int i = 0; i < userArray.length(); i++) {
                                 JSONObject userObject = userArray.getJSONObject(i);
                                 teamUsers.add(new User(userObject.getString("firstname"),
-                                                userObject.getString("lastname"),
-                                                userObject.getString("_id"),
-                                                userObject.getString("profpicpath"))
+                                        userObject.getString("lastname"),
+                                        userObject.getString("_id"),
+                                        userObject.getString("profpicpath"))
                                 );
                             }
                         } catch (JSONException e) {
@@ -250,14 +231,13 @@ public class MainActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        System.out.println(error);
+                        error.printStackTrace();
                     }
                 }
         );
 
         CookieRequest yourSubsRequest = new CookieRequest(Request.Method.GET,
                 "/groups",
-                preferences,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -268,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
                                 JSONObject subdivisionObject = subdivisionArray.getJSONObject(i);
                                 if (subdivisionObject.getString("__t").equals("NormalGroup")) {
                                     yourSubs.add(new Subdivision(subdivisionObject.getString("name"),
-                                                    subdivisionObject.getString("_id"))
+                                            subdivisionObject.getString("_id"))
                                     );
                                 }
                             }
@@ -281,14 +261,13 @@ public class MainActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        System.out.println(error);
+                        error.printStackTrace();
                     }
                 }
         );
 
         CookieRequest publicSubsRequest = new CookieRequest(Request.Method.GET,
                 "/groups/other",
-                preferences,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -299,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
                                 JSONObject subdivisionObject = subdivisionArray.getJSONObject(i);
                                 if (subdivisionObject.getString("__t").equals("NormalGroup")) {
                                     publicSubs.add(new Subdivision(subdivisionObject.getString("name"),
-                                                    subdivisionObject.getString("_id"))
+                                            subdivisionObject.getString("_id"))
                                     );
                                 }
                             }
@@ -403,7 +382,6 @@ public class MainActivity extends AppCompatActivity {
                     builder.setPositiveButton("Choose", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-
 
 
                             JSONArray userArray = new JSONArray();
@@ -591,7 +569,7 @@ public class MainActivity extends AppCompatActivity {
                     positiveButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            EditText nameView = (EditText) ((AlertDialog) nameDialog).findViewById(R.id.chatname_name);
+                            EditText nameView = (EditText) nameDialog.findViewById(R.id.chatname_name);
                             String name = nameView.getText().toString();
                             if (!name.isEmpty()) {
                                 try {
@@ -619,7 +597,6 @@ public class MainActivity extends AppCompatActivity {
         CookieJsonRequest newChatRequest = new CookieJsonRequest(Request.Method.POST,
                 "/chats",
                 params,
-                preferences,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -657,30 +634,34 @@ public class MainActivity extends AppCompatActivity {
 
             System.out.println(params.toString());
 
-            CookieJsonRequest request = new CookieJsonRequest(Request.Method.POST, "/announcements", params, preferences, new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    sectionPagerAdapter.announcementFragment.getAnnouncements();
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    NetworkResponse response = error.networkResponse;
-                    if (response != null) {
-                        if (response.statusCode == 400) {
-                            String message = new String(response.data);
-                            System.out.println(message);
+            CookieJsonRequest request = new CookieJsonRequest(Request.Method.POST,
+                    "/announcements",
+                    params,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            sectionPagerAdapter.announcementFragment.getAnnouncements();
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            NetworkResponse response = error.networkResponse;
+                            if (response != null) {
+                                if (response.statusCode == 400) {
+                                    String message = new String(response.data);
+                                    System.out.println(message);
+                                }
+                            }
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                            builder.setTitle("Error posting announcement");
+                            builder.setMessage("Please try again later");
+                            builder.setPositiveButton("Okay", null);
+                            builder.create().show();
                         }
                     }
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setTitle("Error posting announcement");
-                    builder.setMessage("Please try again later");
-                    builder.setPositiveButton("Okay", null);
-                    builder.create().show();
-                }
-            });
-
+            );
             queue.add(request);
         } else {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);

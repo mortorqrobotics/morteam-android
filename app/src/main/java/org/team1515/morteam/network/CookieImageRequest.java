@@ -29,17 +29,17 @@ public class CookieImageRequest extends ImageRequest {
         }
 
         //Insert session-id cookie into header
-        String sessionId = preferences.getString(CookieRequest.SESSION_COOKIE, "");
+        String sessionId = preferences.getString(NetworkUtils.SESSION_COOKIE, "");
         if(sessionId.length() > 0) {
             StringBuilder builder = new StringBuilder();
-            builder.append(CookieRequest.SESSION_COOKIE);
+            builder.append(NetworkUtils.SESSION_COOKIE);
             builder.append("=");
             builder.append(sessionId);
-            if(headers.containsKey(CookieRequest.COOKIE_KEY)) {
+            if(headers.containsKey(NetworkUtils.COOKIE_KEY)) {
                 builder.append("; ");
-                builder.append(headers.get(CookieRequest.COOKIE_KEY));
+                builder.append(headers.get(NetworkUtils.COOKIE_KEY));
             }
-            headers.put(CookieRequest.COOKIE_KEY, builder.toString());
+            headers.put(NetworkUtils.COOKIE_KEY, builder.toString());
         }
 
         return headers;

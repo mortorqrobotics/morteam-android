@@ -70,7 +70,6 @@ public class RegisterActivity extends AppCompatActivity {
 
         CookieRequest registerRequest = new CookieRequest(Request.Method.POST, "/users",
                 params,
-                preferences,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {

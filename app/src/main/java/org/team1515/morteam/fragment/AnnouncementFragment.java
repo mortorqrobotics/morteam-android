@@ -97,7 +97,6 @@ public class AnnouncementFragment extends Fragment {
         CookieRequest announcementRequest = new CookieRequest(
                 Request.Method.GET,
                 "/announcements?skip=0",
-                preferences,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -171,7 +170,7 @@ public class AnnouncementFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
-                CookieRequest request = new CookieRequest(Request.Method.DELETE, "/announcements/id/" + id, preferences, new Response.Listener<String>() {
+                CookieRequest request = new CookieRequest(Request.Method.DELETE, "/announcements/id/" + id, new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         announcements.remove(position);

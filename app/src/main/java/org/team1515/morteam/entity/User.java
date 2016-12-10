@@ -97,7 +97,6 @@ public class User {
         CookieRequest userRequest = new CookieRequest(Request.Method.GET,
                 "/users",
                 params,
-                preferences,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {

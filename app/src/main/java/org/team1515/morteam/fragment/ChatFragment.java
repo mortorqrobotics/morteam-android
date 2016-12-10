@@ -103,7 +103,6 @@ public class ChatFragment extends Fragment {
             CookieRequest chatRequest = new CookieRequest(
                     Request.Method.GET,
                     "/chats",
-                    preferences,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {

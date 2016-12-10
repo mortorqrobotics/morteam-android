@@ -121,7 +121,6 @@ public class LoginActivity extends AppCompatActivity {
                 Request.Method.POST,
                 "/login",
                 params,
-                preferences,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject userObject) {
