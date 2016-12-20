@@ -9,14 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.NetworkImageView;
 
-import net.team1515.morteam.R;
-
 import org.team1515.morteam.MorTeam;
+import org.team1515.morteam.R;
 import org.team1515.morteam.activity.ProfileActivity;
 import org.team1515.morteam.entity.Announcement;
 import org.team1515.morteam.fragment.AnnouncementFragment;

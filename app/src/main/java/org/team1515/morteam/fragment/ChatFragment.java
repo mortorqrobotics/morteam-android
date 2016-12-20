@@ -1,7 +1,6 @@
 package org.team1515.morteam.fragment;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -11,38 +10,33 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.Volley;
 
-import net.team1515.morteam.R;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.team1515.morteam.MorTeam;
+import org.team1515.morteam.R;
 import org.team1515.morteam.activity.ChatActivity;
 import org.team1515.morteam.entity.Chat;
-import org.team1515.morteam.entity.PictureCallBack;
 import org.team1515.morteam.network.CookieRequest;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.team1515.morteam.MorTeam.preferences;
+import static org.team1515.morteam.MorTeam.queue;
+
 public class ChatFragment extends Fragment {
-
-    private SharedPreferences preferences;
-    private RequestQueue queue;
-
     private RecyclerView chatList;
     private ChatAdapter chatAdapter;
 
@@ -53,9 +47,6 @@ public class ChatFragment extends Fragment {
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
-
-        preferences = getActivity().getSharedPreferences(null, 0);
-        queue = Volley.newRequestQueue(getContext());
 
         chatList = (RecyclerView) view.findViewById(R.id.chat_chatlist);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
@@ -73,6 +64,7 @@ public class ChatFragment extends Fragment {
         });
 
         progress = (ProgressBar) view.findViewById(R.id.chat_loading);
+        progress.setVisibility(View.GONE);
         progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
         errorView = (TextView) view.findViewById(R.id.chat_error);
 
@@ -135,8 +127,8 @@ public class ChatFragment extends Fragment {
 
                                     chats.add(chat);
 
-                                    progress.setVisibility(View.GONE);
                                 }
+                                progress.setVisibility(View.GONE);
                                 notifyDataSetChanged();
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -147,8 +139,6 @@ public class ChatFragment extends Fragment {
                             } finally {
                                 refreshLayout.setRefreshing(false);
                             }
-
-
                         }
                     },
                     new Response.ErrorListener() {

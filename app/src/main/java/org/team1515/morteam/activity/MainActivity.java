@@ -3,7 +3,6 @@ package org.team1515.morteam.activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -35,18 +34,15 @@ import android.widget.TextView;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.NetworkImageView;
-import com.android.volley.toolbox.Volley;
-
-import net.team1515.morteam.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.team1515.morteam.MorTeam;
+import org.team1515.morteam.R;
 import org.team1515.morteam.entity.Subdivision;
 import org.team1515.morteam.entity.User;
 import org.team1515.morteam.fragment.AnnouncementFragment;
@@ -68,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle drawerToggle;
+
     RecyclerView yourSubList;
     SubdivisionListAdapter yourSubAdapter;
     RecyclerView publicSubList;
@@ -103,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
                 popupMenu.show();
             }
         });
-        MorTeam.setNetworkImage("http://www.morteam.com:8080" + preferences.getString("profpicpath", ""), profilePic);
+        MorTeam.setNetworkImage("http://www.morteam.com:80" + preferences.getString("profpicpath", "") + "-60", profilePic);
 
         //Menu
         popupMenu = new PopupMenu(this, profilePic);
@@ -180,13 +177,13 @@ public class MainActivity extends AppCompatActivity {
 
 
         yourSubAdapter = new SubdivisionListAdapter();
-        LinearLayoutManager yourSubLayoutManager = new org.solovyev.android.views.llm.LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        LinearLayoutManager yourSubLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         yourSubList = (RecyclerView) findViewById(R.id.main_yoursub_list);
         yourSubList.setLayoutManager(yourSubLayoutManager);
         yourSubList.setAdapter(yourSubAdapter);
 
         publicSubList = (RecyclerView) findViewById(R.id.main_publicsub_list);
-        LinearLayoutManager publicSubLayoutManager = new org.solovyev.android.views.llm.LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        LinearLayoutManager publicSubLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         publicSubAdapter = new SubdivisionListAdapter();
         publicSubList.setLayoutManager(publicSubLayoutManager);
         publicSubList.setAdapter(publicSubAdapter);
@@ -220,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(String response) {
                         try {
                             JSONArray userArray = new JSONArray(response);
+                            teamUsers.clear();
                             for (int i = 0; i < userArray.length(); i++) {
                                 JSONObject userObject = userArray.getJSONObject(i);
                                 teamUsers.add(new User(userObject.getString("firstname"),
@@ -555,6 +553,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                         audience.put("groups", groupsArray);
 
+                        params.put("audience", audience);
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -601,13 +601,38 @@ public class MainActivity extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        System.out.println(response.toString());
+                        sectionPagerAdapter.chatFragment.getChats();
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
+
+
+                        // Handle chat errors
+                        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(MainActivity.this);
+                        builder.setPositiveButton("Okay", null);
+
+                        NetworkResponse response = error.networkResponse;
+                        if (response != null) {
+                            if (response.statusCode == 400) {
+                                String message = new String(response.data);
+                                System.out.println(message);
+                                if (message.equals("Invalid request")) {
+                                    builder.setTitle("Server error");
+                                    builder.setMessage("Please try again later.");
+                                }
+                            } else {
+                                builder.setTitle("Cannot connect to server");
+                                builder.setMessage("Please make sure you have a stable internet connection.");
+                            }
+                        } else {
+                            builder.setTitle("Cannot connect to server");
+                            builder.setMessage("Please make sure you have a stable internet connection.");
+                        }
+
+                        builder.create().show();
                     }
                 }
         );

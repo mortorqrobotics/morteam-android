@@ -23,22 +23,17 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 
-import net.team1515.morteam.R;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.team1515.morteam.activity.LoginActivity;
+import org.team1515.morteam.R;
 import org.team1515.morteam.adapter.AnnouncementAdapter;
 import org.team1515.morteam.entity.Announcement;
 import org.team1515.morteam.entity.User;
-import org.team1515.morteam.network.CookieJsonRequest;
 import org.team1515.morteam.network.CookieRequest;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class AnnouncementFragment extends Fragment {
 

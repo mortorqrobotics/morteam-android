@@ -11,12 +11,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.android.volley.Network;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -24,15 +22,13 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.Volley;
 
-import net.team1515.morteam.R;
-
-import org.team1515.morteam.MorTeam;
-import org.team1515.morteam.entity.User;
-import org.team1515.morteam.network.CookieRequest;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.team1515.morteam.MorTeam;
+import org.team1515.morteam.R;
+import org.team1515.morteam.entity.User;
+import org.team1515.morteam.network.CookieRequest;
 
 import java.util.ArrayList;
 import java.util.HashMap;

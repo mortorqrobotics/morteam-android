@@ -1,36 +1,30 @@
 package org.team1515.morteam.activity;
 
-import android.app.AlertDialog;
+
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.EditText;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
 
-import net.team1515.morteam.R;
-import org.team1515.morteam.network.CookieRequest;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.team1515.morteam.MorTeam;
+import org.team1515.morteam.R;
+import org.team1515.morteam.network.CookieJsonRequest;
 
 public class JoinTeamActivity extends AppCompatActivity {
-    SharedPreferences preferences;
-    RequestQueue queue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        preferences = getSharedPreferences(null, 0);
-        queue = Volley.newRequestQueue(this);
 
         setContentView(R.layout.activity_jointeam);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -39,44 +33,54 @@ public class JoinTeamActivity extends AppCompatActivity {
 
     public void joinTeamClicked(View view) {
         EditText teamID = (EditText)findViewById(R.id.jointeam_id);
-        Map<String, String> params = new HashMap<>();
-        params.put("team_id", teamID.getText().toString());
-        CookieRequest joinTeamRequest = new CookieRequest(Request.Method.POST,
-                "/f/joinTeam",
-                params,
-                new Response.Listener<String>() {
+
+        CookieJsonRequest joinTeamRequest = new CookieJsonRequest(Request.Method.POST,
+                "/teams/code/" + teamID.getText() + "/join",
+                new Response.Listener<JSONObject>() {
                     @Override
-                    public void onResponse(String response) {
-                        if(response.equals("success")) {
-                            preferences.edit().
-                                    putBoolean("isOnTeam", true)
+                    public void onResponse(JSONObject response) {
+                        try {
+                            MorTeam.preferences.edit()
+                                    .putBoolean("isOnTeam", true)
+                                    .putString("team_id", response.getString("_id"))
+                                    .putString("teamNumber", response.getString("number"))
                                     .apply();
-                            Intent intent = new Intent(JoinTeamActivity.this, MainActivity.class);
-                            startActivity(intent);
-                            finish();
-                        } else if(response.equals("no such team")) {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(JoinTeamActivity.this);
-                            builder.setTitle("The team does not exists");
-                            builder.setMessage("Make sure you inputted the correct team id.");
-                            builder.setPositiveButton("Okay", null);
-                            builder.create().show();
-                        } else if(response.equals("banned")) {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(JoinTeamActivity.this);
-                            builder.setTitle("You have been banned from this team");
-                            builder.setMessage("Contact the team owner if this is an error.");
-                            builder.setPositiveButton("Okay", null);
-                            builder.create().show();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
+
+                        Intent intent = new Intent(JoinTeamActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                // Handle team joining errors
                 AlertDialog.Builder builder = new AlertDialog.Builder(JoinTeamActivity.this);
-                builder.setTitle("Error contacting server");
                 builder.setPositiveButton("Okay", null);
+
+                NetworkResponse response = error.networkResponse;
+                if (response != null) {
+                    if (response.statusCode == 400) {
+                        String message = new String(response.data);
+                        System.out.println(message);
+                        if (message.equals("You already have a team")) {
+                            builder.setTitle("You have already joined a team");
+                            builder.setMessage("Try closing MorTeam and logging in again.");
+                        }
+                    } else {
+                        builder.setTitle("Team does not exist");
+                        builder.setMessage("Please make sure you have entered a valid team code.");
+                    }
+                } else {
+                    builder.setTitle("Cannot connect to server");
+                    builder.setMessage("Please make sure you have a stable internet connection.");
+                }
+
                 builder.create().show();
             }
         });
-        queue.add(joinTeamRequest);
+        MorTeam.queue.add(joinTeamRequest);
     }
 }

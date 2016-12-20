@@ -32,7 +32,7 @@ public class User {
         if (profPicPath.substring(0, 3).equals("/pp")) {
             this.profPicPath = "http://profilepics.morteam.com.s3.amazonaws.com" + profPicPath.substring(3);
         } else {
-            this.profPicPath = "http://www.morteam.com:8080" + profPicPath;
+            this.profPicPath = "http://www.morteam.com:80" + profPicPath;
         }
         this.email = email;
         this.parentEmail = parentEmail;

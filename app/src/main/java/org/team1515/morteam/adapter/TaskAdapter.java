@@ -11,7 +11,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import net.team1515.morteam.R;
+import org.team1515.morteam.R;
 
 import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.activity.ProfileActivity;

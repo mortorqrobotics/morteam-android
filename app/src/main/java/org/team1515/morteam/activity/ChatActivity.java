@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
@@ -27,7 +26,7 @@ import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Manager;
 import com.github.nkzawa.socketio.client.Socket;
 
-import net.team1515.morteam.R;
+import org.team1515.morteam.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -166,7 +165,7 @@ public class ChatActivity extends AppCompatActivity {
 
 
         try {
-            socket = IO.socket("http://www.morteam.com:8080");
+            socket = IO.socket("http://www.morteam.com:80");
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -207,7 +206,6 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
         socket = socket.connect();
-        System.out.println(socket.connected());
 
         socket.emit("get clients");
         socket.on("get clients", new Emitter.Listener() {
@@ -221,46 +219,36 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void call(Object... args) {
                 try {
-                    JSONObject messageObject = new JSONObject(args[0].toString());
+                    JSONObject chatObject = new JSONObject(args[0].toString());
+                    JSONObject messageObject = chatObject.getJSONObject("message");
+                    JSONObject authorObject = messageObject.getJSONObject("author");
+                    System.out.println("\t" + messageObject.toString());
 
-                    String firstName = messageObject.getString("author_fn");
-                    String lastName = messageObject.getString("author_ln");
-                    String content = messageObject.getString("content");
-                    String date = messageObject.getString("timestamp");
-                    String chatId = messageObject.getString("chat_id");
-                    String profPicPath = messageObject.getString("author_profpicpath") + "-60";
-                    profPicPath = profPicPath.replace(" ", "+");
+                    final String firstName = authorObject.getString("firstname");
+                    final String lastName = authorObject.getString("lastname");
+                    final String authorId = authorObject.getString("_id");
+                    final String profPicPath = authorObject.getString("profpicpath") + "-60".replace(" ", "+");
+                    final String content = messageObject.getString("content");
+                    final String date = messageObject.getString("timestamp");
+                    final String chatId = chatObject.getString("chatId");
 
-                    Intent intent = new Intent("message");
-                    intent.putExtra("firstname", firstName);
-                    intent.putExtra("lastname", lastName);
-                    intent.putExtra("content", content);
-                    intent.putExtra("date", date);
-                    intent.putExtra("chatId", chatId);
-                    intent.putExtra("profPicPath", profPicPath);
-                    LocalBroadcastManager.getInstance(ChatActivity.this).sendBroadcast(intent);
+                    final boolean isOwnChat = authorId.equals(MorTeam.preferences.getString("_id", ""));
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            messageAdapter.addMessage(firstName, lastName, content, date, chatId, profPicPath, isOwnChat);
+                            if (messageLayoutManager.findFirstVisibleItemPosition() <= 3) {
+                                messageList.smoothScrollToPosition(0);
+                            }
+                            System.out.println(messageLayoutManager.findFirstVisibleItemPosition());
+                        }
+                    });
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         });
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                messageAdapter.addMessage(
-                        intent.getStringExtra("firstname"),
-                        intent.getStringExtra("lastname"),
-                        intent.getStringExtra("content"),
-                        intent.getStringExtra("date"),
-                        intent.getStringExtra("chatId"),
-                        intent.getStringExtra("profPicPath"),
-                        false
-                );
-
-                messageList.smoothScrollToPosition(0);
-            }
-        }, new IntentFilter("message"));
 
         getChats();
     }

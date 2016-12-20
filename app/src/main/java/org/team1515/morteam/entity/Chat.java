@@ -14,7 +14,7 @@ public class Chat {
         if (picPath.substring(0, 3).equals("/pp")) {
             this.picPath = "http://profilepics.morteam.com.s3.amazonaws.com" + picPath.substring(3);
         } else {
-            this.picPath = "http://www.morteam.com:8080" + picPath;
+            this.picPath = "http://www.morteam.com:80" + picPath;
         }
     }
 

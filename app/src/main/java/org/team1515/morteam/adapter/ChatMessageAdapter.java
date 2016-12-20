@@ -9,7 +9,6 @@ import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.text.style.StyleSpan;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,9 +17,8 @@ import android.widget.TextView;
 
 import com.android.volley.toolbox.NetworkImageView;
 
-import net.team1515.morteam.R;
-
 import org.team1515.morteam.MorTeam;
+import org.team1515.morteam.R;
 import org.team1515.morteam.entity.Message;
 import org.team1515.morteam.entity.User;
 

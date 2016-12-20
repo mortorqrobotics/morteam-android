@@ -24,7 +24,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.NetworkImageView;
 
-import net.team1515.morteam.R;
+import org.team1515.morteam.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -100,12 +100,18 @@ public class ProfileActivity extends AppCompatActivity {
                     public void onResponse(String response) {
                         try {
                             JSONObject userObject = new JSONObject(response);
+                            String parentEmail;
+                            if (userObject.has("parentEmail")) {
+                                parentEmail = userObject.getString("parentEmail");
+                            } else {
+                                parentEmail = "";
+                            }
                             user = new User(userObject.getString("firstname"),
                                     userObject.getString("lastname"),
                                     id,
                                     userObject.getString("profpicpath") + "-300",
                                     userObject.getString("email"),
-                                    userObject.getString("parentEmail"),
+                                    parentEmail,
                                     userObject.getString("phone")
                             );
 

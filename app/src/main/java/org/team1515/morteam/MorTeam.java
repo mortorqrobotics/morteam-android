@@ -10,8 +10,6 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.Volley;
 
-import net.team1515.morteam.R;
-
 import org.team1515.morteam.network.CookieImageLoader;
 
 public class MorTeam extends Application {
@@ -24,7 +22,7 @@ public class MorTeam extends Application {
     public void onCreate() {
         super.onCreate();
 
-        preferences = getSharedPreferences(null, MODE_PRIVATE);
+        preferences = getSharedPreferences("org.team1515.morteam", MODE_PRIVATE);
 
         queue = Volley.newRequestQueue(this);
         imageLoader = new CookieImageLoader(queue, new ImageLoader.ImageCache() {

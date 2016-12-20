@@ -1,44 +1,27 @@
 package org.team1515.morteam.activity;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 
-import net.team1515.morteam.R;
-
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.team1515.morteam.MorTeam;
+import org.team1515.morteam.R;
 import org.team1515.morteam.network.CookieJsonRequest;
-import org.team1515.morteam.network.CookieRequest;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static android.webkit.WebViewDatabase.getInstance;
-
 
 public class LoginActivity extends AppCompatActivity {
-
-    SharedPreferences preferences;
-    RequestQueue queue;
-
-    boolean rememberMe;
 
     public static final String[] userData = {
             "_id",
@@ -57,16 +40,10 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        preferences = getSharedPreferences(null, 0);
-        queue = Volley.newRequestQueue(this);
-
-        rememberMe = false;
-
         for (String data : userData) {
-            if (!preferences.contains(data)) {
-                System.out.println(data);
+            if (!MorTeam.preferences.contains(data)) {
                 // If not logged in, bring to login page and clear data
-                preferences.edit().clear().apply();
+                MorTeam.preferences.edit().clear().apply();
                 setContentView(R.layout.activity_login);
                 return;
             }
@@ -111,7 +88,7 @@ public class LoginActivity extends AppCompatActivity {
         try {
             params.put("username", username);
             params.put("password", password);
-            params.put("rememberMe", rememberMe);
+            params.put("rememberMe", true);
         } catch (JSONException e) {
             e.printStackTrace();
             return;
@@ -125,7 +102,7 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject userObject) {
                         try {
-                            SharedPreferences.Editor editor = preferences.edit();
+                            SharedPreferences.Editor editor =  MorTeam.preferences.edit();
                             editor.putString("_id", userObject.getString("_id"))
                                     .putString("username", userObject.getString("username"))
                                     .putString("firstname", userObject.getString("firstname"))
@@ -196,90 +173,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 }
         );
-        queue.add(loginRequest);
-
-//        CookieRequest loginRequest = new CookieRequest(
-//                Request.Method.POST,
-//                "/login",
-//                params,
-//                preferences,
-//                new Response.Listener<String>() {
-//                    @Override
-//                    public void onResponse(String response) {
-//                        try {
-//                            JSONObject userObject = new JSONObject(response);
-//
-//                            SharedPreferences.Editor editor = preferences.edit();
-//                            editor.putString("_id", userObject.getString("_id"))
-//                                    .putString("username", userObject.getString("username"))
-//                                    .putString("firstname", userObject.getString("firstname"))
-//                                    .putString("lastname", userObject.getString("lastname"))
-//                                    .putString("email", userObject.getString("email"))
-//                                    .putString("phone", userObject.getString("phone"))
-//                                    .putString("profpicpath", userObject.getString("profpicpath"));
-//
-//                            Intent intent = new Intent();
-//
-//                            if (userObject.has("team")) {
-//                                JSONObject teamObject = userObject.getJSONObject("team");
-//                                editor.putString("team_id", teamObject.getString("_id"))
-//                                        .putString("teamNumber", teamObject.getString("number"))
-//                                        .putString("position", userObject.getString("position"));
-//
-//                                intent.setClass(LoginActivity.this, MainActivity.class);
-//                            } else {
-//                                intent.setClass(LoginActivity.this, JoinTeamActivity.class);
-//                            }
-//
-//                            editor.apply();
-//
-//                            loginButton.setClickable(true);
-//                            startActivity(intent);
-//                            finish();
-//                        } catch (JSONException e) {
-//                            e.printStackTrace();
-//                            AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-//                            builder.setTitle("Incorrect username or password");
-//                            builder.setPositiveButton("Okay", null);
-//                            builder.create().show();
-//
-//                            loginButton.setClickable(true);
-//                        }
-//                    }
-//                },
-//                new Response.ErrorListener() {
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                        error.printStackTrace();
-//
-//                        // Handle login errors
-//                        AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-//                        builder.setPositiveButton("Okay", null);
-//
-//                        NetworkResponse response = error.networkResponse;
-//                        if (response != null) {
-//                            if (response.statusCode == 400) {
-//                                String message = new String(response.data);
-//                                System.out.println(message);
-//                                if (message.equals("Invalid login credentials")) {
-//                                    builder.setTitle("Invalid login");
-//                                    builder.setMessage("Please make sure you entered the correct username and password.");
-//                                }
-//                            } else {
-//                                builder.setTitle("Cannot connect to server");
-//                                builder.setMessage("Please make sure you have a stable internet connection.");
-//                            }
-//                        } else {
-//                            builder.setTitle("Cannot connect to server");
-//                            builder.setMessage("Please make sure you have a stable internet connection.");
-//                        }
-//
-//                        builder.create().show();
-//
-//                        loginButton.setClickable(true);
-//                    }
-//                });
-//        queue.add(loginRequest);
+        MorTeam.queue.add(loginRequest);
     }
 
     public void register(View view) {

@@ -1,16 +1,20 @@
 package org.team1515.morteam.network;
 
+import org.json.JSONException;
 import org.team1515.morteam.MorTeam;
 
 import android.content.SharedPreferences;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
+import com.android.volley.ParseError;
 import com.android.volley.Response;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +44,21 @@ public class CookieJsonRequest extends JsonObjectRequest {
                 editor.apply();
             }
         }
-        return super.parseNetworkResponse(response);
+
+        try {
+            String jsonString =
+                    new String(response.data, HttpHeaderParser.parseCharset(response.headers));
+            if (!jsonString.isEmpty()) {
+                return Response.success(new JSONObject(jsonString),
+                        HttpHeaderParser.parseCacheHeaders(response));
+            } else {
+                return Response.success(new JSONObject(), HttpHeaderParser.parseCacheHeaders(response));
+            }
+        } catch (UnsupportedEncodingException e) {
+            return Response.error(new ParseError(e));
+        } catch (JSONException je) {
+            return Response.error(new ParseError(je));
+        }
     }
 
     @Override

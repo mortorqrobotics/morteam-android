@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -29,12 +30,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 
-import net.team1515.morteam.R;
+import org.team1515.morteam.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.solovyev.android.views.llm.LinearLayoutManager;
 import org.team1515.morteam.activity.MainActivity;
 import org.team1515.morteam.entity.Event;
 import org.team1515.morteam.entity.Subdivision;
@@ -47,9 +47,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.team1515.morteam.MorTeam.preferences;
+import static org.team1515.morteam.MorTeam.queue;
+
 public class CalendarFragment extends Fragment {
-    private SharedPreferences preferences;
-    private RequestQueue queue;
 
     private Spinner monthSpinner;
     private ArrayAdapter<CharSequence> monthAdapter;
