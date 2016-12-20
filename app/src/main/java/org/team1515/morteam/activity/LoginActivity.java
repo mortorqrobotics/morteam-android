@@ -111,6 +111,7 @@ public class LoginActivity extends AppCompatActivity {
                                     .putString("phone", userObject.getString("phone"))
                                     .putString("profpicpath", userObject.getString("profpicpath"));
 
+                            String position = userObject.getString("position");
                             Intent intent = new Intent();
 
                             if (userObject.has("team")) {

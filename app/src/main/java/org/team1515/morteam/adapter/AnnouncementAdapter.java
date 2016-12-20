@@ -22,6 +22,8 @@ import org.team1515.morteam.fragment.AnnouncementFragment;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.team1515.morteam.MorTeam.preferences;
+
 public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapter.ViewHolder> {
 
     private List<Announcement> announcements;
@@ -61,7 +63,7 @@ public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapte
             public void onClick(View v) {
                 Intent intent = new Intent(fragment.getContext(), ProfileActivity.class);
                 intent.putExtra("_id", currentAnnouncement.getUserId());
-                if (currentAnnouncement.getUserId().equals(fragment.preferences.getString("_id", ""))) {
+                if (currentAnnouncement.getUserId().equals(preferences.getString("_id", ""))) {
                     intent.putExtra("isCurrentUser", true);
                 } else {
                     intent.putExtra("isCurrentUser", false);
@@ -88,7 +90,7 @@ public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapte
         ImageButton deleteButton = (ImageButton) holder.cardView.findViewById(R.id.delete_button);
 
         //Don't show delete announcement buttons if not admin
-        String teamPosition = fragment.preferences.getString("position", "");
+        String teamPosition = preferences.getString("position", "");
         if (!teamPosition.equals("leader")) {
             deleteButton.setClickable(false);
             deleteButton.setVisibility(View.INVISIBLE);
