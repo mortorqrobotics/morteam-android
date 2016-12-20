@@ -1,7 +1,6 @@
 package org.team1515.morteam.activity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -21,7 +20,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.NetworkImageView;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,10 +34,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SubdivisionActivity extends AppCompatActivity {
+import static org.team1515.morteam.MorTeam.queue;
 
-    SharedPreferences preferences;
-    RequestQueue queue;
+public class SubdivisionActivity extends AppCompatActivity {
 
     String name;
     String id;
@@ -54,10 +51,6 @@ public class SubdivisionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_subdivision);
-
-
-        preferences = getSharedPreferences(null, 0);
-        queue = Volley.newRequestQueue(this);
 
         progress = (ProgressBar) findViewById(R.id.subdivision_loading);
         progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
@@ -187,7 +180,7 @@ public class SubdivisionActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     Intent intent = new Intent(SubdivisionActivity.this, ProfileActivity.class);
                     intent.putExtra("_id", currentUser.getId());
-                    if (currentUser.getId().equals(preferences.getString("_id", ""))) {
+                    if (currentUser.getId().equals(MorTeam.preferences.getString("_id", ""))) {
                         intent.putExtra("isCurrentUser", true);
                     } else {
                         intent.putExtra("isCurrentUser", false);
