@@ -1,11 +1,7 @@
 package org.team1515.morteam.activity;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -86,7 +82,7 @@ public class ChatActivity extends AppCompatActivity {
         chatId = intent.getStringExtra("_id");
         isGroup = intent.getBooleanExtra("isGroup", false);
 
-        messageList = (RecyclerView) findViewById(R.id.chat_messagelist);
+        messageList = (RecyclerView) findViewById(R.id.chat_messageList);
         messageAdapter = new ChatMessageAdapter();
         messageLayoutManager = new LinearLayoutManager(this);
         messageLayoutManager.setReverseLayout(true);

@@ -6,9 +6,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -18,19 +15,14 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -43,13 +35,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.R;
+import org.team1515.morteam.adapter.MainTabAdapter;
+import org.team1515.morteam.adapter.SubdivisionAdapter;
 import org.team1515.morteam.entity.Subdivision;
 import org.team1515.morteam.entity.User;
-import org.team1515.morteam.fragment.AnnouncementFragment;
-import org.team1515.morteam.fragment.CalendarFragment;
-import org.team1515.morteam.fragment.ChatFragment;
 import org.team1515.morteam.network.CookieJsonRequest;
 import org.team1515.morteam.network.CookieRequest;
+import org.team1515.morteam.network.NetworkUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +50,7 @@ import static org.team1515.morteam.MorTeam.preferences;
 import static org.team1515.morteam.MorTeam.queue;
 
 public class MainActivity extends AppCompatActivity {
-    SectionPagerAdapter sectionPagerAdapter;
+    MainTabAdapter sectionPagerAdapter;
 
     PopupMenu popupMenu;
 
@@ -66,9 +58,9 @@ public class MainActivity extends AppCompatActivity {
     ActionBarDrawerToggle drawerToggle;
 
     RecyclerView yourSubList;
-    SubdivisionListAdapter yourSubAdapter;
+    SubdivisionAdapter yourSubAdapter;
     RecyclerView publicSubList;
-    SubdivisionListAdapter publicSubAdapter;
+    SubdivisionAdapter publicSubAdapter;
 
 
     //New announcement alert
@@ -100,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
                 popupMenu.show();
             }
         });
-        MorTeam.setNetworkImage("http://www.morteam.com:80" + preferences.getString("profpicpath", "") + "-60", profilePic);
+        MorTeam.setNetworkImage(NetworkUtils.makeURL(preferences.getString("profpicpath", "") + "-60", false), profilePic);
 
         //Menu
         popupMenu = new PopupMenu(this, profilePic);
@@ -150,12 +142,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        sectionPagerAdapter = new SectionPagerAdapter(getSupportFragmentManager());
+        sectionPagerAdapter = new MainTabAdapter(getSupportFragmentManager());
         ViewPager viewPager = (ViewPager) findViewById(R.id.main_viewpager);
         viewPager.setAdapter(sectionPagerAdapter);
         tabLayout.setupWithViewPager(viewPager);
 
-        drawerLayout = (DrawerLayout) findViewById(R.id.main_drawerlayout);
+        drawerLayout = (DrawerLayout) findViewById(R.id.main_drawerLayout);
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -173,18 +165,18 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         drawerToggle.setDrawerIndicatorEnabled(true);
-        drawerLayout.setDrawerListener(drawerToggle);
+        drawerLayout.addDrawerListener(drawerToggle);
 
 
-        yourSubAdapter = new SubdivisionListAdapter();
+        yourSubAdapter = new SubdivisionAdapter();
         LinearLayoutManager yourSubLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        yourSubList = (RecyclerView) findViewById(R.id.main_yoursub_list);
+        yourSubList = (RecyclerView) findViewById(R.id.main_yourSub_list);
         yourSubList.setLayoutManager(yourSubLayoutManager);
         yourSubList.setAdapter(yourSubAdapter);
 
         publicSubList = (RecyclerView) findViewById(R.id.main_publicsub_list);
         LinearLayoutManager publicSubLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        publicSubAdapter = new SubdivisionListAdapter();
+        publicSubAdapter = new SubdivisionAdapter();
         publicSubList.setLayoutManager(publicSubLayoutManager);
         publicSubList.setAdapter(publicSubAdapter);
 
@@ -725,109 +717,5 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private class SectionPagerAdapter extends FragmentPagerAdapter {
-
-        public AnnouncementFragment announcementFragment;
-        public ChatFragment chatFragment;
-        public CalendarFragment calendarFragment;
-
-        public SectionPagerAdapter(FragmentManager fragmentManager) {
-            super(fragmentManager);
-
-            announcementFragment = new AnnouncementFragment();
-            chatFragment = new ChatFragment();
-            calendarFragment = new CalendarFragment();
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            switch (position) {
-                case 0:
-                    return announcementFragment;
-                case 1:
-                    return chatFragment;
-                case 2:
-                    return calendarFragment;
-                default:
-                    return new Fragment();
-            }
-        }
-
-        @Override
-        public int getCount() {
-            return 2;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return "Home";
-                case 1:
-                    return "Chat";
-                case 2:
-                    return "Calendar";
-                default:
-                    return "Home";
-            }
-        }
-    }
-
-    public class SubdivisionListAdapter extends RecyclerView.Adapter<SubdivisionListAdapter.ViewHolder> {
-
-        private List<Subdivision> subdivisions;
-
-        public SubdivisionListAdapter() {
-            this.subdivisions = new ArrayList<>();
-        }
-
-        public void setSubdivisions(List<Subdivision> subdivisions) {
-            this.subdivisions = subdivisions;
-            notifyDataSetChanged();
-        }
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            public LinearLayout layout;
-
-            public ViewHolder(LinearLayout layout) {
-                super(layout);
-                this.layout = layout;
-            }
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            LinearLayout layout = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.list_subdivision, parent, false);
-            ViewHolder viewHolder = new ViewHolder(layout);
-            return viewHolder;
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder holder, final int position) {
-            final Subdivision currentSubdivision = subdivisions.get(position);
-
-            ImageView icon = (ImageView) holder.layout.findViewById(R.id.subdivisionlist_icon);
-            //TODO: set subdivision icon
-
-            TextView name = (TextView) holder.layout.findViewById(R.id.subdivisionlist_name);
-            name.setText(currentSubdivision.getName());
-
-            holder.layout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(MainActivity.this, SubdivisionActivity.class);
-                    intent.putExtra("name", currentSubdivision.getName());
-                    intent.putExtra("id", currentSubdivision.getId());
-                    startActivity(intent);
-                }
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return subdivisions.size();
-        }
     }
 }

@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -71,7 +72,7 @@ public class ProfileActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDisplayShowHomeEnabled(true);
+            actionBar.setTitle("Profile");
         }
 
         //Get data from intent
@@ -80,11 +81,8 @@ public class ProfileActivity extends AppCompatActivity {
         isCurrentUser = intent.getBooleanExtra("isCurrentUser", false);
 
         if (!isCurrentUser) {
-            Button editProfileButton = (Button) findViewById(R.id.profile_editprofile);
-            editProfileButton.setVisibility(View.GONE);
-
-            Button changePasswordButton = (Button) findViewById(R.id.profile_changepassword);
-            changePasswordButton.setVisibility(View.GONE);
+            LinearLayout editButtons = (LinearLayout) findViewById(R.id.profile_editButtons);
+            editButtons.setVisibility(View.GONE);
 
             Button assignTaskButton = (Button) findViewById(R.id.profile_assigntask);
             String position = MorTeam.preferences.getString("position", "");

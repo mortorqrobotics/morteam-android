@@ -23,6 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/profile_picture"
+            android:layout_toEndOf="@id/profile_picture"
             android:paddingTop="2dp"
             android:textSize="30sp" />
 
@@ -32,6 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/profile_name"
             android:layout_toRightOf="@id/profile_picture"
+            android:layout_toEndOf="@id/profile_picture"
             android:textSize="20sp" />
 
         <TextView
@@ -40,11 +42,13 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/profile_email"
             android:layout_toRightOf="@id/profile_picture"
+            android:layout_toEndOf="@id/profile_picture"
             android:textSize="20sp" />
 
     </RelativeLayout>
 
     <LinearLayout
+        android:id="@+id/profile_editButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -55,7 +59,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:onClick="editProfileClicked"
-            android:text="Edit Profile" />
+            android:text="@string/profile_editProfile"
+            style="?android:attr/buttonBarButtonStyle"/>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="?android:attr/dividerVertical" />
 
         <Button
             android:id="@+id/profile_changepassword"
@@ -63,7 +75,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:onClick="changePasswordClicked"
-            android:text="Change Password" />
+            android:text="@string/profile_changePassword"
+            style="?android:attr/buttonBarButtonStyle" />
 
     </LinearLayout>
 
@@ -85,7 +98,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Attendence"
+                android:text="@string/profile_attendance"
                 android:textSize="25sp" />
 
             <LinearLayout
@@ -96,7 +109,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Unexcused absences: " />
+                    android:text="@string/profile_unexcused" />
 
                 <TextView
                     android:id="@+id/profile_unexcused"
@@ -113,7 +126,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Presence percentage: " />
+                    android:text="@string/profile_presencePercentage" />
 
                 <TextView
                     android:id="@+id/profile_presence"
@@ -125,7 +138,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Dates of unexcused absences: " />
+                android:text="@string/profile_unexcusedDates" />
 
             <TextView
                 android:id="@+id/profile_dates"
@@ -159,17 +172,19 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Pending Tasks"
+                    android:text="@string/profile_pendingTasks"
                     android:textSize="25sp"
-                    android:layout_alignParentLeft="true"/>
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true" />
 
                 <Button
                     android:id="@+id/profile_assigntask"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
                     android:onClick="assignTask"
-                    android:text="Assign Task"
+                    android:text="@string/profile_assignTaskButton"
                     android:visibility="gone"
                     android:minHeight="0dp"
                     android:padding="10dp"/>
@@ -187,13 +202,13 @@
                 android:id="@+id/profile_pendingnone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="\tNone"
+                android:text="@string/profile_noTasks"
                 android:visibility="gone" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Completed Tasks"
+                android:text="@string/profile_completedTasks"
                 android:textSize="25sp" />
 
             <android.support.v7.widget.RecyclerView
@@ -207,7 +222,7 @@
                 android:id="@+id/profile_completednone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="\tNone"
+                android:text="@string/profile_noTasks"
                 android:visibility="gone" />
 
         </LinearLayout>

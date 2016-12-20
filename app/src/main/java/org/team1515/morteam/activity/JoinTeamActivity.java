@@ -32,7 +32,7 @@ public class JoinTeamActivity extends AppCompatActivity {
     }
 
     public void joinTeamClicked(View view) {
-        EditText teamID = (EditText)findViewById(R.id.jointeam_id);
+        EditText teamID = (EditText)findViewById(R.id.joinTeam_id);
 
         CookieJsonRequest joinTeamRequest = new CookieJsonRequest(Request.Method.POST,
                 "/teams/code/" + teamID.getText() + "/join",

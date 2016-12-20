@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">MorTeam</string>
-    <string name="action_settings">Settings</string>
 
     <!-- Login Activity -->
     <string name="login_username">Username</string>
@@ -19,6 +18,10 @@
     <string name="register_phone">Phone</string>
     <string name="register_registerButton">Register</string>
 
+    <!-- Join Team -->
+    <string name="joinTeam_teamIdBox">Team ID</string>
+    <string name="joinTeam_joinButton">Join Team</string>
+
     <!-- Main Tab Activity -->
     <string name="title_frag1">Home</string>
     <string name="title_frag2">Chat</string>
@@ -26,19 +29,35 @@
     <string name="title_frag4">Calendar</string>
     <string name="title_frag5">Settings</string>
     <string name="title_frag6">Sign Out</string>
-    <string name="title_activity_main">MorTeam</string>
 
+    <!-- Subdivision Activity -->
+    <string name="subdivision_userTitle">Users</string>
 
+    <!-- Nav Drawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_drawer_yourSubdivisions">Your Subdivisions</string>
+    <string name="navigation_drawer_publicSubdivisions">Public Subdivisions</string>
+    <string name="navigation_drawer_team">Team</string>
 
-    <!-- Home Fragment -->
-    <string name="home_title">Announcements</string>
-
-    <!-- Chat Fragment -->
+    <!-- Chat Activity -->
+    <string name="chat_messageBox">Message</string>
     <string name="chat_button">Send</string>
-    <string name="title_activity_chat">Chat</string>
-    <string name="section_format">Hello World from section: %1$d</string>
+
+    <!-- Profile Activity -->
+    <string name="profile_editProfile">Edit Profile</string>
+    <string name="profile_changePassword">Change Password</string>
+    <string name="profile_attendance">Attendance</string>
+    <string name="profile_unexcused">Unexcused Absences:\t</string>
+    <string name="profile_presencePercentage">Presence Percentage:\t</string>
+    <string name="profile_unexcusedDates">Dates of Unexcused Absences:\t</string>
+    <string name="profile_pendingTasks">Pending Tasks</string>
+    <string name="profile_completedTasks">Completed Tasks</string>
+    <string name="profile_assignTaskButton">Assign Task</string>
+    <string name="profile_noTasks">\tNone</string>
+
+    <!-- Tasks -->
+    <string name="task_name">Task Name</string>
 
     <string-array name="months">
         <item>January</item>

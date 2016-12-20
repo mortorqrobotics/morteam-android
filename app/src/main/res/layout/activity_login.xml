@@ -1,62 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/orange_theme">
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+    android:background="@color/orange_theme" >
 
         <Button
+            android:id="@+id/login_registerbutton"
             android:layout_width="100dp"
             android:layout_height="40dp"
             android:layout_marginTop="25dp"
             android:layout_marginLeft="25dp"
-            android:layout_gravity="top|left"
-            android:id="@+id/login_registerbutton"
+            android:layout_marginStart="25dp"
+            android:layout_gravity="top|start"
             android:text="@string/login_registerButton"
-            android:onClick="register"
-            android:textColor="#000000"
-            style="@style/Widget.AppCompat.Button.Colored" />
-
-    </LinearLayout>
+            android:onClick="register" />
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:orientation="vertical">
+        android:orientation="vertical" >
 
         <EditText
             android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:id="@+id/login_username"
-            android:inputType="text"
-            android:maxLines="1"
-            android:background="@drawable/edittext_border"
-            android:padding="8dp"
+            android:inputType="textNoSuggestions"
             android:hint="@string/login_username"/>
 
         <EditText
+            android:id="@+id/login_password"
             android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:id="@+id/login_password"
-            android:background="@drawable/edittext_border"
-            android:hint="@string/login_password"
-            android:padding="8dp"
-            android:inputType="textPassword"/>
+            android:inputType="textPassword"
+            android:hint="@string/login_password" />
 
         <Button
-            android:layout_width="250dp"
-            android:layout_height="45dp"
             android:id="@+id/login_loginButton"
-            android:text="@string/login_loginButton"
-            android:onClick="login"
-            android:padding="5dp"
+            android:layout_width="250dp"
+            android:layout_height="50dp"
             android:layout_marginTop="8dp"
-            android:textColor="#000000"
-            style="@style/Widget.AppCompat.Button.Colored"/>
+            android:onClick="login"
+            android:text="@string/login_loginButton" />
 
     </LinearLayout>
 

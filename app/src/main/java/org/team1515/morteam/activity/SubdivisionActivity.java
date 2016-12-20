@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -61,11 +62,7 @@ public class SubdivisionActivity extends AppCompatActivity {
         progress = (ProgressBar) findViewById(R.id.subdivision_loading);
         progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
 
-        //Set up action bar
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
 
         userList = (RecyclerView) findViewById(R.id.subdivision_userlist);
         LinearLayoutManager userLayoutManager = new LinearLayoutManager(this);
@@ -76,6 +73,15 @@ public class SubdivisionActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         name = intent.getStringExtra("name");
+
+        //Set up action bar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(name);
+        }
 
 
         //Get users in subdivision/team
@@ -131,9 +137,6 @@ public class SubdivisionActivity extends AppCompatActivity {
             }
         });
         queue.add(userRequest);
-
-        TextView subName = (TextView) findViewById(R.id.subdivision_name);
-        subName.setText(name);
     }
 
     public boolean onSupportNavigateUp() {
