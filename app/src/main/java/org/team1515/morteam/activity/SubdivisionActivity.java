@@ -146,7 +146,12 @@ public class SubdivisionActivity extends AppCompatActivity {
 
         public void setUsers(List<User> users) {
             this.users = users;
-            notifyDataSetChanged();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    notifyDataSetChanged();
+                }
+            });
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
