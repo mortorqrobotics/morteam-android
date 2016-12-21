@@ -8,24 +8,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.NetworkImageView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.R;
+import org.team1515.morteam.adapter.UserAdapter;
 import org.team1515.morteam.entity.User;
 import org.team1515.morteam.network.CookieRequest;
 
@@ -42,7 +39,7 @@ public class SubdivisionActivity extends AppCompatActivity {
     String id;
 
     RecyclerView userList;
-    UserListAdapter userAdapter;
+    UserAdapter userAdapter;
     List<User> users;
 
     ProgressBar progress;
@@ -60,7 +57,7 @@ public class SubdivisionActivity extends AppCompatActivity {
         userList = (RecyclerView) findViewById(R.id.subdivision_userlist);
         LinearLayoutManager userLayoutManager = new LinearLayoutManager(this);
         userList.setLayoutManager(userLayoutManager);
-        userAdapter = new UserListAdapter();
+        userAdapter = new UserAdapter();
         userList.setAdapter(userAdapter);
         users = new ArrayList<>();
 
@@ -126,7 +123,7 @@ public class SubdivisionActivity extends AppCompatActivity {
         queue.addRequestFinishedListener(new RequestQueue.RequestFinishedListener<Object>() {
             @Override
             public void onRequestFinished(Request<Object> request) {
-                userAdapter.setUsers(users);
+                userAdapter.setUsers(users, SubdivisionActivity.this);
             }
         });
         queue.add(userRequest);
@@ -137,69 +134,4 @@ public class SubdivisionActivity extends AppCompatActivity {
         return true;
     }
 
-    public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHolder> {
-        private List<User> users;
-
-        public UserListAdapter() {
-            this.users = new ArrayList<>();
-        }
-
-        public void setUsers(List<User> users) {
-            this.users = users;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    notifyDataSetChanged();
-                }
-            });
-        }
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            public LinearLayout layout;
-
-            public ViewHolder(LinearLayout layout) {
-                super(layout);
-                this.layout = layout;
-            }
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            LinearLayout layout = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.list_user, parent, false);
-            ViewHolder viewHolder = new ViewHolder(layout);
-            return viewHolder;
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder holder, final int position) {
-            final User currentUser = users.get(position);
-
-            NetworkImageView icon = (NetworkImageView) holder.layout.findViewById(R.id.userlist_icon);
-            MorTeam.setNetworkImage(currentUser.getProfPicPath(), icon);
-
-            TextView name = (TextView) holder.layout.findViewById(R.id.userlist_name);
-            name.setText(currentUser.getFullName());
-
-            holder.layout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(SubdivisionActivity.this, ProfileActivity.class);
-                    intent.putExtra("_id", currentUser.getId());
-                    if (currentUser.getId().equals(MorTeam.preferences.getString("_id", ""))) {
-                        intent.putExtra("isCurrentUser", true);
-                    } else {
-                        intent.putExtra("isCurrentUser", false);
-                    }
-                    startActivity(intent);
-                }
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return users.size();
-        }
-
-
-    }
 }

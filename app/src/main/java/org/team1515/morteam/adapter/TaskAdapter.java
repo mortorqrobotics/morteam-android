@@ -20,7 +20,22 @@ import org.team1515.morteam.entity.Task;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TaskAdapter extends RecyclerView.Adapter<LinearViewHolder> {
+public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
+    class ViewHolder extends RecyclerView.ViewHolder {
+        LinearLayout layout;
+        TextView taskView;
+        Button completeButton;
+
+        ViewHolder(LinearLayout layout) {
+            super(layout);
+
+            this.layout = layout;
+
+            taskView = (TextView) layout.findViewById(R.id.task_text);
+            completeButton = (Button) layout.findViewById(R.id.task_button);
+        }
+    }
+
     private ProfileActivity activity;
     private List<Task> tasks;
     private boolean isPending;
@@ -39,32 +54,30 @@ public class TaskAdapter extends RecyclerView.Adapter<LinearViewHolder> {
     }
 
     @Override
-    public LinearViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LinearLayout layout = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.list_task, parent, false);
-        LinearViewHolder viewHolder = new LinearViewHolder(layout);
+        ViewHolder viewHolder = new ViewHolder(layout);
         return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(LinearViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, int position) {
         final Task currentTask = tasks.get(position);
 
-        TextView taskView = (TextView) holder.layout.findViewById(R.id.task_text);
         String taskString = "&#8226; " + currentTask.getTitle() + " <small>(By " +
                 currentTask.getDueDate() + ")</small>";
         if(!currentTask.getDescription().isEmpty()) {
             taskString += "<br/>\t\t<small>" + currentTask.getDescription() + "</small>";
         }
-        taskView.setText(Html.fromHtml(taskString));
+        holder.taskView.setText(Html.fromHtml(taskString));
 
-        Button completeButton = (Button) holder.layout.findViewById(R.id.task_button);
         if(isPending && (currentTask.getAssignerId().equals(MorTeam.preferences.getString("_id", ""))
                 || activity.isCurrentUser
                 || MorTeam.preferences.getString("position", "").equals("leader")
                 || MorTeam.preferences.getString("position", "").equals("admin"))) {
-            completeButton.setVisibility(View.VISIBLE);
+            holder.completeButton.setVisibility(View.VISIBLE);
         }
-        completeButton.setOnClickListener(new View.OnClickListener() {
+        holder.completeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);

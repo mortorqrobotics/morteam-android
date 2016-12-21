@@ -8,6 +8,7 @@ import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -26,6 +27,27 @@ import static org.team1515.morteam.MorTeam.preferences;
 
 public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapter.ViewHolder> {
 
+    class ViewHolder extends RecyclerView.ViewHolder {
+        CardView layout;
+        NetworkImageView pictureView;
+        TextView authorView;
+        TextView dateView;
+        TextView messageView;
+        ImageButton deleteButton;
+
+        ViewHolder(CardView layout) {
+            super(layout);
+
+            this.layout = layout;
+            pictureView = (NetworkImageView) layout.findViewById(R.id.announcement_pic);
+            authorView = (TextView) layout.findViewById(R.id.author);
+            dateView = (TextView) layout.findViewById(R.id.date);
+            messageView = (TextView) layout.findViewById(R.id.message);
+            deleteButton = (ImageButton) layout.findViewById(R.id.delete_button);
+        }
+    }
+
+
     private List<Announcement> announcements;
     private AnnouncementFragment fragment;
 
@@ -34,14 +56,7 @@ public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapte
         announcements = new ArrayList<>();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        public CardView cardView;
 
-        public ViewHolder(CardView cardView) {
-            super(cardView);
-            this.cardView = cardView;
-        }
-    }
 
     public void setAnnouncements(List<Announcement> announcements) {
         this.announcements = announcements;
@@ -72,30 +87,24 @@ public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapte
             }
         };
 
-        NetworkImageView profPic = (NetworkImageView) holder.cardView.findViewById(R.id.announcement_pic);
-        MorTeam.setNetworkImage(currentAnnouncement.getProfPicPath(), profPic);
-        profPic.setOnClickListener(profileListener);
+        MorTeam.setNetworkImage(currentAnnouncement.getProfPicPath(), holder.pictureView);
+        holder.pictureView.setOnClickListener(profileListener);
 
-        TextView author = (TextView) holder.cardView.findViewById(R.id.author);
-        author.setText(currentAnnouncement.getUserName());
-        author.setOnClickListener(profileListener);
+        holder.authorView.setText(currentAnnouncement.getUserName());
+        holder.authorView.setOnClickListener(profileListener);
 
-        TextView date = (TextView) holder.cardView.findViewById(R.id.date);
-        date.setText(currentAnnouncement.getDate());
+        holder.dateView.setText(currentAnnouncement.getDate());
 
-        TextView message = (TextView) holder.cardView.findViewById(R.id.message);
-        message.setMovementMethod(LinkMovementMethod.getInstance());
-        message.setText(Html.fromHtml(currentAnnouncement.getContent()));
-
-        ImageButton deleteButton = (ImageButton) holder.cardView.findViewById(R.id.delete_button);
+        holder.messageView.setMovementMethod(LinkMovementMethod.getInstance());
+        holder.messageView.setText(Html.fromHtml(currentAnnouncement.getContent()));
 
         //Don't show delete announcement buttons if not admin
         String teamPosition = preferences.getString("position", "");
         if (!teamPosition.equals("leader")) {
-            deleteButton.setClickable(false);
-            deleteButton.setVisibility(View.INVISIBLE);
+            holder.deleteButton.setClickable(false);
+            holder.deleteButton.setVisibility(View.INVISIBLE);
         } else {
-            deleteButton.setOnClickListener(new View.OnClickListener() {
+            holder.deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     fragment.deleteAnnouncement(currentAnnouncement.getId(), holder.getAdapterPosition());

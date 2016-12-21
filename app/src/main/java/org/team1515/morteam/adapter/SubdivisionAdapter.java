@@ -18,6 +18,22 @@ import java.util.List;
 
 public class SubdivisionAdapter extends RecyclerView.Adapter<SubdivisionAdapter.ViewHolder> {
 
+    class ViewHolder extends RecyclerView.ViewHolder {
+        LinearLayout layout;
+        ImageView iconView;
+        TextView nameView;
+
+        ViewHolder(LinearLayout layout) {
+            super(layout);
+            this.layout = layout;
+
+            iconView = (ImageView) layout.findViewById(R.id.subdivisionlist_icon);
+            nameView = (TextView) layout.findViewById(R.id.subdivisionlist_name);
+        }
+    }
+
+
+
     private List<Subdivision> subdivisions;
 
     public SubdivisionAdapter() {
@@ -27,15 +43,6 @@ public class SubdivisionAdapter extends RecyclerView.Adapter<SubdivisionAdapter.
     public void setSubdivisions(List<Subdivision> subdivisions) {
         this.subdivisions = subdivisions;
         notifyDataSetChanged();
-    }
-
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        public LinearLayout layout;
-
-        public ViewHolder(LinearLayout layout) {
-            super(layout);
-            this.layout = layout;
-        }
     }
 
     @Override
@@ -49,11 +56,9 @@ public class SubdivisionAdapter extends RecyclerView.Adapter<SubdivisionAdapter.
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         final Subdivision currentSubdivision = subdivisions.get(position);
 
-        ImageView icon = (ImageView) holder.layout.findViewById(R.id.subdivisionlist_icon);
         //TODO: set subdivision icon
 
-        TextView name = (TextView) holder.layout.findViewById(R.id.subdivisionlist_name);
-        name.setText(currentSubdivision.getName());
+        holder.nameView.setText(currentSubdivision.getName());
 
         holder.layout.setOnClickListener(new View.OnClickListener() {
             @Override
