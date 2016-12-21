@@ -9,11 +9,10 @@
     android:clickable="true"
     android:layout_margin="4dp">
 
-    <com.android.volley.toolbox.NetworkImageView
+    <ImageView
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:id="@+id/chatlist_pic"
-        android:scaleType="centerCrop"
         android:layout_marginRight="8dp"/>
 
     <TextView

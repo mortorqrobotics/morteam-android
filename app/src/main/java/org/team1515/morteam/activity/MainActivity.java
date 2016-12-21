@@ -22,6 +22,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 
 import com.android.volley.NetworkResponse;
@@ -29,6 +30,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.NetworkImageView;
+import com.bumptech.glide.Glide;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -83,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         //Set up action bar profile picture
-        final NetworkImageView profilePic = (NetworkImageView) toolbar.findViewById(R.id.actionbar_pic);
+        final ImageView profilePic = (ImageView) toolbar.findViewById(R.id.actionbar_pic);
         profilePic.setClickable(true);
         profilePic.setVisibility(View.VISIBLE);
         profilePic.setOnClickListener(new View.OnClickListener() {
@@ -92,7 +94,13 @@ public class MainActivity extends AppCompatActivity {
                 popupMenu.show();
             }
         });
-        MorTeam.setNetworkImage(NetworkUtils.makeURL(preferences.getString("profpicpath", "") + "-60", false), profilePic);
+        String stuff = NetworkUtils.makeURL(preferences.getString("profpicpath", "") + "-60", false);
+        Glide
+                .with(this)
+                .load(NetworkUtils.makePictureURL(preferences.getString("profpicpath", ""), "-60"))
+                .centerCrop()
+                .crossFade()
+                .into(profilePic);
 
         //Menu
         popupMenu = new PopupMenu(this, profilePic);

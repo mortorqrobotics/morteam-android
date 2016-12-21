@@ -1,6 +1,7 @@
 package org.team1515.morteam.adapter;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -24,14 +25,14 @@ import java.util.List;
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        LinearLayout layout;
+        Context context;
         ImageView imageView;
         TextView nameView;
 
         ViewHolder(LinearLayout layout) {
             super(layout);
 
-            this.layout = layout;
+            context = layout.getContext();
             imageView = (ImageView) layout.findViewById(R.id.userlist_icon);
             nameView = (TextView) layout.findViewById(R.id.userlist_name);
 
@@ -83,7 +84,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         final User user = users.get(position);
 
         Glide
-                .with(holder.layout.getContext())
+                .with(holder.context)
                 .load(user.getProfPicPath())
                 .centerCrop()
                 .crossFade()

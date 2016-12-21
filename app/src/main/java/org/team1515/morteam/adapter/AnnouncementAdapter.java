@@ -1,5 +1,6 @@
 package org.team1515.morteam.adapter;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -10,9 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.NetworkImageView;
+import com.bumptech.glide.Glide;
 
 import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.R;
@@ -28,7 +31,8 @@ import static org.team1515.morteam.MorTeam.preferences;
 public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapter.ViewHolder> {
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        NetworkImageView pictureView;
+        Context context;
+        ImageView pictureView;
         TextView authorView;
         TextView dateView;
         TextView messageView;
@@ -37,7 +41,8 @@ public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapte
         ViewHolder(CardView layout) {
             super(layout);
 
-            pictureView = (NetworkImageView) layout.findViewById(R.id.announcement_pic);
+            context = layout.getContext();
+            pictureView = (ImageView) layout.findViewById(R.id.announcement_pic);
             authorView = (TextView) layout.findViewById(R.id.author);
             dateView = (TextView) layout.findViewById(R.id.date);
             messageView = (TextView) layout.findViewById(R.id.message);
@@ -85,7 +90,13 @@ public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapte
             }
         };
 
-        MorTeam.setNetworkImage(currentAnnouncement.getProfPicPath(), holder.pictureView);
+        Glide
+                .with(holder.context)
+                .load(currentAnnouncement.getProfPicPath())
+                .centerCrop()
+                .crossFade()
+                .into(holder.pictureView);
+
         holder.pictureView.setOnClickListener(profileListener);
 
         holder.authorView.setText(currentAnnouncement.getUserName());

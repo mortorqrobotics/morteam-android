@@ -1,5 +1,6 @@
 package org.team1515.morteam.adapter;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v7.widget.CardView;
@@ -12,10 +13,12 @@ import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.NetworkImageView;
+import com.bumptech.glide.Glide;
 
 import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.R;
@@ -27,19 +30,20 @@ import java.util.List;
 
 public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.ViewHolder> {
     class ViewHolder extends RecyclerView.ViewHolder {
-        public RelativeLayout layout;
-        public TextView messageView;
-        public TextView dateView;
-        public CardView cardView;
-        public NetworkImageView pictureView;
+        Context context;
+        TextView messageView;
+        TextView dateView;
+        CardView cardView;
+        ImageView pictureView;
 
-        public ViewHolder(View itemView) {
-            super(itemView);
-            layout = (RelativeLayout) itemView;
+        ViewHolder(RelativeLayout layout) {
+            super(layout);
+
+            context = layout.getContext();
             messageView = (TextView) layout.findViewById(R.id.messagelist_message);
             dateView = (TextView) layout.findViewById(R.id.messagelist_date);
             cardView = (CardView) layout.findViewById(R.id.messagelist_cardview);
-            pictureView = (NetworkImageView) layout.findViewById(R.id.messagelist_pic);
+            pictureView = (ImageView) layout.findViewById(R.id.messagelist_pic);
         }
     }
 
@@ -104,7 +108,13 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
             nameString.setSpan(new StyleSpan(Typeface.BOLD), 0, nameString.length(), 0);
             messageString.append(nameString);
 
-            MorTeam.setNetworkImage(currentMessage.getProfPicPath(), holder.pictureView);
+            Glide
+                    .with(holder.context)
+                    .load(currentMessage.getProfPicPath())
+                    .centerCrop()
+                    .crossFade()
+                    .into(holder.pictureView);
+
             holder.pictureView.setVisibility(View.VISIBLE);
 
             holder.cardView.setCardBackgroundColor(Color.WHITE);

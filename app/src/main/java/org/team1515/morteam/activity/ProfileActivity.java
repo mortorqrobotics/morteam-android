@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.NetworkImageView;
+import com.bumptech.glide.Glide;
 
 import org.team1515.morteam.R;
 
@@ -114,8 +116,13 @@ public class ProfileActivity extends AppCompatActivity {
                             );
 
                             //Set up profile picture, name, and email
-                            NetworkImageView profilePic = (NetworkImageView) findViewById(R.id.profile_picture);
-                            MorTeam.setNetworkImage(user.getProfPicPath(), profilePic);
+                            ImageView profilePic = (ImageView) findViewById(R.id.profile_picture);
+                            Glide
+                                    .with(ProfileActivity.this)
+                                    .load(user.getProfPicPath())
+                                    .centerCrop()
+                                    .crossFade()
+                                    .into(profilePic);
 
                             TextView nameView = (TextView) findViewById(R.id.profile_name);
                             nameView.setText(user.getFullName());

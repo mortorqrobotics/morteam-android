@@ -33,11 +33,10 @@
             android:orientation="horizontal"
             android:padding="5dp">
 
-            <com.android.volley.toolbox.NetworkImageView
+            <ImageView
                 android:id="@+id/messagelist_pic"
                 android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:scaleType="centerCrop" />
+                android:layout_height="30dp" />
 
             <TextView
                 android:id="@+id/messagelist_message"

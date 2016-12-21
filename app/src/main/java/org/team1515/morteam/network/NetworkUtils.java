@@ -13,4 +13,12 @@ public class NetworkUtils {
     public static String makeURL(String path, boolean usePrefix) {
         return HOST + ":" + PORT + (usePrefix ? PATH_PREFIX : "") + path;
     }
+
+    public static String makePictureURL(String path, String size) {
+        if (path.length() > 2 && path.substring(0, 3).equals("/pp")) {
+            return "http://profilepics.morteam.com.s3.amazonaws.com" + path.substring(3) + size;
+        } else {
+            return "";
+        }
+    }
 }
