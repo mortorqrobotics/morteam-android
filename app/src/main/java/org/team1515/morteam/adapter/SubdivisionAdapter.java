@@ -18,21 +18,32 @@ import java.util.List;
 
 public class SubdivisionAdapter extends RecyclerView.Adapter<SubdivisionAdapter.ViewHolder> {
 
-    class ViewHolder extends RecyclerView.ViewHolder {
-        LinearLayout layout;
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView iconView;
         TextView nameView;
 
         ViewHolder(LinearLayout layout) {
             super(layout);
-            this.layout = layout;
 
             iconView = (ImageView) layout.findViewById(R.id.subdivisionlist_icon);
             nameView = (TextView) layout.findViewById(R.id.subdivisionlist_name);
+
+            layout.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                Subdivision subdivision = subdivisions.get(position);
+
+                Intent intent = new Intent(v.getContext(), SubdivisionActivity.class);
+                intent.putExtra("name", subdivision.getName());
+                intent.putExtra("id", subdivision.getId());
+                v.getContext().startActivity(intent);
+            }
         }
     }
-
-
 
     private List<Subdivision> subdivisions;
 
@@ -48,27 +59,16 @@ public class SubdivisionAdapter extends RecyclerView.Adapter<SubdivisionAdapter.
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LinearLayout layout = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.list_subdivision, parent, false);
-        ViewHolder viewHolder = new ViewHolder(layout);
-        return viewHolder;
+        return new ViewHolder(layout);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-        final Subdivision currentSubdivision = subdivisions.get(position);
+        final Subdivision subdivision = subdivisions.get(position);
 
         //TODO: set subdivision icon
 
-        holder.nameView.setText(currentSubdivision.getName());
-
-        holder.layout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(holder.layout.getContext(), SubdivisionActivity.class);
-                intent.putExtra("name", currentSubdivision.getName());
-                intent.putExtra("id", currentSubdivision.getId());
-                holder.layout.getContext().startActivity(intent);
-            }
-        });
+        holder.nameView.setText(subdivision.getName());
     }
 
     @Override

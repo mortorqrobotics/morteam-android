@@ -28,7 +28,6 @@ import static org.team1515.morteam.MorTeam.preferences;
 public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapter.ViewHolder> {
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        CardView layout;
         NetworkImageView pictureView;
         TextView authorView;
         TextView dateView;
@@ -38,7 +37,6 @@ public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapte
         ViewHolder(CardView layout) {
             super(layout);
 
-            this.layout = layout;
             pictureView = (NetworkImageView) layout.findViewById(R.id.announcement_pic);
             authorView = (TextView) layout.findViewById(R.id.author);
             dateView = (TextView) layout.findViewById(R.id.date);

@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -20,7 +19,6 @@ import com.android.volley.VolleyError;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.R;
 import org.team1515.morteam.adapter.UserAdapter;
 import org.team1515.morteam.entity.User;
@@ -52,13 +50,12 @@ public class SubdivisionActivity extends AppCompatActivity {
         progress = (ProgressBar) findViewById(R.id.subdivision_loading);
         progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
 
-
-
         userList = (RecyclerView) findViewById(R.id.subdivision_userlist);
         LinearLayoutManager userLayoutManager = new LinearLayoutManager(this);
         userList.setLayoutManager(userLayoutManager);
         userAdapter = new UserAdapter();
         userList.setAdapter(userAdapter);
+
         users = new ArrayList<>();
 
         Intent intent = getIntent();

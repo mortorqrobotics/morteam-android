@@ -6,10 +6,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.NetworkImageView;
+import com.bumptech.glide.Glide;
 
 import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.R;
@@ -21,20 +23,38 @@ import java.util.List;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         LinearLayout layout;
-        NetworkImageView imageView;
+        ImageView imageView;
         TextView nameView;
 
         ViewHolder(LinearLayout layout) {
             super(layout);
-            this.layout = layout;
 
-            imageView = (NetworkImageView) layout.findViewById(R.id.userlist_icon);
+            this.layout = layout;
+            imageView = (ImageView) layout.findViewById(R.id.userlist_icon);
             nameView = (TextView) layout.findViewById(R.id.userlist_name);
+
+            layout.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+                User user = users.get(position);
+
+                Intent intent = new Intent(v.getContext(), ProfileActivity.class);
+                intent.putExtra("_id", user.getId());
+                if (user.getId().equals(MorTeam.preferences.getString("_id", ""))) {
+                    intent.putExtra("isCurrentUser", true);
+                } else {
+                    intent.putExtra("isCurrentUser", false);
+                }
+                v.getContext().startActivity(intent);
+            }
         }
     }
-
 
     private List<User> users;
 
@@ -55,33 +75,21 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LinearLayout layout = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.list_user, parent, false);
-        ViewHolder viewHolder = new ViewHolder(layout);
-        return viewHolder;
+        return new ViewHolder(layout);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
-        final User currentUser = users.get(position);
+    public void onBindViewHolder(final ViewHolder holder, int position) {
+        final User user = users.get(position);
 
-        MorTeam.setNetworkImage(currentUser.getProfPicPath(), holder.imageView);
-        holder.nameView.setText(currentUser.getFullName());
+        Glide
+                .with(holder.layout.getContext())
+                .load(user.getProfPicPath())
+                .centerCrop()
+                .crossFade()
+                .into(holder.imageView);
 
-        holder.layout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), ProfileActivity.class);
-                intent.putExtra("_id", currentUser.getId());
-                if (currentUser.getId().equals(MorTeam.preferences.getString("_id", ""))) {
-                    intent.putExtra("isCurrentUser", true);
-                } else {
-                    intent.putExtra("isCurrentUser", false);
-                }
-                v.getContext().startActivity(intent);
-            }
-        });
-
-
-
+        holder.nameView.setText(user.getFullName());
     }
 
     @Override
