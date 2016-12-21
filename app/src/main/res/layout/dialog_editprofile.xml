@@ -8,36 +8,36 @@
     android:gravity="center">
 
         <EditText
+            android:id="@+id/editProfile_firstName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="First Name"
-            android:id="@+id/editprofile_firstname"/>
+            android:hint="@string/editProfile_firstName" />
 
         <EditText
+            android:id="@+id/editProfile_lastName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Last Name"
-            android:id="@+id/editprofile_lastname"/>
+            android:hint="@string/editProfile_lastName" />
 
         <EditText
+            android:id="@+id/editProfile_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Email"
             android:inputType="textEmailAddress"
-            android:id="@+id/editprofile_email"/>
+            android:hint="@string/editProfile_email" />
 
         <EditText
+            android:id="@+id/editProfile_parentEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Parent Email"
             android:inputType="textEmailAddress"
-            android:id="@+id/editprofile_parentemail"/>
+            android:hint="@string/editProfile_parentEmail" />
 
         <EditText
+            android:id="@+id/editProfile_phone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Phone Number"
             android:inputType="phone"
-            android:id="@+id/editprofile_phone"/>
+            android:hint="@string/editProfile_phone" />
 
 </LinearLayout>

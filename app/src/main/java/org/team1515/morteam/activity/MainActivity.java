@@ -29,13 +29,11 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.NetworkImageView;
 import com.bumptech.glide.Glide;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.R;
 import org.team1515.morteam.adapter.MainTabAdapter;
 import org.team1515.morteam.adapter.SubdivisionAdapter;
@@ -315,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
         newAnnouncementView = getLayoutInflater().inflate(R.layout.dialog_newannouncement, null);
 
         //Populate choice spinner
-        choiceSpinner = (Spinner) newAnnouncementView.findViewById(R.id.announcement_choicespinner);
+        choiceSpinner = (Spinner) newAnnouncementView.findViewById(R.id.newAnnouncement_choiceSpinner);
         choiceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -570,7 +568,7 @@ public class MainActivity extends AppCompatActivity {
                     positiveButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            EditText nameView = (EditText) nameDialog.findViewById(R.id.chatname_name);
+                            EditText nameView = (EditText) nameDialog.findViewById(R.id.chatName_name);
                             String name = nameView.getText().toString();
                             if (!name.isEmpty()) {
                                 try {
@@ -645,7 +643,7 @@ public class MainActivity extends AppCompatActivity {
         imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
 
         //Get content from edittext
-        EditText messageBox = (EditText) newAnnouncementView.findViewById(R.id.announcement_message);
+        EditText messageBox = (EditText) newAnnouncementView.findViewById(R.id.newAnnouncement_message);
         String message = messageBox.getText().toString();
 
         if (!message.isEmpty()) {

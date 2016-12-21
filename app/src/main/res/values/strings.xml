@@ -30,6 +30,10 @@
     <string name="title_frag5">Settings</string>
     <string name="title_frag6">Sign Out</string>
 
+    <!-- Announcements -->
+    <string name="newAnnouncement_audience">Audience:\t</string>
+    <string name="newAnnouncement_message">Type a message...</string>
+
     <!-- Subdivision Activity -->
     <string name="subdivision_userTitle">Users</string>
 
@@ -56,8 +60,22 @@
     <string name="profile_assignTaskButton">Assign Task</string>
     <string name="profile_noTasks">\tNone</string>
 
+    <!-- Change Password -->
+    <string name="changePassword_old">Old Password</string>
+    <string name="changePassword_new">New Password</string>
+    <string name="changePassword_confirm">Confirm New Password</string>
+
+    <!-- Edit Profile -->
+    <string name="editProfile_firstName">First Name</string>
+    <string name="editProfile_lastName">Last Name</string>
+    <string name="editProfile_email">Email</string>
+    <string name="editProfile_parentEmail">Parent Email</string>
+    <string name="editProfile_phone">Phone</string>
+
     <!-- Tasks -->
     <string name="task_name">Task Name</string>
+    <string name="task_description">Task Description</string>
+
 
     <string-array name="months">
         <item>January</item>

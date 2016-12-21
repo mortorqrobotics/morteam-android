@@ -24,7 +24,6 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.NetworkImageView;
 import com.bumptech.glide.Glide;
 
 import org.team1515.morteam.R;
@@ -86,7 +85,7 @@ public class ProfileActivity extends AppCompatActivity {
             LinearLayout editButtons = (LinearLayout) findViewById(R.id.profile_editButtons);
             editButtons.setVisibility(View.GONE);
 
-            Button assignTaskButton = (Button) findViewById(R.id.profile_assigntask);
+            Button assignTaskButton = (Button) findViewById(R.id.profile_assignTask);
             String position = MorTeam.preferences.getString("position", "");
             if(position.equals("leader") || position.equals("admin")) {
                 assignTaskButton.setVisibility(View.VISIBLE);
@@ -201,19 +200,19 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void setupTasks(String id) {
         //Get tasks
-        pendingView = (RecyclerView) findViewById(R.id.profile_pendingtasks);
+        pendingView = (RecyclerView) findViewById(R.id.profile_pendingTasks);
         pendingLayoutManager = new LinearLayoutManager(ProfileActivity.this);
         pendingAdapter = new TaskAdapter(this, true);
         pendingView.setLayoutManager(pendingLayoutManager);
         pendingView.setAdapter(pendingAdapter);
-        pendingNoneView = (TextView) findViewById(R.id.profile_pendingnone);
+        pendingNoneView = (TextView) findViewById(R.id.profile_pendingNone);
 
-        completedView = (RecyclerView) findViewById(R.id.profile_completedtasks);
+        completedView = (RecyclerView) findViewById(R.id.profile_completedTasks);
         completedLayoutManager = new LinearLayoutManager(ProfileActivity.this);
         completedAdapter = new TaskAdapter(this, false);
         completedView.setLayoutManager(completedLayoutManager);
         completedView.setAdapter(completedAdapter);
-        completedNoneView = (TextView) findViewById(R.id.profile_completednone);
+        completedNoneView = (TextView) findViewById(R.id.profile_completedNone);
 
         tasks = new ArrayList<>();
 
@@ -233,15 +232,15 @@ public class ProfileActivity extends AppCompatActivity {
         builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                EditText firstNameView = (EditText) ((AlertDialog) dialog).findViewById(R.id.editprofile_firstname);
+                EditText firstNameView = (EditText) ((AlertDialog) dialog).findViewById(R.id.editProfile_firstName);
                 final String firstName = firstNameView.getText().toString();
-                EditText lastNameView = (EditText) ((AlertDialog) dialog).findViewById(R.id.editprofile_lastname);
+                EditText lastNameView = (EditText) ((AlertDialog) dialog).findViewById(R.id.editProfile_lastName);
                 final String lastName = lastNameView.getText().toString();
-                EditText emailView = (EditText) ((AlertDialog) dialog).findViewById(R.id.editprofile_email);
+                EditText emailView = (EditText) ((AlertDialog) dialog).findViewById(R.id.editProfile_email);
                 final String email = emailView.getText().toString();
-                EditText parentEmailView = (EditText) ((AlertDialog) dialog).findViewById(R.id.editprofile_parentemail);
+                EditText parentEmailView = (EditText) ((AlertDialog) dialog).findViewById(R.id.editProfile_parentEmail);
                 final String parentEmail = parentEmailView.getText().toString();
-                EditText phoneView = (EditText) ((AlertDialog) dialog).findViewById(R.id.editprofile_phone);
+                EditText phoneView = (EditText) ((AlertDialog) dialog).findViewById(R.id.editProfile_phone);
                 final String phone = phoneView.getText().toString();
 
                 //This is horrible
@@ -347,11 +346,11 @@ public class ProfileActivity extends AppCompatActivity {
         builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                EditText oldPasswordView = (EditText) ((AlertDialog) dialog).findViewById(R.id.changepassword_old);
+                EditText oldPasswordView = (EditText) ((AlertDialog) dialog).findViewById(R.id.changePassword_old);
                 String oldPassword = oldPasswordView.getText().toString();
-                EditText newPasswordView = (EditText) ((AlertDialog) dialog).findViewById(R.id.changepassword_new);
+                EditText newPasswordView = (EditText) ((AlertDialog) dialog).findViewById(R.id.changePassword_new);
                 String newPassword = newPasswordView.getText().toString();
-                EditText confirmPasswordView = (EditText) ((AlertDialog) dialog).findViewById(R.id.changepassword_confirm);
+                EditText confirmPasswordView = (EditText) ((AlertDialog) dialog).findViewById(R.id.changePassword_confirm);
                 String confirmPassword = confirmPasswordView.getText().toString();
 
                 Map<String, String> params = new HashMap<>();

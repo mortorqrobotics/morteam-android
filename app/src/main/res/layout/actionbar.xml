@@ -18,7 +18,7 @@
             android:clickable="false"
             android:visibility="gone"
             android:scaleType="centerCrop"
-            android:layout_gravity="right"
+            android:layout_gravity="end"
             android:layout_margin="10dp" />
 
     </android.support.v7.widget.Toolbar>

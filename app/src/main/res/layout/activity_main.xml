@@ -29,91 +29,93 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="280dp"
+    <ScrollView
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="#E9E9E9"
-        android:choiceMode="singleChoice"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="0dp"
-        android:orientation="vertical">
+        android:background="#E9E9E9" >
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="280dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:text="@string/navigation_drawer_yourSubdivisions"
+                    android:textColor="#A8000000"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/main_yourSub_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"
+                android:paddingBottom="3.5dp"
+                android:paddingTop="3.5dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:text="@string/navigation_drawer_publicSubdivisions"
+                    android:textColor="#A8000000"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/main_publicsub_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"
+                android:paddingBottom="3.5dp"
+                android:paddingTop="3.5dp" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:text="@string/navigation_drawer_yourSubdivisions"
-                android:textColor="#A8000000"
+                android:layout_marginBottom="16dp"
+                android:layout_marginTop="16dp"
+                android:background="?attr/selectableItemBackground"
+                android:onClick="teamClick"
+                android:paddingBottom="16dp"
+                android:paddingEnd="46dp"
+                android:paddingLeft="46dp"
+                android:paddingRight="46dp"
+                android:paddingStart="46dp"
+                android:paddingTop="16dp"
+                android:text="@string/navigation_drawer_team"
+                android:textColor="#DE000000"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/main_yourSub_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
         </LinearLayout>
 
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
-            android:paddingBottom="3.5dp"
-            android:paddingTop="3.5dp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:text="@string/navigation_drawer_publicSubdivisions"
-                android:textColor="#A8000000"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/main_publicsub_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
-            android:paddingBottom="3.5dp"
-            android:paddingTop="3.5dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginBottom="16dp"
-            android:layout_marginTop="16dp"
-            android:background="?attr/selectableItemBackground"
-            android:onClick="teamClick"
-            android:paddingBottom="16dp"
-            android:paddingLeft="46dp"
-            android:paddingStart="46dp"
-            android:paddingRight="46dp"
-            android:paddingEnd="46dp"
-            android:paddingTop="16dp"
-            android:textColor="#DE000000"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:text="@string/navigation_drawer_team" />
-
-    </LinearLayout>
+    </ScrollView>
 
 </android.support.v4.widget.DrawerLayout>

@@ -50,7 +50,7 @@ public class SubdivisionActivity extends AppCompatActivity {
         progress = (ProgressBar) findViewById(R.id.subdivision_loading);
         progress.getIndeterminateDrawable().setColorFilter(Color.rgb(255, 197, 71), android.graphics.PorterDuff.Mode.MULTIPLY);
 
-        userList = (RecyclerView) findViewById(R.id.subdivision_userlist);
+        userList = (RecyclerView) findViewById(R.id.subdivision_userList);
         LinearLayoutManager userLayoutManager = new LinearLayoutManager(this);
         userList.setLayoutManager(userLayoutManager);
         userAdapter = new UserAdapter();
