@@ -4,13 +4,11 @@ package org.team1515.morteam.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.util.Pair;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.EditText;
 
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -30,10 +28,8 @@ public class JoinTeamActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_jointeam);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
     }
 
     public void joinTeamClicked(View view) {
@@ -44,19 +40,23 @@ public class JoinTeamActivity extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        Intent intent = new Intent();
                         try {
                             MorTeam.preferences.edit()
                                     .putBoolean("isOnTeam", true)
                                     .putString("team_id", response.getString("_id"))
                                     .putString("teamNumber", response.getString("number"))
                                     .apply();
+
+                            intent.setClass(JoinTeamActivity.this, MainActivity.class);
                         } catch (JSONException e) {
                             e.printStackTrace();
-                        }
 
-                        Intent intent = new Intent(JoinTeamActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
+                            intent.setClass(JoinTeamActivity.this, LoginActivity.class);
+                        } finally {
+                            startActivity(intent);
+                            finish();
+                        }
                     }
                 }, new Response.ErrorListener() {
             @Override
