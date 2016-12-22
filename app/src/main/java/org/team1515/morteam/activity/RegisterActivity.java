@@ -1,8 +1,6 @@
 package org.team1515.morteam.activity;
 
-
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v4.util.Pair;
@@ -15,7 +13,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -35,10 +32,8 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_register);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -53,8 +48,9 @@ public class RegisterActivity extends AppCompatActivity {
             case android.R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     public void register(View view) {
@@ -62,28 +58,37 @@ public class RegisterActivity extends AppCompatActivity {
 
         //Add all user info to post parameters
         JSONObject params = new JSONObject();
-
         try {
-            EditText firstnameBox = (EditText) findViewById(R.id.register_firstName);
-            params.put("firstname", firstnameBox.getText().toString());
-
-            EditText lastnameBox = (EditText) findViewById(R.id.register_lastName);
-            params.put("lastname", lastnameBox.getText().toString());
-
-            EditText usernameBox = (EditText) findViewById(R.id.register_username);
-            params.put("username", usernameBox.getText().toString());
-
             EditText passwordBox = (EditText) findViewById(R.id.register_password);
             params.put("password", passwordBox.getText().toString());
 
             EditText confirmPasswordBox = (EditText) findViewById(R.id.register_passwordConfirm);
             params.put("password_confirm", confirmPasswordBox.getText().toString());
 
+            // Make sure passwords match before proceeding
+            if (!passwordBox.getText().toString().equals(confirmPasswordBox.getText().toString())) {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+                dialog.setTitle("Failed to log in");
+                dialog.setMessage("Please make sure your passwords match.");
+                dialog.setPositiveButton("Okay", null);
+                dialog.show();
+                return;
+            }
+
+            EditText firstNameBox = (EditText) findViewById(R.id.register_firstName);
+            params.put("firstname", firstNameBox.getText().toString());
+
+            EditText lastNameBox = (EditText) findViewById(R.id.register_lastName);
+            params.put("lastname", lastNameBox.getText().toString());
+
+            EditText usernameBox = (EditText) findViewById(R.id.register_username);
+            params.put("username", usernameBox.getText().toString());
+
             EditText emailBox = (EditText) findViewById(R.id.register_email);
             params.put("email", emailBox.getText().toString());
 
-            EditText phonenumberBox = (EditText) findViewById(R.id.register_phone);
-            params.put("phone", phonenumberBox.getText().toString());
+            EditText phoneNumberBox = (EditText) findViewById(R.id.register_phone);
+            params.put("phone", phoneNumberBox.getText().toString());
         } catch (JSONException e) {
             e.printStackTrace();
             return;
