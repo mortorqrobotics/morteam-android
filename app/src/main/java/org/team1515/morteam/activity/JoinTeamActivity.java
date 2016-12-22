@@ -3,6 +3,7 @@ package org.team1515.morteam.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -19,6 +20,10 @@ import org.json.JSONObject;
 import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.R;
 import org.team1515.morteam.network.CookieJsonRequest;
+import org.team1515.morteam.network.NetworkUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class JoinTeamActivity extends AppCompatActivity {
 
@@ -56,29 +61,17 @@ public class JoinTeamActivity extends AppCompatActivity {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                // Handle team joining errors
-                AlertDialog.Builder builder = new AlertDialog.Builder(JoinTeamActivity.this);
-                builder.setPositiveButton("Okay", null);
+                error.printStackTrace();
 
-                NetworkResponse response = error.networkResponse;
-                if (response != null) {
-                    if (response.statusCode == 400) {
-                        String message = new String(response.data);
-                        System.out.println(message);
-                        if (message.equals("You already have a team")) {
-                            builder.setTitle("You have already joined a team");
-                            builder.setMessage("Try closing MorTeam and logging in again.");
-                        }
-                    } else {
-                        builder.setTitle("Team does not exist");
-                        builder.setMessage("Please make sure you have entered a valid team code.");
-                    }
-                } else {
-                    builder.setTitle("Cannot connect to server");
-                    builder.setMessage("Please make sure you have a stable internet connection.");
-                }
+                Map<String, Pair<String, String>> errors = new HashMap<>();
+                errors.put("You already have a team",
+                        new Pair<>("You have already joined a team",
+                                "Try closing MorTeam and logging in again."));
+                errors.put("Team does not exist",
+                        new Pair<>("Team does not exist",
+                                "Please make sure you have entered a valid team code."));
 
-                builder.create().show();
+                NetworkUtils.catchNetworkError(JoinTeamActivity.this, error.networkResponse, errors);
             }
         });
         MorTeam.queue.add(joinTeamRequest);

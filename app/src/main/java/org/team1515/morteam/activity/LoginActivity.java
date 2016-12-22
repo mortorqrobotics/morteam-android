@@ -4,13 +4,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -20,9 +20,14 @@ import org.json.JSONObject;
 import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.R;
 import org.team1515.morteam.network.CookieJsonRequest;
+import org.team1515.morteam.network.NetworkUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
 
+    //TODO: Fix this
     public static final String[] userData = {
             "_id",
             "username",
@@ -67,12 +72,12 @@ public class LoginActivity extends AppCompatActivity {
 
         // Make sure text boxes are not blank
         boolean isEmpty = false;
+
         if (username.trim().isEmpty()) {
             usernameView.setText("");
             usernameView.setHintTextColor(Color.RED);
             isEmpty = true;
         }
-
         if (password.trim().isEmpty()) {
             passwordView.setText("");
             passwordView.setHintTextColor(Color.RED);
@@ -88,7 +93,7 @@ public class LoginActivity extends AppCompatActivity {
         try {
             params.put("username", username);
             params.put("password", password);
-            params.put("rememberMe", true);
+            params.put("rememberMe", true); //TODO: Make this optional
         } catch (JSONException e) {
             e.printStackTrace();
             return;
@@ -111,9 +116,7 @@ public class LoginActivity extends AppCompatActivity {
                                     .putString("phone", userObject.getString("phone"))
                                     .putString("profpicpath", userObject.getString("profpicpath"));
 
-                            String position = userObject.getString("position");
                             Intent intent = new Intent();
-
                             if (userObject.has("team")) {
                                 JSONObject teamObject = userObject.getJSONObject("team");
                                 editor.putString("team_id", teamObject.getString("_id"))
@@ -127,16 +130,17 @@ public class LoginActivity extends AppCompatActivity {
 
                             editor.apply();
 
-                            loginButton.setClickable(true);
                             startActivity(intent);
                             finish();
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-                            builder.setTitle("Incorrect username or password");
-                            builder.setPositiveButton("Okay", null);
-                            builder.create().show();
 
+                            AlertDialog.Builder dialog = new AlertDialog.Builder(LoginActivity.this);
+                            dialog.setTitle("Error retrieving data from server");
+                            dialog.setMessage("Please try again later or contact the developers for assistance.");
+                            dialog.setPositiveButton("Okay", null);
+                            dialog.show();
+                        } finally {
                             loginButton.setClickable(true);
                         }
                     }
@@ -146,29 +150,11 @@ public class LoginActivity extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
 
-                        // Handle login errors
-                        AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-                        builder.setPositiveButton("Okay", null);
-
-                        NetworkResponse response = error.networkResponse;
-                        if (response != null) {
-                            if (response.statusCode == 400) {
-                                String message = new String(response.data);
-                                System.out.println(message);
-                                if (message.equals("Invalid login credentials")) {
-                                    builder.setTitle("Invalid login");
-                                    builder.setMessage("Please make sure you entered the correct username and password.");
-                                }
-                            } else {
-                                builder.setTitle("Cannot connect to server");
-                                builder.setMessage("Please make sure you have a stable internet connection.");
-                            }
-                        } else {
-                            builder.setTitle("Cannot connect to server");
-                            builder.setMessage("Please make sure you have a stable internet connection.");
-                        }
-
-                        builder.create().show();
+                        Map<String, Pair<String, String>> errors = new HashMap<>();
+                        errors.put("Invalid login credentials",
+                                new Pair<>("Invalid login",
+                                        "Please make sure you entered the correct username and password"));
+                        NetworkUtils.catchNetworkError(LoginActivity.this, error.networkResponse, errors);
 
                         loginButton.setClickable(true);
                     }

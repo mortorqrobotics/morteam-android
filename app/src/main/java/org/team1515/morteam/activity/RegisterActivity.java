@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.support.v4.util.Pair;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +25,7 @@ import org.json.JSONObject;
 import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.R;
 import org.team1515.morteam.network.CookieJsonRequest;
+import org.team1515.morteam.network.NetworkUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -107,44 +109,29 @@ public class RegisterActivity extends AppCompatActivity {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                // Handle register errors
-                AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
-                builder.setPositiveButton("Okay", null);
+                error.printStackTrace();
 
+                Map<String, Pair<String, String>> errors = new HashMap<>();
+                errors.put("Username is taken",
+                        new Pair<>("Failed to register",
+                                "The username you entered is already taken."));
+                errors.put("Email is taken",
+                        new Pair<>("Failed to register",
+                                "The email you entered is already taken."));
+                errors.put("Phone number is taken",
+                        new Pair<>("Failed to register",
+                                "The phone number you entered is already taken."));
+                errors.put("Invalid user info",
+                        new Pair<>("Failed to register",
+                                "Please make sure you have entered a valid name, username, and password."));
+                errors.put("Invalid email",
+                        new Pair<>("Failed to register",
+                                "Please make sure you have entered a valid email address."));
+                errors.put("Invalid phone number",
+                        new Pair<>("Failed to register",
+                                "Please make sure you have entered a valid phone number."));
 
-                NetworkResponse response = error.networkResponse;
-                if (response != null) {
-                    if (response.statusCode == 400) {
-                        String message = new String(response.data);
-                        if (message.equals("Username is taken")) {
-                            builder.setTitle("Failed to register");
-                            builder.setMessage("The username you entered is already taken.");
-                        } else if (message.equals("Email is taken")) {
-                            builder.setTitle("Failed to register");
-                            builder.setMessage("The email you entered is already taken.");
-                        } else if (message.equals("Phone number is taken")) {
-                            builder.setTitle("Failed to register");
-                            builder.setMessage("The phone number you entered is already taken.");
-                        } else if (message.equals("Invalid email")) {
-                            builder.setTitle("Failed to register");
-                            builder.setMessage("Please make sure you have entered a valid email address.");
-                        } else if (message.equals("Invalid phone number")) {
-                            builder.setTitle("Failed to register");
-                            builder.setMessage("Please make sure you have entered a valid phone number.");
-                        } else if (message.equals("Invalid user info")) {
-                            builder.setTitle("Failed to register");
-                            builder.setMessage("Please make sure you have entered a valid name, username, and password.");
-                        }
-                    } else {
-                        builder.setTitle("Cannot connect to server");
-                        builder.setMessage("Please make sure you have a stable internet connection.");
-                    }
-                } else {
-                    builder.setTitle("Cannot connect to server");
-                    builder.setMessage("Please make sure you have a stable internet connection.");
-                }
-
-                builder.create().show();
+                NetworkUtils.catchNetworkError(RegisterActivity.this, error.networkResponse, errors);
 
                 registerButton.setClickable(true);
             }
