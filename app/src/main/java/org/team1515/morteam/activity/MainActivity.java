@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -52,7 +53,7 @@ import static org.team1515.morteam.MorTeam.queue;
 public class MainActivity extends AppCompatActivity {
     MainTabAdapter sectionPagerAdapter;
 
-    PopupMenu popupMenu;
+    PopupMenu profileMenu;
 
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle drawerToggle;
@@ -89,10 +90,9 @@ public class MainActivity extends AppCompatActivity {
         profilePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                popupMenu.show();
+                profileMenu.show();
             }
         });
-        String stuff = NetworkUtils.makeURL(preferences.getString("profpicpath", "") + "-60", false);
         Glide
                 .with(this)
                 .load(NetworkUtils.makePictureURL(preferences.getString("profpicpath", ""), "-60"))
@@ -101,9 +101,9 @@ public class MainActivity extends AppCompatActivity {
                 .into(profilePic);
 
         //Menu
-        popupMenu = new PopupMenu(this, profilePic);
-        popupMenu.inflate(R.menu.menu_main);
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+        profileMenu = new PopupMenu(this, profilePic);
+        profileMenu.inflate(R.menu.menu_profile);
+        profileMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
@@ -200,9 +200,29 @@ public class MainActivity extends AppCompatActivity {
         getSubdivisions();
     }
 
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        drawerToggle.syncState();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         getSubdivisions();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Pass the event to ActionBarDrawerToggle, if it returns
+        // true, then it has handled the app icon touch event
+        return drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        drawerToggle.onConfigurationChanged(newConfig);
     }
 
     public void getSubdivisions() {
@@ -580,7 +600,7 @@ public class MainActivity extends AppCompatActivity {
                                 createNewChat(params);
                             } else {
                                 nameView.setHint("Please enter a name");
-                                nameView.setHintTextColor(getResources().getColor(R.color.red));
+                                nameView.setHintTextColor(ContextCompat.getColor(MainActivity.this, R.color.red));
                             }
                         }
                     });
@@ -642,7 +662,7 @@ public class MainActivity extends AppCompatActivity {
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
 
-        //Get content from edittext
+        //Get content from edit text
         EditText messageBox = (EditText) newAnnouncementView.findViewById(R.id.newAnnouncement_message);
         String message = messageBox.getText().toString();
 
@@ -700,28 +720,5 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("isTeam", true);
         intent.putExtra("name", "Team");
         startActivity(intent);
-    }
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        drawerToggle.syncState();
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        drawerToggle.onConfigurationChanged(newConfig);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Pass the event to ActionBarDrawerToggle, if it returns
-        // true, then it has handled the app icon touch event
-        if (drawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }
