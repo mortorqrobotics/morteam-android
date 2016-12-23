@@ -18,6 +18,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -51,7 +53,7 @@ import static org.team1515.morteam.MorTeam.preferences;
 import static org.team1515.morteam.MorTeam.queue;
 
 public class MainActivity extends AppCompatActivity {
-    MainTabAdapter sectionPagerAdapter;
+    MainTabAdapter tabAdapter;
 
     PopupMenu profileMenu;
 
@@ -65,8 +67,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     //New announcement alert
-    public AlertDialog.Builder announcementBuilder;
-    public View newAnnouncementView;
+    private AlertDialog.Builder newAnnouncementBuilder;
+    private View newAnnouncementView;
     private Spinner choiceSpinner;
     private JSONObject currentPostGroup = new JSONObject();
 
@@ -82,6 +84,10 @@ public class MainActivity extends AppCompatActivity {
         //Set up action bar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
         //Set up action bar profile picture
         final ImageView profilePic = (ImageView) toolbar.findViewById(R.id.actionbar_pic);
@@ -108,37 +114,12 @@ public class MainActivity extends AppCompatActivity {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.logout:
-                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                        builder.setTitle("Are you sure you want to logout?");
-                        builder.setPositiveButton("Logout", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                CookieRequest logoutRequest = new CookieRequest(Request.Method.POST,
-                                        "/logout",
-                                        new Response.Listener<String>() {
-                                            @Override
-                                            public void onResponse(String response) {
-                                                preferences.edit().clear().apply();
-                                                finish();
-                                            }
-                                        },
-                                        new Response.ErrorListener() {
-                                            @Override
-                                            public void onErrorResponse(VolleyError error) {
-                                                preferences.edit().clear().apply();
-                                                finish();
-                                            }
-                                        });
-                                queue.add(logoutRequest);
-                            }
-                        });
-                        builder.setNegativeButton("Cancel", null);
-                        builder.create().show();
+                        logout();
                         return true;
                     case R.id.view_profile:
                         Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
                         intent.putExtra("_id", preferences.getString("_id", ""));
-                        intent.putExtra("isCurrentUser", true);
+                        intent.putExtra("isCurrentUser", true); //TODO: Fix this?
                         startActivity(intent);
                         return true;
                     default:
@@ -147,18 +128,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        sectionPagerAdapter = new MainTabAdapter(getSupportFragmentManager());
+
+        // Set up tabs
         ViewPager viewPager = (ViewPager) findViewById(R.id.main_viewpager);
-        viewPager.setAdapter(sectionPagerAdapter);
+        tabAdapter = new MainTabAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(tabAdapter);
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
+        // Set up navigation drawer
         drawerLayout = (DrawerLayout) findViewById(R.id.main_drawerLayout);
-        final ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeButtonEnabled(true);
-        }
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
@@ -186,16 +165,17 @@ public class MainActivity extends AppCompatActivity {
         publicSubList.setLayoutManager(publicSubLayoutManager);
         publicSubList.setAdapter(publicSubAdapter);
 
-
         //Create new announcement dialog
-        announcementBuilder = new AlertDialog.Builder(this);
-        announcementBuilder.setPositiveButton("Post", new DialogInterface.OnClickListener() {
+        newAnnouncementView = getLayoutInflater().inflate(R.layout.dialog_newannouncement, (ViewGroup) getWindow().getDecorView().getRootView(), false);
+        newAnnouncementBuilder = new AlertDialog.Builder(this);
+        newAnnouncementBuilder.setPositiveButton("Post", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 postAnnouncement();
             }
         });
-        announcementBuilder.setNegativeButton("Cancel", null);
+        newAnnouncementBuilder.setNegativeButton("Cancel", null);
+        newAnnouncementBuilder.setView(newAnnouncementView);
 
         getSubdivisions();
     }
@@ -322,16 +302,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void reloadData(View view) {
-        sectionPagerAdapter.announcementFragment.getAnnouncements();
-        sectionPagerAdapter.chatFragment.getChats();
+        tabAdapter.announcementFragment.getAnnouncements();
+        tabAdapter.chatFragment.getChats();
         getSubdivisions();
     }
 
     public void showAnnouncementDialog() {
-
-        //Create new announcement dialog
-        newAnnouncementView = getLayoutInflater().inflate(R.layout.dialog_newannouncement, null);
-
         //Populate choice spinner
         choiceSpinner = (Spinner) newAnnouncementView.findViewById(R.id.newAnnouncement_choiceSpinner);
         choiceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -454,8 +430,14 @@ public class MainActivity extends AppCompatActivity {
         });
         populateChoiceSpinner();
 
-        announcementBuilder.setView(newAnnouncementView);
-        announcementBuilder.create().show();
+        // Free dialog view from any previous dialogs
+        ViewParent viewParent = newAnnouncementView.getParent();
+        if (viewParent != null) {
+            ((ViewGroup) viewParent).removeView(newAnnouncementView);
+        }
+        AlertDialog newAnnouncementDialog = newAnnouncementBuilder.create();
+        newAnnouncementDialog.setView(newAnnouncementView);
+        newAnnouncementDialog.show();
     }
 
     private void populateChoiceSpinner() {
@@ -578,7 +560,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     AlertDialog.Builder nameBuilder = new AlertDialog.Builder(MainActivity.this);
-                    nameBuilder.setView(getLayoutInflater().inflate(R.layout.dialog_chatname, null));
+                    nameBuilder.setView(getLayoutInflater().inflate(R.layout.dialog_chatname, (ViewGroup) getWindow().getDecorView().getRootView(), false));
                     nameBuilder.setTitle("Type a name for your group chat");
                     nameBuilder.setNegativeButton("Cancel", null);
                     nameBuilder.setPositiveButton("Okay", null);
@@ -619,7 +601,7 @@ public class MainActivity extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        sectionPagerAdapter.chatFragment.getChats();
+                        tabAdapter.chatFragment.getChats();
                     }
                 },
                 new Response.ErrorListener() {
@@ -660,10 +642,13 @@ public class MainActivity extends AppCompatActivity {
     public void postAnnouncement() {
         //Hide keyboard
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        View focus = getCurrentFocus();
+        if (focus != null) {
+            imm.hideSoftInputFromWindow(focus.getWindowToken(), 0);
+        }
 
         //Get content from edit text
-        EditText messageBox = (EditText) newAnnouncementView.findViewById(R.id.newAnnouncement_message);
+        final EditText messageBox = (EditText) newAnnouncementView.findViewById(R.id.newAnnouncement_message);
         String message = messageBox.getText().toString();
 
         if (!message.isEmpty()) {
@@ -684,20 +669,13 @@ public class MainActivity extends AppCompatActivity {
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
-                            sectionPagerAdapter.announcementFragment.getAnnouncements();
+                            messageBox.setText("");
+                            tabAdapter.announcementFragment.getAnnouncements();
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            NetworkResponse response = error.networkResponse;
-                            if (response != null) {
-                                if (response.statusCode == 400) {
-                                    String message = new String(response.data);
-                                    System.out.println(message);
-                                }
-                            }
-
                             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                             builder.setTitle("Error posting announcement");
                             builder.setMessage("Please try again later");
@@ -713,6 +691,35 @@ public class MainActivity extends AppCompatActivity {
             builder.setPositiveButton("Okay", null);
             builder.create().show();
         }
+    }
+
+    public void logout() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Are you sure you want to logout?");
+        builder.setPositiveButton("Logout", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                CookieRequest logoutRequest = new CookieRequest(Request.Method.POST,
+                        "/logout",
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                preferences.edit().clear().apply();
+                                finish();
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                preferences.edit().clear().apply();
+                                finish();
+                            }
+                        });
+                queue.add(logoutRequest);
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.create().show();
     }
 
     public void teamClick(View view) {
