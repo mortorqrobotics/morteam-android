@@ -216,30 +216,35 @@ public class ChatActivity extends AppCompatActivity {
             public void call(Object... args) {
                 try {
                     JSONObject chatObject = new JSONObject(args[0].toString());
-                    JSONObject messageObject = chatObject.getJSONObject("message");
-                    JSONObject authorObject = messageObject.getJSONObject("author");
-                    System.out.println("\t" + messageObject.toString());
 
-                    final String firstName = authorObject.getString("firstname");
-                    final String lastName = authorObject.getString("lastname");
-                    final String authorId = authorObject.getString("_id");
-                    final String profPicPath = authorObject.getString("profpicpath") + "-60".replace(" ", "+");
-                    final String content = messageObject.getString("content");
-                    final String date = messageObject.getString("timestamp");
-                    final String chatId = chatObject.getString("chatId");
+                    // Make sure that the message is from this chat
+                    if (chatObject.get("chatId").equals(chatId)) {
 
-                    final boolean isOwnChat = authorId.equals(MorTeam.preferences.getString("_id", ""));
+                        JSONObject messageObject = chatObject.getJSONObject("message");
+                        JSONObject authorObject = messageObject.getJSONObject("author");
+                        System.out.println("\t" + messageObject.toString());
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            messageAdapter.addMessage(firstName, lastName, content, date, chatId, profPicPath, isOwnChat);
-                            if (messageLayoutManager.findFirstVisibleItemPosition() <= 3) {
-                                messageList.smoothScrollToPosition(0);
+                        final String firstName = authorObject.getString("firstname");
+                        final String lastName = authorObject.getString("lastname");
+                        final String authorId = authorObject.getString("_id");
+                        final String profPicPath = authorObject.getString("profpicpath") + "-60".replace(" ", "+");
+                        final String content = messageObject.getString("content");
+                        final String date = messageObject.getString("timestamp");
+                        final String chatId = chatObject.getString("chatId");
+
+                        final boolean isOwnChat = authorId.equals(MorTeam.preferences.getString("_id", ""));
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                messageAdapter.addMessage(firstName, lastName, content, date, chatId, profPicPath, isOwnChat);
+                                if (messageLayoutManager.findFirstVisibleItemPosition() <= 3) {
+                                    messageList.smoothScrollToPosition(0);
+                                }
+                                System.out.println(messageLayoutManager.findFirstVisibleItemPosition());
                             }
-                            System.out.println(messageLayoutManager.findFirstVisibleItemPosition());
-                        }
-                    });
+                        });
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -292,7 +297,6 @@ public class ChatActivity extends AppCompatActivity {
                 return;
             }
 
-            System.out.println(socket.connected());
             socket.emit("sendMessage", messageObject);
 
             isClearingText = true;
@@ -300,7 +304,6 @@ public class ChatActivity extends AppCompatActivity {
             isClearingText = false;
 
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-            System.out.println(df.format(new Date()));
             messageAdapter.addMessage(
                     MorTeam.preferences.getString("firstname", ""),
                     MorTeam.preferences.getString("lastname", ""),
