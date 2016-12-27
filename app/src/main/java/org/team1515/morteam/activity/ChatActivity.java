@@ -12,6 +12,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -120,7 +121,7 @@ public class ChatActivity extends AppCompatActivity {
                 if (!isClearingText) {
                     try {
                         JSONObject typingObject = new JSONObject();
-                        typingObject.put("chat_id", chatId);
+                        typingObject.put("chatId", chatId);
                         socket.emit("start typing", typingObject);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -161,7 +162,7 @@ public class ChatActivity extends AppCompatActivity {
 
 
         try {
-            socket = IO.socket("http://www.morteam.com:80");
+            socket = IO.socket(NetworkUtils.makeURL("", false));
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -222,7 +223,6 @@ public class ChatActivity extends AppCompatActivity {
 
                         JSONObject messageObject = chatObject.getJSONObject("message");
                         JSONObject authorObject = messageObject.getJSONObject("author");
-                        System.out.println("\t" + messageObject.toString());
 
                         final String firstName = authorObject.getString("firstname");
                         final String lastName = authorObject.getString("lastname");
@@ -241,11 +241,49 @@ public class ChatActivity extends AppCompatActivity {
                                 if (messageLayoutManager.findFirstVisibleItemPosition() <= 3) {
                                     messageList.smoothScrollToPosition(0);
                                 }
-                                System.out.println(messageLayoutManager.findFirstVisibleItemPosition());
                             }
                         });
                     }
                 } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        final RelativeLayout currentlyTyping = (RelativeLayout) findViewById(R.id.chat_currentlyTyping);
+        socket.on("start typing", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                try {
+                    JSONObject chatObject = new JSONObject(args[0].toString());
+                    if (chatObject.get("chatId").equals(chatId)) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                currentlyTyping.setVisibility(View.VISIBLE);
+                            }
+                        });
+                    }
+                } catch (JSONException e ) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        socket.on("stop typing", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                try {
+                    JSONObject chatObject = new JSONObject(args[0].toString());
+                    if (chatObject.get("chatId").equals(chatId)) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                currentlyTyping.setVisibility(View.GONE);
+                            }
+                        });
+
+                    }
+                } catch (JSONException e ) {
                     e.printStackTrace();
                 }
             }
@@ -373,7 +411,7 @@ public class ChatActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        System.out.println("ERROR: " + error);
+                        error.printStackTrace();
                     }
                 }
         );
