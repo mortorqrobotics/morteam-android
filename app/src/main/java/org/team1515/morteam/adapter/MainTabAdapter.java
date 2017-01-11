@@ -37,7 +37,7 @@ public class MainTabAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return 2;
+        return 3;
     }
 
     @Override
@@ -49,6 +49,10 @@ public class MainTabAdapter extends FragmentPagerAdapter {
                 return "Chat";
             case 2:
                 return "Calendar";
+            case 3:
+                return "Drive";
+            case 4:
+                return "MorMap";
             default:
                 return "Home";
         }

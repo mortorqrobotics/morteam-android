@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -15,6 +16,8 @@ import com.bumptech.glide.Glide;
 import org.team1515.morteam.R;
 import org.team1515.morteam.activity.ChatActivity;
 import org.team1515.morteam.entity.Chat;
+import org.team1515.morteam.fragment.AnnouncementFragment;
+import org.team1515.morteam.fragment.ChatFragment;
 
 import java.util.List;
 
@@ -24,6 +27,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         Context context;
         ImageView pictureView;
         TextView nameView;
+        ImageButton deleteButton;
 
 
         ViewHolder(LinearLayout layout) {
@@ -32,6 +36,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             context = layout.getContext();
             pictureView = (ImageView) layout.findViewById(R.id.chatlist_pic);
             nameView = (TextView) layout.findViewById(R.id.chatlist_name);
+            deleteButton = (ImageButton) layout.findViewById(R.id.delete_chat_button);
 
             layout.setOnClickListener(this);
         }
@@ -54,8 +59,10 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     private Context context;
     private List<Chat> chats;
+    private ChatFragment fragment;
 
-    public ChatAdapter(Context context, List<Chat> chats) {
+    public ChatAdapter(ChatFragment fragment, Context context, List<Chat> chats) {
+        this.fragment = fragment;
         this.context = context;
         this.chats = chats;
     }
@@ -71,7 +78,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         final Chat currentChat = chats.get(position);
 
         Glide
@@ -82,6 +89,13 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                 .into(holder.pictureView);
 
         holder.nameView.setText(currentChat.getName());
+
+        holder.deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                fragment.deleteChat(currentChat.getId(), holder.getAdapterPosition());
+            }
+        });
     }
 
     @Override

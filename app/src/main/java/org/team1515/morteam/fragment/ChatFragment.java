@@ -1,5 +1,7 @@
 package org.team1515.morteam.fragment;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -50,7 +52,7 @@ public class ChatFragment extends Fragment {
 
         chatList = (RecyclerView) view.findViewById(R.id.chat_chatlist);
         chatLayoutManager = new LinearLayoutManager(getContext());
-        chatAdapter = new ChatAdapter(getContext(), chats);
+        chatAdapter = new ChatAdapter(this, getContext(), chats);
         chatList.setLayoutManager(chatLayoutManager);
         chatList.setAdapter(chatAdapter);
 
@@ -87,6 +89,7 @@ public class ChatFragment extends Fragment {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        System.out.println(response);
                         try {
                             chats = new ArrayList<>();
                             JSONArray chatArray = new JSONArray(response);
@@ -145,5 +148,36 @@ public class ChatFragment extends Fragment {
                 }
         );
         queue.add(chatRequest);
+    }
+
+    public void deleteChat(final String id, final int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Are you sure you want to delete?");
+        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                CookieRequest chatRequest = new CookieRequest(
+                        Request.Method.DELETE,
+                        "/chats/id/" + id, //Response code 403?
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                chats.remove(position);
+                                chatAdapter.notifyItemRemoved(position);
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                //What should we do here? I think we should have it delete the chat once it connects to the internet again. Not sure how to do that though.
+                            }
+                        }
+                );
+                queue.add(chatRequest);
+            }
+        });
+
+        builder.setNegativeButton("Cancel", null);
+        builder.create().show();
     }
 }

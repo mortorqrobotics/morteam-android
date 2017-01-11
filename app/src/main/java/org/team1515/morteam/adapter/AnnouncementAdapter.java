@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.text.Layout;
+import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +24,7 @@ import org.team1515.morteam.R;
 import org.team1515.morteam.activity.ProfileActivity;
 import org.team1515.morteam.entity.Announcement;
 import org.team1515.morteam.fragment.AnnouncementFragment;
+import org.team1515.morteam.network.URLImageParser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,6 +109,10 @@ public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapte
 
         holder.messageView.setMovementMethod(LinkMovementMethod.getInstance());
         holder.messageView.setText(Html.fromHtml(currentAnnouncement.getContent()));
+
+        //How are we doing the image thing? We adding an invisible imageView?
+        //This might help us:
+        //https://stackoverflow.com/questions/16179285/html-imagegetter-textview/16209680#16209680
 
         //Don't show delete announcement buttons if not admin
         String teamPosition = preferences.getString("position", "");
