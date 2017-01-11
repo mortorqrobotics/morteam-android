@@ -16,8 +16,16 @@
         android:layout_marginRight="8dp"/>
 
     <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:id="@+id/chatlist_name"/>
+
+    <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/chatlist_name"/>
+        android:id="@+id/delete_chat_button"
+        android:src="@drawable/ic_delete"
+        android:background="@null" />
 
 </LinearLayout>

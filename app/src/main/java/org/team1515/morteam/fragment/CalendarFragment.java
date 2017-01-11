@@ -155,16 +155,14 @@ public class CalendarFragment extends Fragment {
         }
 
         public void getEvents() {
-            Map<String, String> params = new HashMap<>();
-            params.put("month", selectedMonthNum + "");
-            params.put("year", selectedYear);
+            //The Calendar issue is just a request thing, but I don't understand the documentation :P
 
             CookieRequest eventRequest = new CookieRequest(Request.Method.GET,
-                    "/events",
-                    params,
+                    "/events/startYear/" + selectedYear + "/startMonth/" + selectedMonthNum + "/endYear/" + selectedYear + "/endMonth/" + selectedMonthNum,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
+                            System.out.println(response);
                             try {
                                 JSONArray eventArray = new JSONArray(response);
 
@@ -177,27 +175,28 @@ public class CalendarFragment extends Fragment {
                                     List<User> userAttendees = new ArrayList<>();
                                     List<Subdivision> subdivisionAttendees = new ArrayList<>();
 
-                                    //Because someone refuses to actually fix the database
+                                    //Because someone refuses to actually fix the database -- LUL
                                     boolean entireTeam = false;
                                     if (eventObject.has("entireTeam")) {
                                         entireTeam = eventObject.getBoolean("entireTeam");
                                     }
 
-                                    if (!entireTeam) {
-                                        JSONArray usersArray = eventObject.getJSONArray("userAttendees");
-                                        for (int j = 0; j < usersArray.length(); j++) {
-                                            userAttendees.add(new User(usersArray.getString(j)));
-                                        }
-                                        JSONArray subdivisionsArray = eventObject.getJSONArray("subdivisionAttendees");
-                                        for (int j = 0; j < subdivisionsArray.length(); j++) {
-                                            subdivisionAttendees.add(new Subdivision(subdivisionsArray.getString(j)));
-                                        }
-                                    } else {
-                                        //EntireTeam = true; Get all dem users in the team
-                                        for (User user : MainActivity.teamUsers) {
-                                            userAttendees.add(user);
-                                        }
-                                    }
+                                    //userAttendees is not part of the response -- What is it now?
+//                                    if (!entireTeam) {
+//                                        JSONArray usersArray = eventObject.getJSONArray("userAttendees");
+//                                        for (int j = 0; j < usersArray.length(); j++) {
+//                                            userAttendees.add(new User(usersArray.getString(j)));
+//                                        }
+//                                        JSONArray subdivisionsArray = eventObject.getJSONArray("subdivisionAttendees");
+//                                        for (int j = 0; j < subdivisionsArray.length(); j++) {
+//                                            subdivisionAttendees.add(new Subdivision(subdivisionsArray.getString(j)));
+//                                        }
+//                                    } else {
+//                                        //EntireTeam = true; Get all dem users in the team
+//                                        for (User user : MainActivity.teamUsers) {
+//                                            userAttendees.add(user);
+//                                        }
+//                                    }
 
                                     String title = "";
                                     if (eventObject.has("name")) {
