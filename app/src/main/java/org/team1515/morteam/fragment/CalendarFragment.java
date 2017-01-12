@@ -10,6 +10,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -175,7 +176,7 @@ public class CalendarFragment extends Fragment {
                                     List<User> userAttendees = new ArrayList<>();
                                     List<Subdivision> subdivisionAttendees = new ArrayList<>();
 
-                                    //Because someone refuses to actually fix the database -- LUL
+                                    //Because someone refuses to actually fix the database
                                     boolean entireTeam = false;
                                     if (eventObject.has("entireTeam")) {
                                         entireTeam = eventObject.getBoolean("entireTeam");
@@ -202,11 +203,14 @@ public class CalendarFragment extends Fragment {
                                     if (eventObject.has("name")) {
                                         title = eventObject.getString("name");
                                     }
+
+                                    //When this contains a link, there is a space at the end...
                                     String description = "";
                                     if (eventObject.has("description")) {
                                         description = eventObject.getString("description");
                                     }
 
+                                    //userAttendees and subdivisionAttendees are not defined
                                     Event event = new Event(creator,
                                             eventObject.getString("_id"),
                                             title,
@@ -368,7 +372,7 @@ public class CalendarFragment extends Fragment {
 
             TextView descriptionView = (TextView) holder.layout.findViewById(R.id.event_description);
             descriptionView.setMovementMethod(LinkMovementMethod.getInstance());
-            descriptionView.setText(Html.fromHtml(currentEvent.getDescription()));
+            descriptionView.setText(Html.fromHtml(currentEvent.getDescription()).toString().trim());
 
             ImageView deleteView = (ImageView) holder.layout.findViewById(R.id.event_delete);
             if (preferences.getString("position", "").equals("admin") || preferences.getString("position", "").equals("leader")) {
