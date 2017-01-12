@@ -5,21 +5,16 @@ import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
-import android.text.Layout;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.volley.toolbox.NetworkImageView;
 import com.bumptech.glide.Glide;
 
-import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.R;
 import org.team1515.morteam.activity.ProfileActivity;
 import org.team1515.morteam.entity.Announcement;
@@ -39,6 +34,7 @@ public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapte
         TextView authorView;
         TextView dateView;
         TextView messageView;
+
         ImageButton deleteButton;
 
         ViewHolder(CardView layout) {
@@ -52,7 +48,6 @@ public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapte
             deleteButton = (ImageButton) layout.findViewById(R.id.delete_button);
         }
     }
-
 
     private List<Announcement> announcements;
     private AnnouncementFragment fragment;
@@ -108,11 +103,8 @@ public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapte
         holder.dateView.setText(currentAnnouncement.getDate());
 
         holder.messageView.setMovementMethod(LinkMovementMethod.getInstance());
-        holder.messageView.setText(Html.fromHtml(currentAnnouncement.getContent()));
-
-        //How are we doing the image thing? We adding an invisible imageView?
-        //This might help us:
-        //https://stackoverflow.com/questions/16179285/html-imagegetter-textview/16209680#16209680
+        //The images need resizing -- Check URLImageParser onPostExecute() function
+        holder.messageView.setText(Html.fromHtml(currentAnnouncement.getContent(), new URLImageParser(holder.messageView, holder.context), null));
 
         //Don't show delete announcement buttons if not admin
         String teamPosition = preferences.getString("position", "");
