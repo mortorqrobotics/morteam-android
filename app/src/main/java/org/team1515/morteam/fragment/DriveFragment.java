@@ -2,6 +2,7 @@ package org.team1515.morteam.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+<<<<<<< HEAD
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -43,6 +44,19 @@ public class DriveFragment extends Fragment {
         driveList.setLayoutManager(driveLayoutManager);
         driveList.setAdapter(driveAdapter);
 
+=======
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import org.team1515.morteam.R;
+
+public class DriveFragment extends Fragment {
+    //This exists for the sake of existing
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_drive, container, false);
+
+>>>>>>> 1117939d1629ebded774c4c412c10000b8be809e
         return view;
     }
 }
