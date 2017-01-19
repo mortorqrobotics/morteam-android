@@ -7,11 +7,13 @@ import android.support.v4.app.FragmentPagerAdapter;
 import org.team1515.morteam.fragment.AnnouncementFragment;
 import org.team1515.morteam.fragment.CalendarFragment;
 import org.team1515.morteam.fragment.ChatFragment;
+import org.team1515.morteam.fragment.DriveFragment;
 
 public class MainTabAdapter extends FragmentPagerAdapter {
     public AnnouncementFragment announcementFragment;
     public ChatFragment chatFragment;
     public CalendarFragment calendarFragment;
+    public DriveFragment driveFragment;
 
     public MainTabAdapter(FragmentManager fragmentManager) {
         super(fragmentManager);
@@ -19,6 +21,7 @@ public class MainTabAdapter extends FragmentPagerAdapter {
         announcementFragment = new AnnouncementFragment();
         chatFragment = new ChatFragment();
         calendarFragment = new CalendarFragment();
+        driveFragment = new DriveFragment();
     }
 
     @Override
@@ -30,6 +33,8 @@ public class MainTabAdapter extends FragmentPagerAdapter {
                 return chatFragment;
             case 2:
                 return calendarFragment;
+            case 3:
+                return driveFragment;
             default:
                 return new Fragment();
         }
@@ -37,7 +42,7 @@ public class MainTabAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return 3;
+        return 4;
     }
 
     @Override

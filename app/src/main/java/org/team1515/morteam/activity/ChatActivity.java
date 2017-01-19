@@ -143,7 +143,6 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Date runTime = new Date();
-
                         if ((lastTypeTime.getTime() + 1000) <= runTime.getTime()) {
                             try {
                                 JSONObject typingObject = new JSONObject();
@@ -269,6 +268,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         });
+
         socket.on("stop typing", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
