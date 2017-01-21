@@ -163,7 +163,6 @@ public class CalendarFragment extends Fragment {
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            System.out.println(response);
                             try {
                                 JSONArray eventArray = new JSONArray(response);
 

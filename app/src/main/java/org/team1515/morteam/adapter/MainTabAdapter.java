@@ -42,11 +42,7 @@ public class MainTabAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-<<<<<<< HEAD
         return 4;
-=======
-        return 3;
->>>>>>> 1117939d1629ebded774c4c412c10000b8be809e
     }
 
     @Override

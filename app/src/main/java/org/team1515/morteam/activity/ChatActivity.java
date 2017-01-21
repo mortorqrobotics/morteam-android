@@ -357,7 +357,6 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
-
     public void getChats() {
         final int skip;
         if (!messages.isEmpty()) {
