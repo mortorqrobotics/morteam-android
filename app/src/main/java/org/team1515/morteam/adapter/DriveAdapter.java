@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import org.team1515.morteam.R;
 import org.team1515.morteam.activity.DriveActivity;
@@ -17,8 +18,12 @@ import java.util.List;
 
 public class DriveAdapter extends RecyclerView.Adapter<DriveAdapter.ViewHolder> {
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        TextView folderName;
+
         ViewHolder(LinearLayout layout) {
             super(layout);
+
+            folderName = (TextView) layout.findViewById(R.id.folder_name);
 
             layout.setOnClickListener(this);
         }
@@ -27,11 +32,11 @@ public class DriveAdapter extends RecyclerView.Adapter<DriveAdapter.ViewHolder> 
         public void onClick(View view) {
             int position = getAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
-                Folder folder = drive.get(position);
+//                Folder folder = drive.get(position);
 
-                Intent intent = new Intent(context, DriveActivity.class);
-                intent.putExtra("_id", folder.getName());
-                context.startActivity(intent);
+//                Intent intent = new Intent(context, DriveActivity.class);
+//                intent.putExtra("_id", folder.getName());
+//                context.startActivity(intent);
             }
         }
     }
@@ -59,6 +64,8 @@ public class DriveAdapter extends RecyclerView.Adapter<DriveAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final Folder currentFolder = drive.get(position);
+
+        holder.folderName.setText(currentFolder.getName());
     }
 
     @Override

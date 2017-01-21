@@ -82,6 +82,7 @@ public class DriveFragment extends Fragment {
                             }
 
                             driveAdapter.setDrive(drive);
+                            driveAdapter.notifyDataSetChanged();
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
