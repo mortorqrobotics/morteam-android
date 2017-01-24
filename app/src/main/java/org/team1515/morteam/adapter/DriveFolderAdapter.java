@@ -2,11 +2,11 @@ package org.team1515.morteam.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.team1515.morteam.R;
@@ -16,11 +16,11 @@ import org.team1515.morteam.fragment.DriveFragment;
 
 import java.util.List;
 
-public class DriveAdapter extends RecyclerView.Adapter<DriveAdapter.ViewHolder> {
+public class DriveFolderAdapter extends RecyclerView.Adapter<DriveFolderAdapter.ViewHolder> {
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView folderName;
 
-        ViewHolder(LinearLayout layout) {
+        ViewHolder(CardView layout) {
             super(layout);
 
             folderName = (TextView) layout.findViewById(R.id.folder_name);
@@ -32,11 +32,12 @@ public class DriveAdapter extends RecyclerView.Adapter<DriveAdapter.ViewHolder> 
         public void onClick(View view) {
             int position = getAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
-//                Folder folder = drive.get(position);
+                Folder folder = drive.get(position);
 
-//                Intent intent = new Intent(context, DriveActivity.class);
-//                intent.putExtra("_id", folder.getName());
-//                context.startActivity(intent);
+                Intent intent = new Intent(context, DriveActivity.class);
+                intent.putExtra("name", folder.getName());
+                intent.putExtra("_id", folder.getId());
+                context.startActivity(intent);
             }
         }
     }
@@ -45,7 +46,7 @@ public class DriveAdapter extends RecyclerView.Adapter<DriveAdapter.ViewHolder> 
     private List<Folder> drive;
     private DriveFragment fragment;
 
-    public DriveAdapter(DriveFragment fragment, Context context, List<Folder> drive) {
+    public DriveFolderAdapter(DriveFragment fragment, Context context, List<Folder> drive) {
         this.fragment = fragment;
         this.context = context;
         this.drive = drive;
@@ -57,7 +58,7 @@ public class DriveAdapter extends RecyclerView.Adapter<DriveAdapter.ViewHolder> 
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        LinearLayout view = (LinearLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.list_folder, parent, false);
+        CardView view = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.list_folder, parent, false);
         return new ViewHolder(view);
     }
 

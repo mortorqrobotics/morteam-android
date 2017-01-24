@@ -19,21 +19,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.team1515.morteam.R;
-import org.team1515.morteam.adapter.DriveAdapter;
+import org.team1515.morteam.adapter.DriveFolderAdapter;
 import org.team1515.morteam.entity.Folder;
 import org.team1515.morteam.entity.User;
 import org.team1515.morteam.network.CookieRequest;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import static org.team1515.morteam.MorTeam.preferences;
 import static org.team1515.morteam.MorTeam.queue;
 
 public class DriveFragment extends Fragment {
     private RecyclerView driveList;
-    private DriveAdapter driveAdapter;
+    private DriveFolderAdapter driveAdapter;
     private LinearLayoutManager driveLayoutManager;
 
     private SwipeRefreshLayout refreshLayout;
@@ -48,9 +46,9 @@ public class DriveFragment extends Fragment {
 
         drive = new ArrayList<>();
 
-        driveList = (RecyclerView) view.findViewById(R.id.drive_list);
+        driveList = (RecyclerView) view.findViewById(R.id.drive_folders);
         driveLayoutManager = new LinearLayoutManager(getContext());
-        driveAdapter = new DriveAdapter(this, getContext(), drive);
+        driveAdapter = new DriveFolderAdapter(this, getContext(), drive);
         driveList.setLayoutManager(driveLayoutManager);
         driveList.setAdapter(driveAdapter);
 
@@ -61,7 +59,9 @@ public class DriveFragment extends Fragment {
 
     //Drive requests and what they do:
     //folders: /folders
-    //press on folder: /folders/id/:folderID/files
+    //files: /folders/id/:folderID/files -- onClick
+
+    //TODO: Implement "add folder" button
 
     public void getFolders() {
         CookieRequest folderRequests = new CookieRequest(
@@ -76,7 +76,11 @@ public class DriveFragment extends Fragment {
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
 
-                                Folder folder = new Folder(jsonObject.getString("name"), jsonObject.getBoolean("defaultFolder"), new User(jsonObject.getString("creator")));
+                                Folder folder = new Folder(jsonObject.getString("_id"), jsonObject.getString("created_at"), jsonObject.getString("updated_at"), jsonObject.getString("name"), jsonObject.getBoolean("defaultFolder"), new User(jsonObject.getString("creator")));
+
+                                //System.out.println(folder.getCreator().getFullName()); --> null null | Why is this not working?
+
+                                //TODO: Audience stuffs
 
                                 drive.add(folder);
                             }
