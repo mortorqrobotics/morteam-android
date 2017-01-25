@@ -18,6 +18,7 @@ import com.android.volley.VolleyError;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.R;
 import org.team1515.morteam.adapter.DriveFolderAdapter;
 import org.team1515.morteam.entity.Folder;
@@ -26,8 +27,6 @@ import org.team1515.morteam.network.CookieRequest;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.team1515.morteam.MorTeam.queue;
 
 public class DriveFragment extends Fragment {
     private RecyclerView driveList;
@@ -56,10 +55,6 @@ public class DriveFragment extends Fragment {
 
         return view;
     }
-
-    //Drive requests and what they do:
-    //folders: /folders
-    //files: /folders/id/:folderID/files -- onClick
 
     //TODO: Implement "add folder" button
 
@@ -99,6 +94,6 @@ public class DriveFragment extends Fragment {
                     }
                 }
         );
-        queue.add(folderRequests);
+        MorTeam.queue.add(folderRequests);
     }
 }

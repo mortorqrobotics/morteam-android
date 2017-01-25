@@ -5,14 +5,24 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import org.team1515.morteam.R;
 
-//Pretty much here just to exist
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 public class DriveFileAdapter extends RecyclerView.Adapter<DriveFileAdapter.ViewHolder> {
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        TextView fileName;
+
         ViewHolder(CardView layout) {
             super(layout);
+
+            fileName = (TextView) layout.findViewById(R.id.file_name);
+
+            layout.setOnClickListener(this);
         }
 
         @Override
@@ -21,8 +31,14 @@ public class DriveFileAdapter extends RecyclerView.Adapter<DriveFileAdapter.View
         }
     }
 
-    public void setDrive() {
+    private List<File> files;
 
+    public DriveFileAdapter() {
+        files = new ArrayList<>();
+    }
+
+    public void setFiles(List<File> files) {
+        this.files = files;
     }
 
     @Override
@@ -33,7 +49,10 @@ public class DriveFileAdapter extends RecyclerView.Adapter<DriveFileAdapter.View
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
+        //Which object type do we need here?
+        final File currentFile = files.get(position);
 
+        holder.fileName.setText(currentFile.getName());
     }
 
     @Override

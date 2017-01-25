@@ -76,6 +76,7 @@
     <string name="task_name">Task Name</string>
     <string name="task_description">Task Description</string>
 
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyDlLpJ3d9qsETIEAIJbEAj1TdybCOf8IEY</string>
 
     <string-array name="months">
         <item>January</item>
