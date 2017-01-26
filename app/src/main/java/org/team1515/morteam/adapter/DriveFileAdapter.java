@@ -8,8 +8,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.team1515.morteam.R;
-import org.team1515.morteam.entity.File;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class DriveFileAdapter extends RecyclerView.Adapter<DriveFileAdapter.View
 
             fileName = (TextView) layout.findViewById(R.id.file_name);
 
-            //layout.setOnClickListener(this);
+            layout.setOnClickListener(this);
         }
 
         @Override
@@ -39,7 +39,6 @@ public class DriveFileAdapter extends RecyclerView.Adapter<DriveFileAdapter.View
 
     public void setFiles(List<File> files) {
         this.files = files;
-        notifyDataSetChanged();
     }
 
     @Override
@@ -50,6 +49,7 @@ public class DriveFileAdapter extends RecyclerView.Adapter<DriveFileAdapter.View
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
+        //Which object type do we need here?
         final File currentFile = files.get(position);
 
         holder.fileName.setText(currentFile.getName());
