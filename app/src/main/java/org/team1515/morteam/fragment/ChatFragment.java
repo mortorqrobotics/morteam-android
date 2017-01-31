@@ -89,7 +89,6 @@ public class ChatFragment extends Fragment {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        System.out.println(response);
                         try {
                             chats = new ArrayList<>();
                             JSONArray chatArray = new JSONArray(response);

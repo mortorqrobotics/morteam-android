@@ -24,6 +24,11 @@ public class CookieRequest extends StringRequest {
         this.params = params;
     }
 
+    public CookieRequest(int method, String path, boolean isAPI, Listener<String> listener, ErrorListener errorListener) {
+        super(method, NetworkUtils.makeURL(path, isAPI), listener, errorListener);
+        params = null;
+    }
+
     public CookieRequest(int method, String path, Listener<String> listener, ErrorListener errorListener) {
         this(method, path, null, listener, errorListener);
     }

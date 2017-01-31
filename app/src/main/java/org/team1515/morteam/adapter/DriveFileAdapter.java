@@ -57,6 +57,6 @@ public class DriveFileAdapter extends RecyclerView.Adapter<DriveFileAdapter.View
 
     @Override
     public int getItemCount() {
-        return 0;
+        return files.size();
     }
 }

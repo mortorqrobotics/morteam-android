@@ -8,12 +8,14 @@ import org.team1515.morteam.fragment.AnnouncementFragment;
 import org.team1515.morteam.fragment.CalendarFragment;
 import org.team1515.morteam.fragment.ChatFragment;
 import org.team1515.morteam.fragment.DriveFragment;
+import org.team1515.morteam.fragment.MapFragment;
 
 public class MainTabAdapter extends FragmentPagerAdapter {
     public AnnouncementFragment announcementFragment;
     public ChatFragment chatFragment;
     public CalendarFragment calendarFragment;
     public DriveFragment driveFragment;
+    public MapFragment mapFragment;
 
     public MainTabAdapter(FragmentManager fragmentManager) {
         super(fragmentManager);
@@ -22,6 +24,7 @@ public class MainTabAdapter extends FragmentPagerAdapter {
         chatFragment = new ChatFragment();
         calendarFragment = new CalendarFragment();
         driveFragment = new DriveFragment();
+        mapFragment = new MapFragment();
     }
 
     @Override
@@ -35,6 +38,8 @@ public class MainTabAdapter extends FragmentPagerAdapter {
                 return calendarFragment;
             case 3:
                 return driveFragment;
+            case 4:
+                return mapFragment;
             default:
                 return new Fragment();
         }
@@ -42,7 +47,7 @@ public class MainTabAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        return 4;
+        return 5;
     }
 
     @Override
