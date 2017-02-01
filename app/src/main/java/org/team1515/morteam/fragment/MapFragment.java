@@ -65,7 +65,9 @@ public class MapFragment extends Fragment {
             @Override
             public void afterTextChanged(Editable arg0) {
                 String searchText = arg0.toString();
-                searchLocations(searchText);
+                if (!searchText.equals("")) {
+                    searchLocations(searchText);
+                }
             }
 
             @Override

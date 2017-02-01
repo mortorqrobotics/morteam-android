@@ -2,11 +2,13 @@ package org.team1515.morteam.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.Image;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.team1515.morteam.R;
@@ -18,11 +20,13 @@ import java.util.List;
 
 public class DriveFolderAdapter extends RecyclerView.Adapter<DriveFolderAdapter.ViewHolder> {
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        ImageView folderGlyph;
         TextView folderName;
 
         ViewHolder(CardView layout) {
             super(layout);
 
+            folderGlyph = (ImageView) layout.findViewById(R.id.folder_glyphicon);
             folderName = (TextView) layout.findViewById(R.id.folder_name);
 
             layout.setOnClickListener(this);
@@ -66,6 +70,7 @@ public class DriveFolderAdapter extends RecyclerView.Adapter<DriveFolderAdapter.
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final Folder currentFolder = drive.get(position);
 
+        holder.folderGlyph.setImageResource(R.drawable.folder);
         holder.folderName.setText(currentFolder.getName());
     }
 

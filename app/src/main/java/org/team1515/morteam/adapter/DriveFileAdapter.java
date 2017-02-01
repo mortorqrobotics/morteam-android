@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.team1515.morteam.R;
@@ -15,11 +16,13 @@ import java.util.List;
 
 public class DriveFileAdapter extends RecyclerView.Adapter<DriveFileAdapter.ViewHolder> {
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        ImageView filePreview;
         TextView fileName;
 
         ViewHolder(CardView layout) {
             super(layout);
 
+            filePreview = (ImageView) layout.findViewById(R.id.file_preview);
             fileName = (TextView) layout.findViewById(R.id.file_name);
 
             //layout.setOnClickListener(this);
@@ -27,7 +30,7 @@ public class DriveFileAdapter extends RecyclerView.Adapter<DriveFileAdapter.View
 
         @Override
         public void onClick(View view) {
-
+            //TODO: Take to website --> morteam.com/files/id/:fileID
         }
     }
 
@@ -52,6 +55,7 @@ public class DriveFileAdapter extends RecyclerView.Adapter<DriveFileAdapter.View
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final File currentFile = files.get(position);
 
+        holder.filePreview.setImageResource(R.drawable.file);
         holder.fileName.setText(currentFile.getName());
     }
 
