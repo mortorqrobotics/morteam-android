@@ -1,6 +1,8 @@
 package org.team1515.morteam.adapter;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.widget.CardView;
@@ -39,10 +41,20 @@ public class DriveFileAdapter extends RecyclerView.Adapter<DriveFileAdapter.View
         public void onClick(View view) {
             int position = getAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
-                File file = files.get(position);
+                final File file = files.get(position);
 
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.morteam.com/api/files/id/" + file.getId()));
-                context.startActivity(browserIntent);
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("Download '" + file.getName() + "'?");
+                builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.morteam.com/api/files/id/" + file.getId()));
+                        context.startActivity(browserIntent);
+                    }
+                });
+
+                builder.setNegativeButton("Cancel", null);
+                builder.create().show();
             }
         }
     }

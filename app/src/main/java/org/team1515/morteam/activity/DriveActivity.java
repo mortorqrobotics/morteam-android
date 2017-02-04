@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -27,6 +28,8 @@ import java.util.List;
 public class DriveActivity extends AppCompatActivity {
     private String folderName;
     private String folderId;
+
+    private TextView folderNameView;
 
     private RecyclerView fileList;
     private DriveFileAdapter fileAdapter;
@@ -51,6 +54,9 @@ public class DriveActivity extends AppCompatActivity {
         Intent intent = getIntent();
         folderName = intent.getStringExtra("name");
         folderId = intent.getStringExtra("_id");
+
+        folderNameView = (TextView) findViewById(R.id.file_folder_name);
+        folderNameView.setText(folderName);
 
         fileList = (RecyclerView) findViewById(R.id.drive_files);
         fileAdapter = new DriveFileAdapter();

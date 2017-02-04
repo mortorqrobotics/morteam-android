@@ -5,6 +5,22 @@
 
     <include layout="@layout/actionbar" />
 
+    <TextView
+        android:id="@+id/file_folder_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="15dp"
+        android:paddingBottom="15dp"
+        android:textSize="15sp"
+        android:layout_gravity="center"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_marginRight="25dp"
+        android:layout_marginLeft="25dp"
+        android:layout_height="1dp"
+        android:background="@color/dark_gray" />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/drive_files"
         android:layout_width="match_parent"
