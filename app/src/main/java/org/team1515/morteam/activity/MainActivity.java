@@ -68,7 +68,9 @@ public class MainActivity extends AppCompatActivity {
 
     //New announcement alert
     private AlertDialog.Builder newAnnouncementBuilder;
+    private AlertDialog.Builder newFolderBuilder;
     private View newAnnouncementView;
+    private View newFolderView;
     private Spinner choiceSpinner;
     private JSONObject currentPostGroup = new JSONObject();
 
@@ -177,6 +179,18 @@ public class MainActivity extends AppCompatActivity {
         newAnnouncementBuilder.setNegativeButton("Cancel", null);
         newAnnouncementBuilder.setView(newAnnouncementView);
 
+        //Create new folder dialog
+        newFolderView = getLayoutInflater().inflate(R.layout.dialog_newfolder, (ViewGroup) getWindow().getDecorView().getRootView(), false);
+        newFolderBuilder = new AlertDialog.Builder(this);
+        newFolderBuilder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                addFolder();
+            }
+        });
+        newFolderBuilder.setNegativeButton("Cancel", null);
+        newFolderBuilder.setView(newFolderView);
+
         getSubdivisions();
     }
 
@@ -219,9 +233,9 @@ public class MainActivity extends AppCompatActivity {
                             for (int i = 0; i < userArray.length(); i++) {
                                 JSONObject userObject = userArray.getJSONObject(i);
                                 teamUsers.add(new User(userObject.getString("firstname"),
-                                        userObject.getString("lastname"),
-                                        userObject.getString("_id"),
-                                        userObject.getString("profpicpath"))
+                                                userObject.getString("lastname"),
+                                                userObject.getString("_id"),
+                                                userObject.getString("profpicpath"))
                                 );
                             }
                         } catch (JSONException e) {
@@ -249,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
                                 JSONObject subdivisionObject = subdivisionArray.getJSONObject(i);
                                 if (subdivisionObject.getString("__t").equals("NormalGroup")) {
                                     yourSubs.add(new Subdivision(subdivisionObject.getString("name"),
-                                            subdivisionObject.getString("_id"))
+                                                    subdivisionObject.getString("_id"))
                                     );
                                 }
                             }
@@ -279,7 +293,7 @@ public class MainActivity extends AppCompatActivity {
                                 JSONObject subdivisionObject = subdivisionArray.getJSONObject(i);
                                 if (subdivisionObject.getString("__t").equals("NormalGroup")) {
                                     publicSubs.add(new Subdivision(subdivisionObject.getString("name"),
-                                            subdivisionObject.getString("_id"))
+                                                    subdivisionObject.getString("_id"))
                                     );
                                 }
                             }
@@ -440,6 +454,17 @@ public class MainActivity extends AppCompatActivity {
         newAnnouncementDialog.show();
     }
 
+    public void showFolderDialog() {
+        ViewParent viewParent = newFolderView.getParent();
+        if (viewParent != null) {
+            ((ViewGroup) viewParent).removeView(newFolderView);
+        }
+
+        AlertDialog newFolderDialog = newFolderBuilder.create();
+        newFolderDialog.setView(newFolderView);
+        newFolderDialog.show();
+    }
+
     private void populateChoiceSpinner() {
         List<String> choices = new ArrayList<>();
         choices.add("Everyone");
@@ -461,6 +486,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void newAnnouncement(View view) {
         showAnnouncementDialog();
+    }
+
+    public void newFolder(View view) {
+        showFolderDialog();
     }
 
     public void newChat(View view) {
@@ -693,6 +722,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void addFolder() {
+        EditText addedFolderView = (EditText) newFolderView.findViewById(R.id.newFolder_name);
+        String folderName = addedFolderView.getText().toString();
+
+        System.out.println(folderName);
+    }
+
     public void logout() {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("Are you sure you want to logout?");
@@ -727,5 +763,21 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("isTeam", true);
         intent.putExtra("name", "Team");
         startActivity(intent);
+    }
+
+    public void onMapSearch(View view) {
+        EditText searchMap = (EditText) findViewById(R.id.map_search_text);
+        String searchText = searchMap.getText().toString();
+
+        if (!searchText.equals("")) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            View focus = getCurrentFocus();
+            if (focus != null) {
+                imm.hideSoftInputFromWindow(focus.getWindowToken(), 0);
+            }
+
+            tabAdapter.mapFragment.searchLocations(searchText);
+            searchMap.setText("");
+        }
     }
 }

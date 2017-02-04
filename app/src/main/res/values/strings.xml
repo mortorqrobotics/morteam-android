@@ -34,6 +34,9 @@
     <string name="newAnnouncement_audience">Audience:\t</string>
     <string name="newAnnouncement_message">Type a message...</string>
 
+    <!-- Drive -->
+    <string name="newFolder_message">Folder name</string>
+
     <!-- Subdivision Activity -->
     <string name="subdivision_userTitle">Users</string>
 

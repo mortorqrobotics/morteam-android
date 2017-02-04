@@ -56,8 +56,6 @@ public class DriveFragment extends Fragment {
         return view;
     }
 
-    //TODO: Implement "add folder" button
-
     public void getFolders() {
         CookieRequest folderRequests = new CookieRequest(
                 Request.Method.GET,
@@ -72,8 +70,6 @@ public class DriveFragment extends Fragment {
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
 
                                 Folder folder = new Folder(jsonObject.getString("_id"), jsonObject.getString("created_at"), jsonObject.getString("updated_at"), jsonObject.getString("name"), jsonObject.getBoolean("defaultFolder"), new User(jsonObject.getString("creator")));
-
-                                //System.out.println(folder.getCreator().getFullName()); --> null null | Why is this not working?
 
                                 //TODO: Audience stuffs
 

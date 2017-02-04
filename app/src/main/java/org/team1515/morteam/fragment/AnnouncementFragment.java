@@ -89,8 +89,6 @@ public class AnnouncementFragment extends Fragment {
         errorView.setVisibility(View.GONE);
         progress.setVisibility(View.VISIBLE);
 
-        //What is "infinite scroll"?
-        //Does this not contain every announcement made? (that seems like a bad idea for the future)
         CookieRequest announcementRequest = new CookieRequest(
                 Request.Method.GET,
                 "/announcements?skip=0",
