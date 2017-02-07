@@ -15,7 +15,7 @@
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/buttonView"
+            android:id="@+id/drive_folder_buttonView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -23,7 +23,7 @@
         </LinearLayout>
 
         <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab"
+            android:id="@+id/drive_folder_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
@@ -31,7 +31,7 @@
             android:onClick="newFolder"
             android:src="@drawable/ic_floating_button"
             app:backgroundTint="@color/orange_theme"
-            app:layout_anchor="@id/buttonView"
+            app:layout_anchor="@id/drive_folder_buttonView"
             app:layout_anchorGravity="bottom|right|end"
             app:rippleColor="#FFF" />
 

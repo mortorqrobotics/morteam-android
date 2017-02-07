@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -42,14 +43,6 @@ public class DriveActivity extends AppCompatActivity {
         setContentView(R.layout.activity_drive);
 
         files = new ArrayList<>();
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDisplayShowHomeEnabled(true);
-        }
 
         Intent intent = getIntent();
         folderName = intent.getStringExtra("name");
@@ -106,5 +99,26 @@ public class DriveActivity extends AppCompatActivity {
         MorTeam.queue.add(fileRequest);
     }
 
-    //TODO: Upload files
+    public void newFile(View view) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(intent, 1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        System.out.println("3");
+        if (requestCode == 1) {
+            System.out.println("2");
+            if (resultCode == RESULT_OK) {
+                // The user picked a contact.
+                // The Intent's data Uri identifies which contact was selected.
+
+                // Do something with the contact here (bigger example below)
+
+                System.out.println("1");
+            }
+        }
+    }
 }
