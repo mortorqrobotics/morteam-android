@@ -10,11 +10,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.team1515.morteam.R;
-import org.team1515.morteam.entity.File;
+import org.team1515.morteam.entity.MorFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ public class DriveFileAdapter extends RecyclerView.Adapter<DriveFileAdapter.View
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView filePreview;
         TextView fileName;
+        ImageButton deleteButton;
 
         private final Context context;
 
@@ -33,6 +35,7 @@ public class DriveFileAdapter extends RecyclerView.Adapter<DriveFileAdapter.View
 
             filePreview = (ImageView) layout.findViewById(R.id.file_preview);
             fileName = (TextView) layout.findViewById(R.id.file_name);
+            deleteButton = (ImageButton) layout.findViewById(R.id.file_delete);
 
             layout.setOnClickListener(this);
         }
@@ -41,7 +44,7 @@ public class DriveFileAdapter extends RecyclerView.Adapter<DriveFileAdapter.View
         public void onClick(View view) {
             int position = getAdapterPosition();
             if (position != RecyclerView.NO_POSITION) {
-                final File file = files.get(position);
+                final MorFile file = files.get(position);
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setTitle("Download '" + file.getName() + "'?");
@@ -59,13 +62,13 @@ public class DriveFileAdapter extends RecyclerView.Adapter<DriveFileAdapter.View
         }
     }
 
-    private List<File> files;
+    private List<MorFile> files;
 
     public DriveFileAdapter() {
         files = new ArrayList<>();
     }
 
-    public void setFiles(List<File> files) {
+    public void setFiles(List<MorFile> files) {
         this.files = files;
         notifyDataSetChanged();
     }
@@ -78,15 +81,19 @@ public class DriveFileAdapter extends RecyclerView.Adapter<DriveFileAdapter.View
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        final File currentFile = files.get(position);
+        final MorFile currentFile = files.get(position);
+
+        if (currentFile.getFolderName().equalsIgnoreCase("personal files")) {
+            holder.deleteButton.setVisibility(View.VISIBLE);
+        }
 
         if (currentFile.getType().equals("word")) {
             holder.filePreview.setImageResource(R.drawable.doc);
         } else if (currentFile.getType().equals("pdf")) {
             holder.filePreview.setImageResource(R.drawable.pdf);
-        } else if (currentFile.getMimeType().substring(6).equals("pjpeg")) {
+        } else if (currentFile.getMimeType().contains("jpeg") || currentFile.getType().equals("image")) {
             holder.filePreview.setImageResource(R.drawable.jpg);
-        } else if (currentFile.getMimeType().substring(6).equals("png")) {
+        } else if (currentFile.getMimeType().contains("png")) {
             holder.filePreview.setImageResource(R.drawable.png);
         } else if (currentFile.getType().equals("audio")) {
             holder.filePreview.setImageResource(R.drawable.mp3);

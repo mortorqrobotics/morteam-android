@@ -71,7 +71,7 @@ public class DriveFragment extends Fragment {
 
                                 Folder folder = new Folder(jsonObject.getString("_id"), jsonObject.getString("created_at"), jsonObject.getString("updated_at"), jsonObject.getString("name"), jsonObject.getBoolean("defaultFolder"), new User(jsonObject.getString("creator")));
 
-                                //TODO: Audience stuffs
+                                //TODO: Audience stuffs?
 
                                 drive.add(folder);
                             }

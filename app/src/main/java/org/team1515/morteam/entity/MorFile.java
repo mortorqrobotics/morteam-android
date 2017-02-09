@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class File {
+public class MorFile {
     private String id;
     private Date created_at;
     private Date updated_at;
@@ -17,8 +17,9 @@ public class File {
     private String type;
     private String mimeType;
     private User creator;
+    private String folderName;
 
-    public File(String id, String created_at, String updated_at, String name, String originalName, int size, String type, String mimeType, String creator) {
+    public MorFile(String id, String created_at, String updated_at, String name, String originalName, int size, String type, String mimeType, String creator, String folderName) {
         this.id = id;
         try {
             this.created_at = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.US).parse(created_at.replace("Z", "+0000"));
@@ -32,6 +33,7 @@ public class File {
         this.type = type;
         this.mimeType = mimeType;
         this.creator = new User(creator);
+        this.folderName = folderName;
     }
 
     public String getId() {
@@ -68,5 +70,9 @@ public class File {
 
     public User getCreator() {
         return creator;
+    }
+
+    public String getFolderName() {
+        return folderName;
     }
 }
