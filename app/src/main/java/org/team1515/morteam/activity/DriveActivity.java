@@ -1,5 +1,6 @@
 package org.team1515.morteam.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -19,13 +20,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.team1515.morteam.MorTeam;
+import org.team1515.morteam.PathHandler;
 import org.team1515.morteam.R;
 import org.team1515.morteam.adapter.DriveFileAdapter;
 import org.team1515.morteam.entity.MorFile;
 import org.team1515.morteam.network.CookieRequest;
+import org.team1515.morteam.network.MultipartUtility;
 
 import java.io.File;
-import java.net.URISyntaxException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -115,46 +121,53 @@ public class DriveActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
-                try {
-                    android.net.Uri returnURI = data.getData();
-                    java.net.URI jURI = new java.net.URI(returnURI.toString());
+                String fileName;
 
-                    File file = new File(jURI);
+                Uri uri = data.getData();
+                String mimeType = getContentResolver().getType(uri);
 
-                    System.out.println(file.getName());
-
-                    Cursor returnCursor = getContentResolver().query(returnURI, null, null, null, null);
-
+                if (mimeType == null) {
+                    String path = PathHandler.getPath(this, uri);
+                    File file = new File(path);
+                    fileName = file.getName();
+                } else {
+                    Uri returnUri = data.getData();
+                    Cursor returnCursor = getContentResolver().query(returnUri, null, null, null, null);
                     int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
                     returnCursor.moveToFirst();
+                    fileName = returnCursor.getString(nameIndex);
+                }
 
-                    Map<String, String> params = new HashMap<>();
-                    params.put("uploadedFile", file.toString()); //What?
-                    params.put("currentFolderId", folderId);
-                    params.put("fileName", returnCursor.getString(nameIndex));
+                File fileSave = getExternalFilesDir(null);
+                String sourcePath = getExternalFilesDir(null).toString();
 
-//                    CookieRequest uploadFile = new CookieRequest(Request.Method.POST,
-//                            "/files/upload",
-//                            params,
-//                            new Response.Listener<String>() {
-//                                @Override
-//                                public void onResponse(String response) {
-//                                    System.out.println(response);
-//                                    fileAdapter.setFiles(files);
-//                                }
-//                            },
-//                            new Response.ErrorListener() {
-//                                @Override
-//                                public void onErrorResponse(VolleyError error) {
-//                                    error.printStackTrace();
-//                                }
-//                            }
-//                    );
-//                    MorTeam.queue.add(uploadFile);
-                } catch (URISyntaxException e) {
+                try {
+                    copyFileStream(new File(sourcePath + "/" + fileName), uri, this);
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    private void copyFileStream(File dest, Uri uri, Context context) throws IOException {
+        InputStream is = null;
+        OutputStream os = null;
+        try {
+            is = context.getContentResolver().openInputStream(uri);
+            os = new FileOutputStream(dest);
+            byte[] buffer = new byte[1024];
+            int length;
+
+            while ((length = is.read(buffer)) > 0) {
+                os.write(buffer, 0, length);
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            is.close();
+            os.close();
         }
     }
 

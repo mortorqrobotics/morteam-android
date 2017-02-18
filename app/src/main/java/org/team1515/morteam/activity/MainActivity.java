@@ -27,7 +27,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -105,8 +104,8 @@ public class MainActivity extends AppCompatActivity {
         Glide
                 .with(this)
                 .load(NetworkUtils.makePictureURL(preferences.getString("profpicpath", ""), "-60"))
-                .centerCrop()
                 .crossFade()
+                .centerCrop()
                 .into(profilePic);
 
         //Menu

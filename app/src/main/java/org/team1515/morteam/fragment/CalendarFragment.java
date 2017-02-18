@@ -98,7 +98,7 @@ public class CalendarFragment extends Fragment {
                 selectedMonth = monthAdapter.getItem(position).toString();
                 selectedMonthNum = position;
                 dayAdapter.getDays();
-                dayAdapter.notifyDataSetChanged();
+                dayAdapter.getEvents();
             }
 
             @Override
@@ -115,7 +115,7 @@ public class CalendarFragment extends Fragment {
             years.add(i + "");
         }
         yearSpinner = (Spinner) view.findViewById(R.id.calendar_years);
-        selectedYear = "2016";
+        selectedYear = "2017";
         yearAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, years);
         yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         yearSpinner.setAdapter(yearAdapter);
@@ -156,7 +156,7 @@ public class CalendarFragment extends Fragment {
         }
 
         public void getEvents() {
-            //The Calendar issue is just a request thing, but I don't understand the documentation :P
+            events.clear();
 
             CookieRequest eventRequest = new CookieRequest(Request.Method.GET,
                     "/events/startYear/" + selectedYear + "/startMonth/" + selectedMonthNum + "/endYear/" + selectedYear + "/endMonth/" + selectedMonthNum,

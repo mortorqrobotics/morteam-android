@@ -26,7 +26,7 @@ public class NetworkUtils {
         if (path.length() > 2 && path.substring(0, 3).equals("/pp")) {
             return "http://profilepics.morteam.com.s3.amazonaws.com" + path.substring(3) + size;
         } else {
-            return "";
+            return "http://www.morteam.com" + path + size;
         }
     }
 
