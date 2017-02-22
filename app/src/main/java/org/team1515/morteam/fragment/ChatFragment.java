@@ -86,6 +86,7 @@ public class ChatFragment extends Fragment {
         CookieRequest chatRequest = new CookieRequest(
                 Request.Method.GET,
                 "/chats",
+                true,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -158,6 +159,7 @@ public class ChatFragment extends Fragment {
                 CookieRequest chatRequest = new CookieRequest(
                         Request.Method.DELETE,
                         "/chats/id/" + id, //Response code 403?
+                        true,
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {

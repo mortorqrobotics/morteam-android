@@ -25,7 +25,6 @@ import org.team1515.morteam.R;
 import org.team1515.morteam.adapter.DriveFileAdapter;
 import org.team1515.morteam.entity.MorFile;
 import org.team1515.morteam.network.CookieRequest;
-import org.team1515.morteam.network.MultipartUtility;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -80,6 +79,7 @@ public class DriveActivity extends AppCompatActivity {
         CookieRequest fileRequest = new CookieRequest(
                 Request.Method.GET,
                 "/folders/id/" + folderId + "/files",
+                true,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -143,11 +143,37 @@ public class DriveActivity extends AppCompatActivity {
 
                 try {
                     copyFileStream(new File(sourcePath + "/" + fileName), uri, this);
+
+                    //TODO: Fix upload request and params
+
+                    Map<String, String> params = new HashMap<>();
+
+                    params.put("currentFolderId", folderId);
+                    params.put("uploadedFile", String.valueOf(fileSave));
+                    params.put("fileName", fileName);
+
+                    CookieRequest uploadRequest = new CookieRequest(Request.Method.POST, "/files/upload", params,
+                            new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response) {
+                                    System.out.println(response);
+                                }
+                            },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    error.printStackTrace();
+                                }
+                            }
+                    );
+
+                    MorTeam.queue.add(uploadRequest);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
+
     }
 
     private void copyFileStream(File dest, Uri uri, Context context) throws IOException {
@@ -170,8 +196,4 @@ public class DriveActivity extends AppCompatActivity {
             os.close();
         }
     }
-
-//    public void deleteFile(final String id, final int position) {
-//
-//    }
 }

@@ -94,6 +94,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         CookieRequest userRequest = new CookieRequest(Request.Method.GET,
                 "/users/id/" + id,
+                true,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -139,6 +140,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                             CookieRequest attendanceRequest = new CookieRequest(Request.Method.GET,
                                     "/users/id/" + id + "/absences",
+                                    true,
                                     new Response.Listener<String>() {
                                         @Override
                                         public void onResponse(String response) {
@@ -461,6 +463,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         CookieRequest taskRequest = new CookieRequest(Request.Method.GET,
                 path,
+                true,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -531,6 +534,7 @@ public class ProfileActivity extends AppCompatActivity {
     public void completeTask(String taskId) {
         CookieRequest completeRequest = new CookieRequest(Request.Method.POST,
                 "/tasks/id/" + taskId + "/markCompleted",
+                true,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {

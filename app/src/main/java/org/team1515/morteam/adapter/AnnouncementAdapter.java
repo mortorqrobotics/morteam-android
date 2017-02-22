@@ -34,6 +34,7 @@ public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapte
         TextView authorView;
         TextView dateView;
         TextView messageView;
+        ImageView imageView;
 
         ImageButton deleteButton;
 
@@ -45,6 +46,7 @@ public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapte
             authorView = (TextView) layout.findViewById(R.id.author);
             dateView = (TextView) layout.findViewById(R.id.date);
             messageView = (TextView) layout.findViewById(R.id.message);
+            imageView = (ImageView) layout.findViewById(R.id.announcement_image);
             deleteButton = (ImageButton) layout.findViewById(R.id.delete_button);
         }
     }
@@ -105,6 +107,16 @@ public class AnnouncementAdapter extends RecyclerView.Adapter<AnnouncementAdapte
         holder.messageView.setMovementMethod(LinkMovementMethod.getInstance());
         //The images need resizing -- Check URLImageParser onPostExecute() function
         holder.messageView.setText(Html.fromHtml(currentAnnouncement.getContent(), new URLImageParser(holder.messageView, holder.context), null));
+
+//        Glide
+//                .with(holder.context)
+//                .load(currentAnnouncement.getContent().substring(currentAnnouncement.getContent().indexOf("<img>"), currentAnnouncement.getContent().indexOf("</img>")))
+//                .centerCrop()
+//                .crossFade()
+//                .into(holder.imageView);
+        if (currentAnnouncement.getContent().contains("<img>")) {
+            System.out.println(currentAnnouncement.getContent().length());
+        }
 
         //Don't show delete announcement buttons if not admin
         String teamPosition = preferences.getString("position", "");

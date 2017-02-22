@@ -29,10 +29,6 @@ public class CookieRequest extends StringRequest {
         params = null;
     }
 
-    public CookieRequest(int method, String path, Listener<String> listener, ErrorListener errorListener) {
-        this(method, path, null, listener, errorListener);
-    }
-
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
         //Store session-id cookie in storage

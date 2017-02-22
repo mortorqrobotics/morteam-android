@@ -367,6 +367,7 @@ public class ChatActivity extends AppCompatActivity {
         CookieRequest messageRequest = new CookieRequest(
                 Request.Method.GET,
                 "/chats/id/" + chatId + "/messages?skip=" + skip,
+                true,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {

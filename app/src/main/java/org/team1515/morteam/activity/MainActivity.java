@@ -224,6 +224,7 @@ public class MainActivity extends AppCompatActivity {
         CookieRequest usersRequest = new CookieRequest(
                 Request.Method.GET,
                 "/teams/current/users",
+                true,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -253,6 +254,7 @@ public class MainActivity extends AppCompatActivity {
 
         CookieRequest yourSubsRequest = new CookieRequest(Request.Method.GET,
                 "/groups",
+                true,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -283,6 +285,7 @@ public class MainActivity extends AppCompatActivity {
 
         CookieRequest publicSubsRequest = new CookieRequest(Request.Method.GET,
                 "/groups/other",
+                true,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -737,6 +740,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 CookieRequest logoutRequest = new CookieRequest(Request.Method.POST,
                         "/logout",
+                        true,
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {

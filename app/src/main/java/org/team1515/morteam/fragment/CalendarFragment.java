@@ -160,6 +160,7 @@ public class CalendarFragment extends Fragment {
 
             CookieRequest eventRequest = new CookieRequest(Request.Method.GET,
                     "/events/startYear/" + selectedYear + "/startMonth/" + selectedMonthNum + "/endYear/" + selectedYear + "/endMonth/" + selectedMonthNum,
+                    true,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {

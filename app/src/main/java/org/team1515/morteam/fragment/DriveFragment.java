@@ -60,6 +60,7 @@ public class DriveFragment extends Fragment {
         CookieRequest folderRequests = new CookieRequest(
                 Request.Method.GET,
                 "/folders",
+                true,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {

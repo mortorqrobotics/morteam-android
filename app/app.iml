@@ -176,6 +176,7 @@
     <orderEntry type="library" exported="" name="play-services-places-10.0.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-wallet-10.0.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-maps-10.0.1" level="project" />
+    <orderEntry type="library" exported="" name="httpclient-4.3.6" level="project" />
     <orderEntry type="library" exported="" name="play-services-location-10.0.1" level="project" />
     <orderEntry type="library" exported="" name="firebase-crash-10.0.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-appinvite-10.0.1" level="project" />
@@ -243,5 +244,6 @@
     <orderEntry type="library" exported="" name="appcompat-v7-25.1.0" level="project" />
     <orderEntry type="library" exported="" name="recyclerview-v7-25.1.0" level="project" />
     <orderEntry type="library" exported="" name="mediarouter-v7-24.0.0" level="project" />
+    <orderEntry type="library" exported="" name="android-async-http-1.4.9" level="project" />
   </component>
 </module>

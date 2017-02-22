@@ -1,10 +1,8 @@
 package org.team1515.morteam;
 
 import android.app.Application;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.support.v7.app.AlertDialog;
 import android.util.LruCache;
 
 import com.android.volley.RequestQueue;
