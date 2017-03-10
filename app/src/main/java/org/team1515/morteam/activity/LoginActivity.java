@@ -9,6 +9,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.android.volley.Request;
@@ -27,7 +28,7 @@ import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
 
-    //TODO: Fix this
+    //TODO: Fix this (Fix what?)
     public static final String[] userData = {
             "_id",
             "username",
@@ -70,6 +71,8 @@ public class LoginActivity extends AppCompatActivity {
         String username = usernameView.getText().toString();
         String password = passwordView.getText().toString();
 
+        CheckBox rememberMe = (CheckBox) findViewById(R.id.login_rememberMe);
+
         // Make sure text boxes are not blank
         boolean isEmpty = false;
 
@@ -93,7 +96,7 @@ public class LoginActivity extends AppCompatActivity {
         try {
             params.put("username", username);
             params.put("password", password);
-            params.put("rememberMe", true); //TODO: Make this optional
+            params.put("rememberMe", rememberMe.isChecked());
         } catch (JSONException e) {
             e.printStackTrace();
             return;
