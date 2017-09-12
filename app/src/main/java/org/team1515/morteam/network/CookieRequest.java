@@ -1,18 +1,14 @@
 package org.team1515.morteam.network;
 
 import android.content.SharedPreferences.Editor;
-import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Response;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
-import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.team1515.morteam.MorTeam;
 
 import java.util.Collections;
@@ -35,16 +31,18 @@ public class CookieRequest extends StringRequest {
 
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
-        String TAG = "Thing";
-
-        try {
-            JSONObject jsonResponse = new JSONObject(HttpHeaderParser.parseCharset(response.headers));
-        } catch (JSONException e) {
-            Log.e("JSONResponse Error", "Wow this is really bad practice right here", e);
+        //Store session-id cookie in storage
+        if(response.headers.containsKey(NetworkUtils.SET_COOKIE_KEY) && response.headers.get(NetworkUtils.SET_COOKIE_KEY).startsWith(NetworkUtils.SESSION_COOKIE)) {
+            String cookie = response.headers.get(NetworkUtils.SET_COOKIE_KEY);
+            if (cookie.length() > 0) {
+                String[] splitCookie = cookie.split(";");
+                String[] splitSessionId = splitCookie[0].split("=");
+                cookie = splitSessionId[1];
+                Editor editor = MorTeam.preferences.edit();
+                editor.putString(NetworkUtils.SESSION_COOKIE, cookie);
+                editor.apply();
+            }
         }
-
-//        Log.d()
-
         return super.parseNetworkResponse(response);
     }
 
@@ -72,8 +70,6 @@ public class CookieRequest extends StringRequest {
                 builder.append(headers.get(NetworkUtils.COOKIE_KEY));
             }
             headers.put(NetworkUtils.COOKIE_KEY, builder.toString());
-
-//            HttpHeaderParser
         }
 
         return headers;
