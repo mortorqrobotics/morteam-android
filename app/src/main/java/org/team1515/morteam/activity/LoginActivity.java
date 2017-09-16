@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -23,10 +24,13 @@ import org.team1515.morteam.R;
 import org.team1515.morteam.network.CookieJsonRequest;
 import org.team1515.morteam.network.NetworkUtils;
 
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.util.HashMap;
 import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
+    static final String TAG = "LoginActivity";
 
     //TODO: Fix this (Fix what?)
     public static final String[] userData = {
@@ -46,6 +50,8 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        MorTeam.preferences.edit().clear().apply();
+
         for (String data : userData) {
             if (!MorTeam.preferences.contains(data)) {
                 // If not logged in, bring to login page and clear data
@@ -53,6 +59,8 @@ public class LoginActivity extends AppCompatActivity {
                 setContentView(R.layout.activity_login);
                 return;
             }
+
+            Log.i(TAG, data + " : " + MorTeam.preferences.getString(data, "DEFAULT"));
         }
 
         // If all values are present, proceed to main activity

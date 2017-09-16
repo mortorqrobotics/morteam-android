@@ -12,6 +12,9 @@ import com.android.volley.toolbox.Volley;
 
 import org.team1515.morteam.network.CookieImageLoader;
 
+import java.net.CookieHandler;
+import java.net.CookieManager;
+
 public class MorTeam extends Application {
     public static SharedPreferences preferences;
 
@@ -24,7 +27,11 @@ public class MorTeam extends Application {
 
         preferences = getSharedPreferences("org.team1515.morteam", MODE_PRIVATE);
 
+        CookieManager cookieManager = new CookieManager();
+        CookieHandler.setDefault(cookieManager);
+
         queue = Volley.newRequestQueue(this);
+
         imageLoader = new CookieImageLoader(queue, new ImageLoader.ImageCache() {
             private final LruCache<String, Bitmap> cache
                     = new LruCache<>(50);

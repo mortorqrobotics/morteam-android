@@ -1,22 +1,32 @@
 package org.team1515.morteam.network;
 
 import android.content.SharedPreferences.Editor;
+import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Response;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.team1515.morteam.MorTeam;
 
+import java.io.UnsupportedEncodingException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class CookieRequest extends StringRequest {
+    static String TAG = "CookieRequest";
+
     private final Map<String, String> params;
 
     public CookieRequest(int method, String path, Map<String, String> params, Listener<String> listener, ErrorListener errorListener) {
@@ -32,46 +42,35 @@ public class CookieRequest extends StringRequest {
     @Override
     protected Response<String> parseNetworkResponse(NetworkResponse response) {
         //Store session-id cookie in storage
-        if(response.headers.containsKey(NetworkUtils.SET_COOKIE_KEY) && response.headers.get(NetworkUtils.SET_COOKIE_KEY).startsWith(NetworkUtils.SESSION_COOKIE)) {
-            String cookie = response.headers.get(NetworkUtils.SET_COOKIE_KEY);
-            if (cookie.length() > 0) {
-                String[] splitCookie = cookie.split(";");
-                String[] splitSessionId = splitCookie[0].split("=");
-                cookie = splitSessionId[1];
-                Editor editor = MorTeam.preferences.edit();
-                editor.putString(NetworkUtils.SESSION_COOKIE, cookie);
-                editor.apply();
-            }
+        JSONArray jsonResponse = null;
+        String stringResponse = null;
+        Map<String, String> headers = response.headers;
+
+        try {
+            stringResponse = new String(response.data, HttpHeaderParser.parseCharset(headers));
+        } catch (UnsupportedEncodingException e) {
+            Log.e(TAG, "Something went wrong, encoding-wise", e);
         }
+
+        Log.i(TAG, "asdfkla;sdjf;lkj");
+        Log.i(TAG, stringResponse);
+        Log.i(TAG, Boolean.toString(headers.get("Set-Cookie") == null));
+
+        Cookie
+
+        try {
+            jsonResponse = new JSONArray(stringResponse);
+        } catch (JSONException e) {
+            Log.e(TAG, "Something went wrong, json-wise", e);
+        }
+
+        Log.i(TAG, jsonResponse.toString());
+
         return super.parseNetworkResponse(response);
     }
 
     @Override
     protected Map<String, String> getParams() {
         return params;
-    }
-
-    @Override
-    public Map<String, String> getHeaders() throws AuthFailureError {
-        Map<String, String> headers = super.getHeaders();
-        if(headers == null || headers.equals(Collections.emptyMap())) {
-            headers = new HashMap<>();
-        }
-
-        //Insert session-id cookie into header
-        String sessionId = MorTeam.preferences.getString(NetworkUtils.SESSION_COOKIE, "");
-        if(sessionId.length() > 0) {
-            StringBuilder builder = new StringBuilder();
-            builder.append(NetworkUtils.SESSION_COOKIE);
-            builder.append("=");
-            builder.append(sessionId);
-            if(headers.containsKey(NetworkUtils.COOKIE_KEY)) {
-                builder.append("; ");
-                builder.append(headers.get(NetworkUtils.COOKIE_KEY));
-            }
-            headers.put(NetworkUtils.COOKIE_KEY, builder.toString());
-        }
-
-        return headers;
     }
 }
