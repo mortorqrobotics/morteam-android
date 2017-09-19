@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,7 +71,16 @@ public class DriveFragment extends Fragment {
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
 
-                                Folder folder = new Folder(jsonObject.getString("_id"), jsonObject.getString("created_at"), jsonObject.getString("updated_at"), jsonObject.getString("name"), jsonObject.getBoolean("defaultFolder"), new User(jsonObject.getString("creator")));
+                                Log.i("THING", jsonObject.toString());
+
+
+                                Folder folder;
+                                try {
+                                    folder = new Folder(jsonObject.getString("_id"), jsonObject.getString("created_at"), jsonObject.getString("updated_at"), jsonObject.getString("name"), jsonObject.getBoolean("defaultFolder"), new User(jsonObject.getString("creator")));
+                                } catch (JSONException e) {
+                                    Log.e("THING", "", e);
+                                    folder = new Folder(jsonObject.getString("_id"), jsonObject.getString("created_at"), jsonObject.getString("updated_at"), jsonObject.getString("name"), jsonObject.getBoolean("defaultFolder"), null);
+                                }
 
                                 //TODO: Audience stuffs?
 
