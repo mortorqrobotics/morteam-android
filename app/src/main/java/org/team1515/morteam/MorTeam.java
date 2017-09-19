@@ -17,6 +17,7 @@ import java.net.CookieManager;
 
 public class MorTeam extends Application {
     public static SharedPreferences preferences;
+    public static SharedPreferences cookiePrefs;
 
     public static RequestQueue queue;
     public static CookieImageLoader imageLoader;
@@ -26,6 +27,7 @@ public class MorTeam extends Application {
         super.onCreate();
 
         preferences = getSharedPreferences("org.team1515.morteam", MODE_PRIVATE);
+        cookiePrefs = getSharedPreferences("org.team1515.morteam.cookies", MODE_PRIVATE);
 
         CookieManager cookieManager = new CookieManager();
         CookieHandler.setDefault(cookieManager);
