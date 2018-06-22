@@ -11,14 +11,16 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.Volley;
 
 import org.team1515.morteam.network.CookieImageLoader;
+import org.team1515.morteam.network.PersistentCookieStore;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
+import java.net.CookiePolicy;
 
 public class MorTeam extends Application {
     public static SharedPreferences preferences;
-    public static SharedPreferences cookiePrefs;
 
+    public static PersistentCookieStore cookieStore;
     public static RequestQueue queue;
     public static CookieImageLoader imageLoader;
 
@@ -27,9 +29,9 @@ public class MorTeam extends Application {
         super.onCreate();
 
         preferences = getSharedPreferences("org.team1515.morteam", MODE_PRIVATE);
-        cookiePrefs = getSharedPreferences("org.team1515.morteam.cookies", MODE_PRIVATE);
+        cookieStore = new PersistentCookieStore();
 
-        CookieManager cookieManager = new CookieManager();
+        CookieManager cookieManager = new CookieManager(cookieStore, CookiePolicy.ACCEPT_ALL);
         CookieHandler.setDefault(cookieManager);
 
         queue = Volley.newRequestQueue(this);
