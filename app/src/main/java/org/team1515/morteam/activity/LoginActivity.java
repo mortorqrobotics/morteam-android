@@ -50,8 +50,6 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        MorTeam.preferences.edit().clear().apply();
-
         for (String data : userData) {
             if (!MorTeam.preferences.contains(data)) {
                 // If not logged in, bring to login page and clear data
@@ -61,6 +59,12 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             Log.i(TAG, data + " : " + MorTeam.preferences.getString(data, "DEFAULT"));
+        }
+
+        if (!MorTeam.cookieStore.foundCookies()) {
+            MorTeam.preferences.edit().clear().apply();
+            setContentView(R.layout.activity_login);
+            return;
         }
 
         // If all values are present, proceed to main activity

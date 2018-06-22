@@ -1,13 +1,20 @@
 package org.team1515.morteam.network;
 
-import com.google.gson.Gson;
+import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.HTTP;
 import org.team1515.morteam.MorTeam;
 
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Type;
 import java.net.CookieStore;
 import java.net.HttpCookie;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,47 +26,66 @@ import java.util.Map;
  */
 
 public class PersistentCookieStore implements CookieStore {
+    private final String TAG = "PersistentCookieStore";
+    private final Type type;
+
+    private boolean foundCookies;
+
     private Map<URI, List<HttpCookie>> cookies;
-    private ObjectOutputStream mapSerializer;
     private Gson gson;
 
     @SuppressWarnings("unchecked")
     public PersistentCookieStore() {
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapter(HttpCookie.class, new HttpCookieSerializer());
+        builder.registerTypeAdapter(HttpCookie.class, new HttpCookieDeserializer());
+
+        gson = builder.create();
         cookies = new HashMap<>();
-        gson = new Gson();
+        type = new TypeToken<ArrayList<HttpCookie>>() {}.getType();
 
         // Populate HashMap with contents of SharedPrefs with cookies
-        for (String gsonStr : MorTeam.cookiePrefs.getAll().keySet()) {
-            URI key = gson.fromJson(gsonStr, URI.class);
-            List<HttpCookie> value = gson.fromJson(MorTeam.cookiePrefs.getString(gsonStr, "DEFAULT"), List.class);
+        String cookieStr = MorTeam.preferences.getString("cookies", "");
+        if (cookieStr.equals("")) {
+            this.foundCookies = false;
+            return;
+        }
 
-            // Make sure all cookies have not expired
-            for (HttpCookie cookie : value) {
-                if (cookie.hasExpired())
-                    value.remove(cookie);
+        for (HttpCookie cookie : (ArrayList<HttpCookie>) gson.fromJson(cookieStr, type)) {
+            if (cookie.hasExpired())
+                continue;
+
+            try {
+                this.addCookie(new URI(cookie.getCommentURL()), cookie);
+            } catch (URISyntaxException e) {
+                // this is bad, and i feel bad for writing it.
+                Log.e(TAG, "Invalid URI syntax when attempting to deserialize cookies, serialized store invalidated", e);
+                this.foundCookies = false;
+                return;
             }
-
-            cookies.put(key, value);
         }
     }
 
     public void add(URI uri, HttpCookie cookie) {
-        // Add cookies to HashMap, then to SharedPreferences
-
+        if (cookie == null)
+            throw new NullPointerException("Attempted to add a null cookie");
         // Make sure cookie has not expired
         if (cookie.hasExpired())
             return;
 
-        if (cookies.get(uri) == null) {
-            cookies.put(uri, Arrays.asList(cookie));
-        } else {
-            cookies.get(uri).add(cookie);
-        }
-
-        MorTeam.cookiePrefs.edit().putString(gson.toJson(uri), gson.toJson(cookies.get(uri))).apply();
+        // Add cookie to hashmap, then write newly serialized array of cookies to SharedPrefs to make sure we don't lose any data
+        // what follows is a hack to make serializing the cookie uri easier. please refrain from judgement, it's 11:52
+        cookie.setCommentURL(uri == null ? "" : uri.toString());
+        this.addCookie(uri, cookie);
+        this.serialize();
     }
 
     public List<HttpCookie> get(URI uri) {
+        if (uri == null)
+            throw new NullPointerException("Attempted to retrieve cookie from null uri");
+        if (cookies.get(uri) == null)
+            return new ArrayList<>();
+
         return cookies.get(uri);
     }
 
@@ -68,8 +94,9 @@ public class PersistentCookieStore implements CookieStore {
 
         for (List<HttpCookie> value : cookies.values()) {
             for (HttpCookie cookie : value) {
-                if (cookie.hasExpired())
+                if (cookie.hasExpired()) {
                     value.remove(cookie);
+                }
             }
 
             result.addAll(value);
@@ -87,11 +114,16 @@ public class PersistentCookieStore implements CookieStore {
     }
 
     public boolean remove(URI uri, HttpCookie cookie) {
-        boolean success = cookies.get(uri).remove(cookie);
+        if (cookie == null)
+            throw new NullPointerException("Attempted to remove a null cookie");
 
-        // since we want to be sure that the contents of the map matches that of the SharedPrefs
+        boolean success = cookies.get(uri).remove(cookie);
+        if (cookies.get(uri).size() == 0)
+            cookies.remove(uri);
+
+        // since we want to be sure that the serialized contents matches the map
         if (success) {
-            MorTeam.preferences.edit().putString(gson.toJson(uri), gson.toJson(cookies.get(uri))).apply();
+            this.serialize();
         }
 
         return success;
@@ -99,8 +131,31 @@ public class PersistentCookieStore implements CookieStore {
 
     public boolean removeAll() {
         cookies.clear();
-        MorTeam.preferences.edit().clear().apply();
+        MorTeam.preferences.edit().remove("cookies").apply();
 
         return true;
+    }
+
+    public boolean foundCookies() {
+        return this.foundCookies;
+    }
+
+    private void addCookie(URI uri, HttpCookie cookie) {
+        if (cookies.containsKey(uri))
+            cookies.get(uri).add(cookie);
+        else {
+            ArrayList<HttpCookie> currentUri = new ArrayList<>();
+            currentUri.add(cookie);
+            cookies.put(uri, currentUri);
+        }
+    }
+
+    private void serialize() {
+        ArrayList<HttpCookie> masterList = new ArrayList<>();
+        for (List<HttpCookie> value : cookies.values()) {
+            masterList.addAll(value);
+        }
+
+        MorTeam.preferences.edit().putString("cookies", gson.toJson(masterList, type)).apply();
     }
 }
