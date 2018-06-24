@@ -56,6 +56,7 @@ public class PersistentCookieStore implements CookieStore {
                 continue;
 
             try {
+                Log.v(TAG, cookie.getCommentURL());
                 this.addCookie(new URI(cookie.getCommentURL()), cookie);
             } catch (URISyntaxException e) {
                 // this is bad, and i feel bad for writing it.
@@ -64,6 +65,9 @@ public class PersistentCookieStore implements CookieStore {
                 return;
             }
         }
+
+        Log.v(TAG, "Retrieved " + Integer.toString(cookies.size()) + " cookies");
+        this.foundCookies = true;
     }
 
     public void add(URI uri, HttpCookie cookie) {
@@ -81,12 +85,25 @@ public class PersistentCookieStore implements CookieStore {
     }
 
     public List<HttpCookie> get(URI uri) {
+        Log.v(TAG, "Returning cookie(s) for host " + uri.getHost());
+        Log.v(TAG, "Exact uri: " + uri.toString());
+
         if (uri == null)
             throw new NullPointerException("Attempted to retrieve cookie from null uri");
-        if (cookies.get(uri) == null)
-            return new ArrayList<>();
 
-        return cookies.get(uri);
+        if (cookies.get(uri) == null) {
+            for (URI key : cookies.keySet()) {
+                if (key.getHost().equals(uri.getHost())) {
+                    Log.v(TAG, "special");
+                    return cookies.get(key);
+                }
+            }
+
+            return new ArrayList<>();
+        } else {
+            Log.v(TAG, "else");
+            return cookies.get(uri);
+        }
     }
 
     public List<HttpCookie> getCookies() {
