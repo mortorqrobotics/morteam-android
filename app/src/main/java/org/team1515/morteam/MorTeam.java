@@ -19,6 +19,7 @@ import java.net.CookiePolicy;
 
 public class MorTeam extends Application {
     public static SharedPreferences preferences;
+    public static SharedPreferences cookieSerialize;
 
     public static PersistentCookieStore cookieStore;
     public static RequestQueue queue;
@@ -29,10 +30,12 @@ public class MorTeam extends Application {
         super.onCreate();
 
         preferences = getSharedPreferences("org.team1515.morteam", MODE_PRIVATE);
+        cookieSerialize = getSharedPreferences("org.team1515.morteam.cookie", MODE_PRIVATE);
         cookieStore = new PersistentCookieStore();
 
         CookieManager cookieManager = new CookieManager(cookieStore, CookiePolicy.ACCEPT_ALL);
         CookieHandler.setDefault(cookieManager);
+
 
         queue = Volley.newRequestQueue(this);
 

@@ -62,6 +62,8 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         if (!MorTeam.cookieStore.foundCookies()) {
+            Log.v(TAG, "Found no cookies");
+            MorTeam.cookieSerialize.edit().clear().apply();
             MorTeam.preferences.edit().clear().apply();
             setContentView(R.layout.activity_login);
             return;

@@ -45,7 +45,7 @@ public class PersistentCookieStore implements CookieStore {
         type = new TypeToken<ArrayList<HttpCookie>>() {}.getType();
 
         // Populate HashMap with contents of SharedPrefs with cookies
-        String cookieStr = MorTeam.preferences.getString("cookies", "");
+        String cookieStr = MorTeam.cookieSerialize.getString("cookies", "");
         if (cookieStr.equals("")) {
             this.foundCookies = false;
             return;
@@ -79,6 +79,9 @@ public class PersistentCookieStore implements CookieStore {
 
         // Add cookie to hashmap, then write newly serialized array of cookies to SharedPrefs to make sure we don't lose any data
         // what follows is a hack to make serializing the cookie uri easier. please refrain from judgement, it's 11:52
+        Log.v(TAG, "Adding cookie");
+        Log.v(TAG, cookie.getName());
+        Log.v(TAG, cookie.toString());
         cookie.setCommentURL(uri == null ? "" : uri.toString());
         this.addCookie(uri, cookie);
         this.serialize();
@@ -87,6 +90,7 @@ public class PersistentCookieStore implements CookieStore {
     public List<HttpCookie> get(URI uri) {
         Log.v(TAG, "Returning cookie(s) for host " + uri.getHost());
         Log.v(TAG, "Exact uri: " + uri.toString());
+        ArrayList<HttpCookie> toReturn = new ArrayList<>();
 
         if (uri == null)
             throw new NullPointerException("Attempted to retrieve cookie from null uri");
@@ -95,15 +99,16 @@ public class PersistentCookieStore implements CookieStore {
             for (URI key : cookies.keySet()) {
                 if (key.getHost().equals(uri.getHost())) {
                     Log.v(TAG, "special");
-                    return cookies.get(key);
+                    toReturn.addAll(cookies.get(key));
                 }
             }
 
-            return new ArrayList<>();
         } else {
             Log.v(TAG, "else");
-            return cookies.get(uri);
+            toReturn.addAll(cookies.get(uri));
         }
+        
+        return toReturn;
     }
 
     public List<HttpCookie> getCookies() {
@@ -148,7 +153,8 @@ public class PersistentCookieStore implements CookieStore {
 
     public boolean removeAll() {
         cookies.clear();
-        MorTeam.preferences.edit().remove("cookies").apply();
+        MorTeam.cookieSerialize.edit().remove("cookies").apply();
+        Log.v(TAG, "clearing cookies");
 
         return true;
     }
@@ -173,6 +179,6 @@ public class PersistentCookieStore implements CookieStore {
             masterList.addAll(value);
         }
 
-        MorTeam.preferences.edit().putString("cookies", gson.toJson(masterList, type)).apply();
+        MorTeam.cookieSerialize.edit().putString("cookies", gson.toJson(masterList, type)).apply();
     }
 }
