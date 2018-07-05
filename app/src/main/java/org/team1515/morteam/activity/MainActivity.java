@@ -16,6 +16,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +54,8 @@ import static org.team1515.morteam.MorTeam.preferences;
 import static org.team1515.morteam.MorTeam.queue;
 
 public class MainActivity extends AppCompatActivity {
+    static final String TAG = "MainActivity";
+
     MainTabAdapter tabAdapter;
 
     PopupMenu profileMenu;
@@ -744,6 +747,7 @@ public class MainActivity extends AppCompatActivity {
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
+                                Log.v(TAG, "logging out");
                                 preferences.edit().clear().apply();
                                 finish();
                             }
@@ -751,6 +755,7 @@ public class MainActivity extends AppCompatActivity {
                         new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
+                                Log.v(TAG, "Logging out");
                                 preferences.edit().clear().apply();
                                 finish();
                             }

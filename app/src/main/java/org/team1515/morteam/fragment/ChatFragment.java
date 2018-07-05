@@ -23,6 +23,7 @@ import com.android.volley.VolleyError;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.R;
 import org.team1515.morteam.adapter.ChatAdapter;
 import org.team1515.morteam.entity.Chat;
@@ -35,6 +36,8 @@ import static org.team1515.morteam.MorTeam.preferences;
 import static org.team1515.morteam.MorTeam.queue;
 
 public class ChatFragment extends Fragment {
+    private static final String TAG = "ChatFragment";
+
     private RecyclerView chatList;
     private ChatAdapter chatAdapter;
     private LinearLayoutManager chatLayoutManager;
@@ -98,6 +101,8 @@ public class ChatFragment extends Fragment {
                             for (int i = 0; i < chatArray.length(); i++) {
                                 JSONObject chatObject = chatArray.getJSONObject(i);
                                 String id = chatObject.getString("_id");
+                                Log.v(TAG, id);
+                                Log.v(TAG, preferences.getString("_id", "bad"));
                                 String name = "";
                                 String picPath = "";
                                 boolean isTwoPeople = chatObject.getBoolean("isTwoPeople");
@@ -150,6 +155,7 @@ public class ChatFragment extends Fragment {
                 }
         );
         queue.add(chatRequest);
+        Log.v("shit", MorTeam.preferences.getString("_id", "bad"));
     }
 
     public void deleteChat(final String id, final int position) {
