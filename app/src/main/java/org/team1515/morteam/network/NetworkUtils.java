@@ -10,9 +10,9 @@ import java.util.Map;
 
 public class NetworkUtils {
     // Constants
-    public static final String HOST = "http://www.morteam.com";
+    public static final String HOST = "https://www.morteam.com";
     public static final String PATH_PREFIX = "/api";
-    public static final int PORT = 80;
+    public static final int PORT = 443;
 
     public static final String SET_COOKIE_KEY = "set-cookie";
     public static final String COOKIE_KEY = "Cookie";
