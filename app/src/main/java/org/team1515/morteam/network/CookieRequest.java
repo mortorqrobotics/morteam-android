@@ -61,11 +61,12 @@ public class CookieRequest extends StringRequest {
 
         //Insert session-id cookie into header
         String sessionId = MorTeam.preferences.getString(NetworkUtils.SESSION_COOKIE, "");
+        // behold, redundancy
         if (sessionId.equals(""))
             sessionId = sID;
         else
             sID = sessionId;
-        
+
         if(sessionId.length() > 0) {
             StringBuilder builder = new StringBuilder();
             builder.append(NetworkUtils.SESSION_COOKIE);
