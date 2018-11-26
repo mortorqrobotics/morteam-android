@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CookieJsonRequest extends JsonObjectRequest {
+    private static String sID;
 
 
     public CookieJsonRequest(int method, String path, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
@@ -70,6 +71,11 @@ public class CookieJsonRequest extends JsonObjectRequest {
 
         //Insert session-id cookie into header
         String sessionId = MorTeam.preferences.getString(NetworkUtils.SESSION_COOKIE, "");
+        if (sessionId.equals(""))
+            sessionId = sID;
+        else
+            sID = sessionId;
+
         if(sessionId.length() > 0) {
             StringBuilder builder = new StringBuilder();
             builder.append(NetworkUtils.SESSION_COOKIE);

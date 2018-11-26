@@ -73,7 +73,7 @@ public class CalendarFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_calendar, container, false);
 
-        preferences = getActivity().getSharedPreferences(null, 0);
+//        preferences = getActivity().getSharedPreferences(null, 0);
         queue = Volley.newRequestQueue(getContext());
 
         refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.calendar_refresh);

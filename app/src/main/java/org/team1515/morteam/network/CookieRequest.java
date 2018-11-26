@@ -17,6 +17,7 @@ import java.util.Map;
 
 
 public class CookieRequest extends StringRequest {
+    private static String sID;
     private final Map<String, String> params;
 
     public CookieRequest(int method, String path, Map<String, String> params, Listener<String> listener, ErrorListener errorListener) {
@@ -60,6 +61,11 @@ public class CookieRequest extends StringRequest {
 
         //Insert session-id cookie into header
         String sessionId = MorTeam.preferences.getString(NetworkUtils.SESSION_COOKIE, "");
+        if (sessionId.equals(""))
+            sessionId = sID;
+        else
+            sID = sessionId;
+        
         if(sessionId.length() > 0) {
             StringBuilder builder = new StringBuilder();
             builder.append(NetworkUtils.SESSION_COOKIE);
