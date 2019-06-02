@@ -10,6 +10,7 @@ import com.android.volley.VolleyError;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.team1515.morteam.MorTeam;
 import org.team1515.morteam.network.CookieRequest;
 import org.team1515.morteam.network.CookieImageRequest;
 
@@ -29,11 +30,14 @@ public class User {
         this.firstName = firstName;
         this.lastName = lastName;
         this.id = id;
-        if (profPicPath.substring(0, 3).equals("/pp")) {
-            this.profPicPath = "http://profilepics.morteam.com.s3.amazonaws.com" + profPicPath.substring(3);
+        String usr = MorTeam.preferences.getString("username", "");
+        if (profPicPath.substring(0, 3).equals("/pp") && profPicPath.contains(usr)) {
+//            this.profPicPath = "http://profilepics.morteam.com.s3.amazonaws.com" + profPicPath.substring(3);
+            this.profPicPath = "http://www.morteam.com" + profPicPath;
         } else {
-            this.profPicPath = "http://www.morteam.com:80" + profPicPath;
+            this.profPicPath = profPicPath;
         }
+        System.out.println(this.profPicPath);
         this.email = email;
         this.parentEmail = parentEmail;
         this.phone = phone;

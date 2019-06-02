@@ -72,7 +72,7 @@ public class CookieJsonRequest extends JsonObjectRequest {
         //Insert session-id cookie into header
         String sessionId = MorTeam.preferences.getString(NetworkUtils.SESSION_COOKIE, "");
         if (sessionId.equals(""))
-            sessionId = sID;
+            sessionId = ""; // sessionId = sID;
         else
             sID = sessionId;
 

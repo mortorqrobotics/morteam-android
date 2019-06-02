@@ -6,6 +6,8 @@ import android.support.v7.app.AlertDialog;
 
 import com.android.volley.NetworkResponse;
 
+import org.team1515.morteam.MorTeam;
+
 import java.util.Map;
 
 public class NetworkUtils {
@@ -23,10 +25,12 @@ public class NetworkUtils {
     }
 
     public static String makePictureURL(String path, String size) {
-        if (path.length() > 2 && path.substring(0, 3).equals("/pp")) {
-            return "http://profilepics.morteam.com.s3.amazonaws.com" + path.substring(3) + size;
-        } else {
+        String usr = MorTeam.preferences.getString("username", "");
+        if (path.length() > 2 && path.substring(0, 3).equals("/pp") && path.contains(usr)) {
+//            return "http://profilepics.morteam.com.s3.amazonaws.com" + path.substring(3) + size;
             return "http://www.morteam.com" + path + size;
+        } else {
+            return "https://i.imgur.com" + path.substring(3) + size;
         }
     }
 

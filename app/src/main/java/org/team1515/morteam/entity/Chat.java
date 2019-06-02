@@ -1,5 +1,7 @@
 package org.team1515.morteam.entity;
 
+import org.team1515.morteam.MorTeam;
+
 public class Chat {
     private String name;
     private String id;
@@ -11,10 +13,13 @@ public class Chat {
         this.id = id;
         this.picPath = picPath;
         this.isGroup = isGroup;
+        String usr = MorTeam.preferences.getString("username", "");
         if (picPath.substring(0, 3).equals("/pp")) {
-            this.picPath = "http://profilepics.morteam.com.s3.amazonaws.com" + picPath.substring(3);
+//            this.picPath = "http://profilepics.morteam.com.s3.amazonaws.com" + picPath.substring(3);
+            this.picPath = "http://www.morteam.com:80" + picPath.substring(3);
         } else {
-            this.picPath = "http://www.morteam.com:80" + picPath;
+            this.picPath = picPath.contains("group") ?
+                    "http://www.morteam.com:80" + picPath : picPath;
         }
     }
 
